@@ -9,8 +9,11 @@ motorZ = 22;
 shellThickness = 3.5;
 armW = 6;
 m2mDist = 100;
-batteryWidth = 30.5;
+batteryWidth = 35.0;
 quadThickness = 5;
+
+usbWidth = 12;
+usbOff = 0;
 
 propLength = 70;
 
@@ -50,8 +53,13 @@ difference() {
                         cube([m2mDist/2,armW,armW]);
                 cylinder(h = motorZ/2, r=motorD/2 + shellThickness/2);
                 sphere(r=motorD/2 + shellThickness/2);
+                
                 //prop preview
-                %rotate([0,0,45]) cylinder(d=propLength, h=5);
+                //%rotate([0,0,45]) cylinder(d=propLength, h=5);
+                
+                // print helper discs ("brim")
+                translate([0, 0, 10.8])
+                    cylinder(h=0.2, d=40);
             }
         }
         
@@ -69,6 +77,9 @@ difference() {
                                 oval(m2mDist/2,m2mDist/2.8, 20);
             }
     }
+    
+    translate([usbOff, batteryWidth / 2 - 2, -1])
+        cube([usbWidth, 5, 10]);
     
     //create each arms hollow area
     rotate([0,0,45]){

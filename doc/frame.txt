@@ -1,0 +1,6 @@
+Frame Requirements:
+
+Breite FC: 20mm / 21mm mit Luft für Löt-Noobs
+Breite Rx: 13mm / 14mm mit Luft
+
+--> Breite 35mm

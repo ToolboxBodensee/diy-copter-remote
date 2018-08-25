@@ -1,0 +1,9 @@
+Arduino Pinbelegung:
+
+Display I2C: SDA & SCL: D2 & D3
+Interrupt Pints: INT2 & INT3: D0 & D1
+Joysticks & Schalter: A0, A1, A2, A3, A8, A9
+Spannungsteiler: A10
+SPI: MOSI, MISO, CLK, CS: D14, D15, D16, D7
+CC2500: PA & LNA: D4 & D5
+Buzzer: D6
