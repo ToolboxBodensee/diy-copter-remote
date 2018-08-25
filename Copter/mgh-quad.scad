@@ -4,7 +4,7 @@
 //01/06/16
 //https://www.thingiverse.com/thing:843597
 
-motorD = 9;
+motorD = 8.2;
 motorZ = 22;
 shellThickness = 3.5;
 armW = 6;
@@ -12,8 +12,8 @@ m2mDist = 100;
 batteryWidth = 35.0;
 quadThickness = 5;
 
-usbWidth = 12;
-usbOff = 0;
+usbWidth = 14;
+usbOff = -1;
 
 propLength = 70;
 
@@ -36,6 +36,7 @@ module makeArmHollow() {
     }
 }
 
+module copter_frame() {
 difference() {
     union(){
         
@@ -78,7 +79,7 @@ difference() {
             }
     }
     
-    translate([usbOff, batteryWidth / 2 - 2, -1])
+    translate([usbOff, batteryWidth / 2 - 2, -0.75])
         cube([usbWidth, 5, 10]);
     
     //create each arms hollow area
@@ -125,13 +126,13 @@ difference() {
         translate([2,2,motorZ/2]) 
             linear_extrude(height = w, center = true, convexity = 10, twist = 0)
                 polygon(points=[[0,0],[h,0],[0,b]], paths=[[0,1,2]]);
-                
-    
+}
 }
 
 module oval(w,h, height, center = false) {
     scale([1, h/w, 1]) cylinder(h=height, r=w, center=center);
 }
 
-
-
+translate([0, 0, 11])
+rotate([180, 0, 0])
+    copter_frame();
