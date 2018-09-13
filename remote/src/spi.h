@@ -15,14 +15,15 @@
 #ifndef SPI_H
 #define SPI_H
 #include <Arduino.h>
-class SPI {
-    private:
+class SPI
+{
+private:
 
-    public:
-        SPI();
-        void init(void);
-        void write(uint8_t command);
-        uint8_t read(void);
+public:
+    SPI();
+    void init(void);
+    void write(uint8_t command);
+    uint8_t read(void);
 };
 
 #endif

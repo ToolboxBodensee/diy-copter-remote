@@ -248,3 +248,17 @@
 #define SPI_MOSI_IS_LOW             ((SPI_MOSI_IPR &  _BV(SPI_MOSI_PIN) == 0x00)
 
 #define NOP                         __asm__("nop");
+
+#define PE1_pin     1                               //A1 = PC1
+#define PE1_port    PORTC
+#define PE1_ddr     DDRC
+#define PE1_output  PE1_ddr  |=  _BV(PE1_pin)
+#define PE1_on      PE1_port |=  _BV(PE1_pin)
+#define PE1_off     PE1_port &= ~_BV(PE1_pin)
+
+#define PE2_pin     2                               //A2 = PC2
+#define PE2_port    PORTC
+#define PE2_ddr     DDRC
+#define PE2_output  PE2_ddr  |=  _BV(PE2_pin)
+#define PE2_on      PE2_port |=  _BV(PE2_pin)
+#define PE2_off     PE2_port &= ~_BV(PE2_pin)

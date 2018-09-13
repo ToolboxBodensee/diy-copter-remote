@@ -8,7 +8,7 @@ IO_DATA::IO_DATA()
 void IO_DATA::adc_init(void)
 {
     // AREF = AVcc
-    ADMUX = (0<<REFS1) | (1<<REFS0);
+    ADMUX = (0 << REFS1) | (1 << REFS0);
     Serial.print("ADMUX");
     Serial.print(ADMUX);
     Serial.print(" ADCSRA");
@@ -26,31 +26,34 @@ uint16_t IO_DATA::adc_read(uint8_t ch)
 {
     // ‘ch’ between 0 and 7
     //
-	if ( ch >= 0x08 ) {
-		/* Set Mux5 */
-		ADCSRB |= _BV(MUX5);
-		ch &= ~0x08;
-	} else {
-		/* Clear Mux5 */
-		ADCSRB &= ~_BV(MUX5);
-	}
+    if (ch >= 0x08) {
+        /* Set Mux5 */
+        ADCSRB |= _BV(MUX5);
+        ch &= ~0x08;
+    } else {
+        /* Clear Mux5 */
+        ADCSRB &= ~_BV(MUX5);
+    }
+
     ch = ch & 0b00000111;
     Serial.print("ch");
     Serial.print(ch);
     ADMUX |= ch;
 
     // start single convertion
-    ADCSRA |= (1<<ADSC);
+    ADCSRA |= (1 << ADSC);
 
     // wait for conversion to complete
     delay(50);
-    while (ADCSRA & (1<<ADSC)); // wait for conversion to complete
+
+    while (ADCSRA & (1 << ADSC)); // wait for conversion to complete
+
     /* while(!(ADCSRA & (1<<ADIF))) { */
     /*     /1* nothing *1/ */
     /* } */
 
     // clear bit
-    ADCSRA |= (1<<ADIF);
+    ADCSRA |= (1 << ADIF);
 
     return (ADC);
 }

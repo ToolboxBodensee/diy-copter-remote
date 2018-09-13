@@ -17,6 +17,8 @@
 /********************/
 #include "spi.h"
 #include "pins.h"
+#include "Arduino.h"
+
 SPI::SPI()
 {
 }
@@ -25,6 +27,12 @@ void SPI::init(void)
     SPI_SCLK_OUTPUT;
     SPI_MOSI_OUTPUT;
     SPI_MISO_INPUT;
+
+    SPI_MOSI_ON;
+    SPI_SCLK_OFF;
+
+    // wait for the components
+    delay(100);
 }
 
 void SPI::write(const uint8_t command)
@@ -35,9 +43,9 @@ void SPI::write(const uint8_t command)
     SPI_SCLK_OFF;
     SPI_MOSI_OFF;
 
-    for (uint8_t i = 0; i< 8; ++i) {
+    for (uint8_t i = 0; i < 8; ++i) {
         // check if bit is set
-        if(tmp & 0x80) {
+        if (tmp & 0x80) {
             SPI_MOSI_ON;
         } else {
             SPI_MOSI_OFF;
@@ -50,6 +58,7 @@ void SPI::write(const uint8_t command)
         // reset clock
         SPI_SCLK_OFF;
     }
+
     SPI_MOSI_ON;
 }
 
@@ -57,10 +66,11 @@ uint8_t SPI::read(void)
 {
     uint8_t result = 0;
 
-    for(uint8_t i = 0; i < 8; i++) {
+    for (uint8_t i = 0; i < 8; i++) {
 
         result = result << 1;
-        if(SPI_MISO_IS_HIGH) {
+
+        if (SPI_MISO_IS_HIGH) {
             result |= 0x01;
         }
 
@@ -71,5 +81,6 @@ uint8_t SPI::read(void)
         // reset clock
         SPI_SCLK_OFF;
     }
+
     return result;
 }
