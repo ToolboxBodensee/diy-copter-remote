@@ -1,138 +1,165 @@
-//parametric micro quadcopter frame for lulfro and others
-//Patrick Sapinski
-//v2
-//01/06/16
-//https://www.thingiverse.com/thing:843597
+motor_size = 8.45;
+motor_height = 10;
+motor_wall_d = 2.2;
+motor_clamp_cut = 3;
 
-motorD = 8.2;
-motorZ = 22;
-shellThickness = 3.5;
-armW = 6;
-m2mDist = 100;
-batteryWidth = 35.0;
-quadThickness = 5;
+motor_helper_disc = 40;
+motor_helper_height = 0.2;
 
-usbWidth = 14;
-usbOff = -1;
+motor_arm_width = 8;
+motor_arm_height = 6;
+motor_arm_length = 20;
 
-propLength = 70;
+motor_body_len = 40;
+motor_body_height = 8;
+motor_body_wall = 2;
 
-module makeArmHollow() {
-    translate([m2mDist/2,0,0]) 
-        union(){
-            
-        //hollow out the motor holder
-        sphere(r=motorD/2);
-        cylinder(h = motorZ/2, r=motorD/2);
-        
-        //hollow out the groove for the wire in the motor holder
-        translate([-shellThickness,0,-shellThickness]) 
-            cube([m2mDist,armW - shellThickness,motorZ],center=true);
-        
-        //???
-        translate([-shellThickness*2,-armW/2 + shellThickness/2,-motorZ/2]) 
-            cube([motorZ,armW - shellThickness,motorZ + shellThickness]);
-            
-    }
+triangle_cut_height = 8;
+cable_cut_width = 3;
+cable_cut_height = 1.5;
+
+motor_body_arm_dist = (motor_body_len - motor_arm_width + 2) / sqrt(2);
+
+fc_width = 20;
+fc_height = 28;
+rx_width = 12;
+rx_height = 25;
+
+$fn = 25;
+
+module triangle(o_len, a_len, depth) {
+    linear_extrude(height=depth)
+        polygon(points=[[0,0],[a_len,0],[0,o_len]], paths=[[0,1,2]]);
 }
 
-module copter_frame() {
-difference() {
-    union(){
-        
-        //translate([15,5,4]) rotate([90,0,0]) linear_extrude(height = 2) polygon(points=[[0,0],[10,0],[12,7],[0,7]]);
-        //translate([15,-3,4]) rotate([90,0,0]) linear_extrude(height = 2) polygon(points=[[0,0],[10,0],[12,7],[0,7]]);
-        
-        //create each arm
-        rotate([0,0,45]){
-        for (i = [0 : 3])
-            rotate([0,0,i * 90])
-            translate([m2mDist/2,0,0]) 
-            //create the motor holder and arm
-            union(){
-                    translate([-m2mDist/2 + motorD/2,-armW/2,motorZ/2 - armW]) 
-                        cube([m2mDist/2,armW,armW]);
-                cylinder(h = motorZ/2, r=motorD/2 + shellThickness/2);
-                sphere(r=motorD/2 + shellThickness/2);
+module fc_pcb() {
+    %cube([fc_width, fc_height, 2]);
+}
+
+module rx_pcb() {
+    %cube([rx_width, rx_height, 2]);
+}
+
+module motor_clamp() {
+    // motor / prop mockup
+    %cylinder(d = motor_size, h = motor_height + 5);
+    %cylinder(d = 2, h = motor_height + 15);
+    %translate([0, 0, 20]) cylinder(d = 65, h = 2);
+    
+    difference() {
+        union () {
+            color("blue")
+            hull() {
+                cylinder(d = motor_size + motor_wall_d, h = motor_height);
                 
-                //prop preview
-                //%rotate([0,0,45]) cylinder(d=propLength, h=5);
-                
-                // print helper discs ("brim")
-                translate([0, 0, 10.8])
-                    cylinder(h=0.2, d=40);
+                translate([-motor_arm_width / 2, -(motor_size + motor_wall_d) / 2 - 2, motor_height - motor_arm_height])
+                    cube([motor_arm_width, 1, motor_arm_height]);
             }
+            
+            color("green")
+            translate([0, 0, motor_height - motor_helper_height])
+                cylinder(d = motor_helper_disc, h = motor_helper_height);
+            
+            color("blue")
+            sphere(d = motor_size + motor_wall_d);
         }
         
-        //create the FC cube
-        translate([0,0,motorZ/2 - armW/2]) 
-            cube([batteryWidth + shellThickness,batteryWidth + shellThickness,armW],center=true);
+        // cable hole
+        translate([-cable_cut_width / 2, -(motor_size + motor_wall_d) / 2 - cable_cut_height, -5])
+            cube([cable_cut_width, cable_cut_height, 20]);
         
-        //parabolic arms
-        translate([0,0,8]) 
-            difference() {
-                cube([m2mDist-20,m2mDist-20,armW],center=true);
-                    for (i = [0 : 3])
-                        rotate([0,0,i * 90])
-                            translate([m2mDist - 35,0,-10]) 
-                                oval(m2mDist/2,m2mDist/2.8, 20);
-            }
+        // motor hole
+        translate([0, 0, -1])
+            cylinder(d = motor_size, h = motor_height + 2);
+        
+        // clamp cutout
+        translate([-motor_clamp_cut / 2, -3, -motor_size - motor_wall_d - 1])
+            cube([motor_clamp_cut, motor_size + motor_wall_d + 5, motor_height + motor_size + motor_wall_d + 2]);
+        
+        sphere(d = motor_size);
     }
-    
-    translate([usbOff, batteryWidth / 2 - 2, -0.75])
-        cube([usbWidth, 5, 10]);
-    
-    //create each arms hollow area
-    rotate([0,0,45]){
-            rotate([0,0,90]) makeArmHollow();
-            rotate([0,0,180]) makeArmHollow();
-            rotate([0,0,270]) makeArmHollow();
-            rotate([0,0,360]) makeArmHollow();
-    }
-    
-    translate([0,0,motorZ/2 - armW/2 - motorZ/2 + shellThickness/2])
-    union(){
-        //hollow out some grooves in the arms for the wires
-        rotate([0,0,45])
-            cube([armW - shellThickness,m2mDist/2,motorZ/1.5],center=true);
-        rotate([0,0,45])
-            cube([m2mDist/2,armW - shellThickness,motorZ/1.5],center=true);
-    }
-    
-    //hollow out the FC hole
-    translate([0,0,motorZ/2 - armW/2 - shellThickness/2]) 
-    cube([batteryWidth,batteryWidth,armW],center=true);
-    
-    //drunk code below
-    b = 11;
-    h = 11;
-    w = 4;
-    rotate(a=[0,0,45])
-        translate([2,2,motorZ/2]) 
-            linear_extrude(height = w, center = true, convexity = 10, twist = 0)
-                polygon(points=[[0,0],[h,0],[0,b]], paths=[[0,1,2]]);
-        
-    rotate(a=[0,0,45 + 180])
-        translate([2,2,motorZ/2]) 
-            linear_extrude(height = w, center = true, convexity = 10, twist = 0)
-                polygon(points=[[0,0],[h,0],[0,b]], paths=[[0,1,2]]);
-        
-    rotate(a=[0,0,45 + 90])
-        translate([2,2,motorZ/2]) 
-            linear_extrude(height = w, center = true, convexity = 10, twist = 0)
-                polygon(points=[[0,0],[h,0],[0,b]], paths=[[0,1,2]]);
-        
-    rotate(a=[0,0,45 + 270])
-        translate([2,2,motorZ/2]) 
-            linear_extrude(height = w, center = true, convexity = 10, twist = 0)
-                polygon(points=[[0,0],[h,0],[0,b]], paths=[[0,1,2]]);
-}
 }
 
-module oval(w,h, height, center = false) {
-    scale([1, h/w, 1]) cylinder(h=height, r=w, center=center);
+module arm() {
+    motor_clamp();
+    
+    // motor arm itself
+    color("blue")
+        translate([-motor_arm_width / 2, -(motor_arm_length + ((motor_size + motor_wall_d) / 2) + 2), motor_height - motor_arm_height])
+        cube([motor_arm_width, motor_arm_length, motor_arm_height]);
 }
 
-translate([0, 0, 11])
-rotate([180, 0, 0])
-    copter_frame();
+module body() {
+    // arms
+    for(r = [45 : 90 : 360]) {
+        rotate([0, 0, r])
+        translate([0, motor_arm_length + ((motor_size + motor_wall_d) / 2) + motor_body_arm_dist + 1, 0])
+        difference() {
+            arm();
+            
+            translate([-cable_cut_width / 2, -motor_arm_length - ((motor_size + motor_wall_d) / 2) - 2, motor_height - cable_cut_height])
+                cube([cable_cut_width, motor_arm_length + 1, cable_cut_height + 1]);
+        }
+    }
+    
+    color("red")
+    translate([-motor_body_len / 2, -motor_body_len / 2, motor_height - motor_body_height])
+    difference() {
+        cube([motor_body_len, motor_body_len, motor_body_height]);
+        
+        for(r = [45 : 90 : 360]) {
+            translate([motor_body_len / 2, motor_body_len / 2, -motor_height + motor_body_height])
+                rotate([0, 0, r])
+                translate([-cable_cut_width / 2, motor_body_len / 2 * sqrt(2) - 6, motor_height - cable_cut_height]) {
+                    cube([cable_cut_width, 8, cable_cut_height + 1]);
+                    translate([0, -1, -5])
+                        cube([cable_cut_width, cable_cut_height, 10]);
+                }
+        }
+    }
+}
+
+module quad() {
+    difference() {
+        translate([0, 0, motor_height])
+        rotate([180, 0, 0]) {
+            body();
+            
+            translate([-3, -14, 6])
+                fc_pcb();
+            
+            translate([-16, -12.5, 6])
+                rx_pcb();
+        }
+        
+        // cut out for actual PCBs
+        translate([-(motor_body_len - (2 * motor_body_wall)) / 2, -(motor_body_len - (2 * motor_body_wall)) / 2, motor_body_wall])
+            cube([motor_body_len - (2 * motor_body_wall), motor_body_len - (2 * motor_body_wall), motor_body_height - motor_body_wall + 1]);
+        
+        // usb cutout
+        translate([-2, -motor_body_len / 2 - 1, 2])
+            cube([12, 4, 7]);
+        
+        // triangle cut-outs
+        translate([0, -motor_body_len / 3, -1]) {
+            triangle(triangle_cut_height, motor_body_len / 4, 4);
+            triangle(triangle_cut_height, -motor_body_len / 4, 4);
+        }
+        translate([0, motor_body_len / 3, -1]) {
+            triangle(-triangle_cut_height, motor_body_len / 4, 4);
+            triangle(-triangle_cut_height, -motor_body_len / 4, 4);
+        }
+        translate([-motor_body_len / 3, 0, -1])
+        rotate([0, 0, -90]) {
+            triangle(triangle_cut_height, motor_body_len / 4, 4);
+            triangle(triangle_cut_height, -motor_body_len / 4, 4);
+        }
+        translate([motor_body_len / 3, 0, -1])
+        rotate([0, 0, 90]) {
+            triangle(triangle_cut_height, motor_body_len / 4, 4);
+            triangle(triangle_cut_height, -motor_body_len / 4, 4);
+        }
+    }
+}
+
+quad();
