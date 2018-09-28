@@ -383,7 +383,16 @@ void loop()
 
       //debugln("diff = %d", update_end - update_start);
       //next_abs_call = last_call + next_callback;
-      delayMilliseconds(next_callback / 1000);
+
+      #if 0
+      { // next_callback should not be more than 32767 so we will wait here...
+        uint16_t temp=(next_callback>>10)-2;
+        delayMilliseconds(temp);
+        next_callback-=temp<<10;        // between 2-3ms left at this stage
+      }
+      #else
+        delayMicroseconds(next_callback);
+      #endif
 		}
 		while(diff&0x8000);	 						// Callback did not took more than requested time for next callback
 													// so we can launch Update_All before next callback
