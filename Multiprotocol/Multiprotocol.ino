@@ -20,7 +20,10 @@
  You should have received a copy of the GNU General Public License
  along with Multiprotocol.  If not, see <http://www.gnu.org/licenses/>.
 */
+#if 0
 #include <avr/pgmspace.h>
+#include <avr/eeprom.h>
+#endif
 
 //#define DEBUG_PIN		// Use pin TX for AVR and SPI_CS for STM32 => DEBUG_PIN_on, DEBUG_PIN_off, DEBUG_PIN_toggle
 #define DEBUG_SERIAL	// Only for STM32_BOARD compiled with Upload method "Serial"->usart1, "STM32duino bootloader"->USB serial
@@ -37,8 +40,6 @@
 #include "Pins.h"
 #include "TX_Def.h"
 #include "Validate.h"
-
-#include <avr/eeprom.h>
 
 //Global constants/variables
 uint32_t MProtocol_id;//tx id,
@@ -134,20 +135,17 @@ void_function_t remote_callback = 0;
 // Init
 void setup()
 {
-  
-    eeprom_write_byte((EE_ADDR)EEPROM_BANK_OFFSET,0x00);  // set bank to 0
-    
 	// Setup diagnostic uart before anything else
 	#ifdef DEBUG_SERIAL
 		Serial.begin(115200,SERIAL_8N1);
 		while (!Serial); // Wait for ever for the serial port to connect...
 		debugln("Multiprotocol version: %d.%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_PATCH_LEVEL);
+    debugln("time %s ", __TIME__);
 	#endif
 
 	// General pinout
 		//ATMEGA328p
 		// all inputs
-		DDRB=0x00;DDRC=0x00;DDRD=0x00;
 		// outputs
 		SDI_output;
 		SCLK_output;
@@ -164,10 +162,6 @@ void setup()
 		#ifdef NRF_CSN_pin
 			NRF_CSN_output;
 		#endif
-
-		// Timer1 config
-		TCCR1A = 0;
-		TCCR1B = (1 << CS11);	//prescaler8, set timer1 to increment every 0.5us(16Mhz) and start timer
 
 		// Random
 		//random_init();
@@ -217,7 +211,7 @@ void setup()
         char recieved = Serial.read();
         if (recieved == '\n') {  
           int new_bank = atoi(str.c_str());
-          eeprom_write_byte((EE_ADDR)EEPROM_BANK_OFFSET,new_bank);
+          curr_bank = new_bank;
           debugln("Bank selection %d", new_bank);
           break;
         }else {
@@ -318,6 +312,7 @@ void setup()
 		#endif
 				option			=	PPM_prot[line].option;	// Use radio-defined option value
 
+    debugln("freq offset: %d", option);
 		if(PPM_prot[line].power)		POWER_FLAG_on;
 		if(PPM_prot[line].autobind)
 		{
@@ -371,68 +366,24 @@ void loop()
 			}
 			while(remote_callback==0 || IS_WAIT_BIND_on);
 		}
-		#ifndef STM32_BOARD
-			if( (TIFR1 & OCF1A_bm) != 0)
-			{
-				cli();					// Disable global int due to RW of 16 bits registers
-				OCR1A=TCNT1;			// Callback should already have been called... Use "now" as new sync point.
-				sei();					// Enable global int
-			}
-			else
-				while((TIFR1 & OCF1A_bm) == 0); // Wait before callback
-		#else
-
-		#endif
-    
+   
 		do
 		{
 			TX_MAIN_PAUSE_on;
 			tx_pause();
+      unsigned long last_call = millis();
 			if(IS_INPUT_SIGNAL_on && remote_callback!=0)
 				next_callback=remote_callback();
 			else
 				next_callback=2000;					// No PPM/serial signal check again in 2ms...
-      #if 0
-        delayMilliseconds(next_callback);
-      #else
-    		TX_MAIN_PAUSE_off;
-    		tx_resume();
-    		while(next_callback>4000)
-    		{ // start to wait here as much as we can...
-    			next_callback-=2000;				// We will wait below for 2ms
-    			cli();								// Disable global int due to RW of 16 bits registers
-    			OCR1A += 2000*2 ;					// set compare A for callback
-    			#ifndef STM32_BOARD	
-    				TIFR1=OCF1A_bm;					// clear compare A=callback flag
-    			#else
-    				TIMER2_BASE->SR = 0x1E5F & ~TIMER_SR_CC1IF;	// Clear Timer2/Comp1 interrupt flag
-    			#endif
-    			sei();								// enable global int
-    			if(Update_All())					// Protocol changed?
-    			{
-    				next_callback=0;				// Launch new protocol ASAP
-            debugln("%s:%d Launch new protocol ASAP ",__func__, __LINE__);
-    				break;
-    			}
-    			#ifndef STM32_BOARD	
-    				while((TIFR1 & OCF1A_bm) == 0);	// wait 2ms...
-    			#else
-    				while((TIMER2_BASE->SR & TIMER_SR_CC1IF)==0);//2ms wait
-    			#endif
-    		}
-    		// at this point we have a maximum of 4ms in next_callback
-    		next_callback *= 2 ;
-    		cli();									// Disable global int due to RW of 16 bits registers
-    		OCR1A+= next_callback ;					// set compare A for callback
-    		#ifndef STM32_BOARD			
-    			TIFR1=OCF1A_bm;						// clear compare A=callback flag
-    		#else
-    			TIMER2_BASE->SR = 0x1E5F & ~TIMER_SR_CC1IF;	// Clear Timer2/Comp1 interrupt flag
-    		#endif		
-    		diff=OCR1A-TCNT1;						// compare timer and comparator
-       
-    		sei();									// enable global int
-      #endif
+      
+      unsigned long update_start = millis();
+      update_inputs();
+      unsigned long update_end = millis();
+
+      //debugln("diff = %d", update_end - update_start);
+      //next_abs_call = last_call + next_callback;
+      delayMilliseconds(next_callback / 1000);
 		}
 		while(diff&0x8000);	 						// Callback did not took more than requested time for next callback
 													// so we can launch Update_All before next callback
@@ -455,7 +406,7 @@ uint8_t Update_All()
 				val=map16b(val,PPM_MIN_100*2,PPM_MAX_100*2,CHANNEL_MIN_100,CHANNEL_MAX_100);
 				if(val&0x8000) 					val=CHANNEL_MIN_125;
 				else if(val>CHANNEL_MAX_125)	val=CHANNEL_MAX_125;
-				Channel_data[i]=val;
+				//Channel_data[i]=val;
 			}
 			PPM_FLAG_off;									// wait for next frame before update
 			update_channels_aux();
@@ -525,10 +476,10 @@ static void update_channels_aux(void)
 #ifdef ENABLE_PPM
 uint8_t bank_switch(void)
 {
-	uint8_t bank=eeprom_read_byte((EE_ADDR)EEPROM_BANK_OFFSET);
+	uint8_t bank= curr_bank;
 	if(bank>=NBR_BANKS)
 	{ // Wrong number of bank
-		eeprom_write_byte((EE_ADDR)EEPROM_BANK_OFFSET,0x00);	// set bank to 0
+		curr_bank = 0;	// set bank to 0
 		bank=0;
 	}
 	debugln("Using bank %d", bank);
@@ -573,7 +524,7 @@ uint8_t bank_switch(void)
 				bank++;
 				if(bank>=NBR_BANKS)
 					bank=0;
-				eeprom_write_byte((EE_ADDR)EEPROM_BANK_OFFSET,bank);
+				curr_bank = bank;
 				debugln("Using bank %d", bank);
 				phase=3;
 				blink+=BLINK_BANK_REPEAT;
@@ -688,20 +639,11 @@ static void protocol_init()
 	WAIT_BIND_off;
 	CHANGE_PROTOCOL_FLAG_off;
 
-	if(next_callback>32000)
 	{ // next_callback should not be more than 32767 so we will wait here...
 		uint16_t temp=(next_callback>>10)-2;
 		delayMilliseconds(temp);
 		next_callback-=temp<<10;				// between 2-3ms left at this stage
 	}
-	cli();										// disable global int
-	OCR1A = TCNT1 + next_callback*2;			// set compare A for callback
-	#ifndef STM32_BOARD
-		TIFR1 = OCF1A_bm ;						// clear compare A flag
-	#else
-		TIMER2_BASE->SR = 0x1E5F & ~TIMER_SR_CC1IF;	// Clear Timer2/Comp1 interrupt flag
-	#endif	
-	sei();										// enable global int
 	BIND_BUTTON_FLAG_off;						// do not bind/reset id anymore even if protocol change
  
   debugln("%s BIND_BUTTON_FLAG_off",__func__);
@@ -1001,7 +943,8 @@ static uint32_t random_id(uint16_t address, uint8_t create_new)
 	#ifndef FORCE_GLOBAL_ID
 		uint32_t id=0;
 
-		if(eeprom_read_byte((EE_ADDR)(address+10))==0xf0 && !create_new)
+		#if 0
+		//(eeprom_read_byte((EE_ADDR)(address+10))==0xf0 && !create_new)
 		{  // TXID exists in EEPROM
 			for(uint8_t i=4;i>0;i--)
 			{
@@ -1024,11 +967,14 @@ static uint32_t random_id(uint16_t address, uint8_t create_new)
 			}
 			else
 		#endif
+    #endif
 				id = random(0xfefefefe) + ((uint32_t)random(0xfefefefe) << 16);
 
+    #if 0
 		for(uint8_t i=0;i<4;i++)
 			eeprom_write_byte((EE_ADDR)address+i,id >> (i*8));
 		eeprom_write_byte((EE_ADDR)(address+10),0xf0);//write bind flag in eeprom.
+    #endif
 		return id;
 	#else
 		(void)address;
@@ -1044,7 +990,7 @@ static uint32_t random_id(uint16_t address, uint8_t create_new)
 /**************************/
 
 //PPM
-#ifdef ENABLE_PPM
+#ifdef blubber // ENABLE_PPM
 	#ifdef ORANGE_TX
 		#if PPM_pin == 2
 			ISR(PORTD_INT0_vect)
@@ -1194,44 +1140,4 @@ static uint32_t random_id(uint16_t address, uint8_t create_new)
 	}
 #endif //ENABLE_SERIAL
 
-#if not defined (ORANGE_TX) && not defined (STM32_BOARD)
-	static void random_init(void)
-	{
-		cli();					// Temporarily turn off interrupts, until WDT configured
-		MCUSR = 0;				// Use the MCU status register to reset flags for WDR, BOR, EXTR, and POWR
-		WDTCSR |= _BV(WDCE);	// WDT control register, This sets the Watchdog Change Enable (WDCE) flag, which is  needed to set the prescaler
-		WDTCSR = _BV(WDIE);		// Watchdog interrupt enable (WDIE)
-		sei();					// Turn interupts on
-	}
 
-	static uint32_t random_value(void)
-	{
-		while (!gWDT_entropy);
-		return gWDT_entropy;
-	}
-
-	// Random interrupt service routine called every time the WDT interrupt is triggered.
-	// It is only enabled at startup to generate a seed.
-	ISR(WDT_vect)
-	{
-		static uint8_t gWDT_buffer_position=0;
-		#define gWDT_buffer_SIZE 32
-		static uint8_t gWDT_buffer[gWDT_buffer_SIZE];
-		gWDT_buffer[gWDT_buffer_position] = TCNT1L; // Record the Timer 1 low byte (only one needed) 
-		gWDT_buffer_position++;                     // every time the WDT interrupt is triggered
-		if (gWDT_buffer_position >= gWDT_buffer_SIZE)
-		{
-			// The following code is an implementation of Jenkin's one at a time hash
-			for(uint8_t gWDT_loop_counter = 0; gWDT_loop_counter < gWDT_buffer_SIZE; ++gWDT_loop_counter)
-			{
-				gWDT_entropy += gWDT_buffer[gWDT_loop_counter];
-				gWDT_entropy += (gWDT_entropy << 10);
-				gWDT_entropy ^= (gWDT_entropy >> 6);
-			}
-			gWDT_entropy += (gWDT_entropy << 3);
-			gWDT_entropy ^= (gWDT_entropy >> 11);
-			gWDT_entropy += (gWDT_entropy << 15);
-			WDTCSR = 0;	// Disable Watchdog interrupt
-		}
-	}
-#endif

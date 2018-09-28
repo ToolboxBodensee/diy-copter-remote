@@ -59,9 +59,9 @@
 //Once a good tuning value is found it can be set here and will override the radio's 'option' setting for all existing and new models which use that protocol.
 //For more information: https://github.com/pascallanger/DIY-Multiprotocol-TX-Module/tree/master/docs/Frequency_Tuning.md
 //Uncomment the lines below (remove the "//") and set an appropriate value (replace the "0") to enable. Valid range is -127 to +127.
-#define FORCE_FRSKYD_TUNING	0
-#define FORCE_FRSKYV_TUNING	0
-#define FORCE_FRSKYX_TUNING	0
+//#define FORCE_FRSKYD_TUNING	0
+//#define FORCE_FRSKYV_TUNING	0
+//#define FORCE_FRSKYX_TUNING	0
 
 /** Low Power **/
 //Low power is reducing the transmit power of the multi module. This setting is configurable per model in PPM (table below) or Serial mode (radio GUI).
@@ -226,25 +226,25 @@
 
 //The parameter below indicates the number of desired banks between 1 and 5. Default is 5.
 #define NBR_BANKS 3
-
+uint8_t curr_bank = 0;
 const PPM_Parameters PPM_prot[14*NBR_BANKS]=	{
 #if NBR_BANKS > 0
 //******************************       BANK 1       ******************************
 //	Switch	Protocol 	    	Sub protocol	RX_Num	Power		Auto Bind		Option
-/*	1	*/	  {PROTO_FRSKYD,	0		        ,	0	,	P_LOW	,	AUTOBIND	,	-120		},
-/*  2 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , -100   },
-/*	3	*/	  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , -80   },
-/*	4	*/	  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , -60   },
-/*	5	*/	  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , -40   },
-/*	6	*/	  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , -20   },
-/*	7	*/	  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  ,   0   },
-/*	8	*/	  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  ,  10   },
-/*	9	*/	  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  ,  20   },
-/*	10	*/	{PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  ,  40   },
-/*	11	*/	{PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  ,  60   },
-/*	12	*/	{PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  ,  80   }, // option=fine freq tuning
-/*	13	*/	{PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  ,  100   },
-/*	14	*/	{PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  ,  120   },
+/*  1 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 0   },
+/*  2 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 20   },
+/*  3 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 40   },
+/*  4 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 60  },
+/*  5 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 80  },
+/*  6 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 100  },
+/*  7 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 120  },
+/*  8 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 140  },
+/*  9 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 160  },
+/*  10  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 180  },
+/*  11  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 200  },
+/*  12  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 220  }, // option=fine freq tuning
+/*  13  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 240   },
+/*  14  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 255   },
 #endif
 #if NBR_BANKS > 1
 //******************************       BANK 2       ******************************

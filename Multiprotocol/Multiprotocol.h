@@ -462,10 +462,10 @@ enum CC2500_POWER
 	CC2500_POWER_16 = 0xFE,	//   0dbm
 	CC2500_POWER_17 = 0xFF	//  +1dbm
 };
-#define CC2500_HIGH_POWER	CC2500_POWER_17
-#define CC2500_LOW_POWER	CC2500_POWER_13
+#define CC2500_HIGH_POWER	  CC2500_POWER_1
+#define CC2500_LOW_POWER	  CC2500_POWER_1
 #define CC2500_RANGE_POWER	CC2500_POWER_1
-#define CC2500_BIND_POWER	CC2500_POWER_1
+#define CC2500_BIND_POWER	  CC2500_POWER_1
 
 // CYRF power
 enum CYRF_POWER
@@ -756,7 +756,8 @@ Serial: 100000 Baud 8e2      _ xxxx xxxx p --
    [2] Type (see below)
    [3] Length (excluding the 4 header bytes)
 
-   [4-xx] data
+   [4-xx] data#define EEPROM_BANK_OFFSET    15    // Current bank number (1 byte)
+
 
   Commands from TX to multi cannot be longer than 22 bytes (RXLen -4byte header)
 

@@ -332,8 +332,8 @@ uint16_t initFrSkyX()
 		FrX_chanskip=random(0xfefefefe)%47;
 
 	//for test***************
-	//rx_tx_addr[3]=0xB3;
-	//rx_tx_addr[2]=0xFD;
+	rx_tx_addr[3]=0xB3;
+	rx_tx_addr[2]=0xFD;
 	//************************
 	frskyX_init();
 #if defined  SPORT_POLLING
