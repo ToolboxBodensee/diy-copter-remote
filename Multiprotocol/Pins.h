@@ -13,41 +13,48 @@
 //*******************
 //***   Pinouts   ***
 //*******************
-#if 0
-	// SDIO MOSI
-	#define SDI_pin	    2										//D5 = PD5
-	#define SDI_port    PORTB
-	#define SDI_ipr     PINB
-	#define SDI_ddr     DDRB
-	#define SDI_on	    SDI_port |= _BV(SDI_pin)
-	#define SDI_off	    SDI_port &= ~_BV(SDI_pin)
-	#define SDI_1	      (SDI_ipr & _BV(SDI_pin))
-	#define SDI_0	      (SDI_ipr & _BV(SDI_pin)) == 0x00
-	#define SDI_input	  SDI_ddr &= ~_BV(SDI_pin)
-	#define SDI_output	SDI_ddr |=  _BV(SDI_pin)
+#define LED_off
+#define LED_on
+#define LED_output
+#define IS_LED_on false
+#define LED_toggle
+#if 1
 
-	//SDO / MISO
-	#define SDO_pin		3									//D6 = PD6
-	#define SDO_port	PORTB
-	#define SDO_ipr		PINB
-	#define SDO_1 (SDO_ipr & _BV(SDO_pin))
-	#define SDO_0 (SDO_ipr & _BV(SDO_pin)) == 0x00
+  // SDIO MOSI
+  #define SDI_pin     16
+  #define SDI_on      digitalWrite(SDI_pin, HIGH)
+  #define SDI_off     digitalWrite(SDI_pin, LOW)
+  #define SDI_1       (digitalRead(SDI_pin) == HIGH)
+  #define SDI_0       (digitalRead(SDI_pin) == LOW)
+  #define SDI_input   pinMode(SDI_pin, INPUT);
+  #define SDI_output  pinMode(SDI_pin, OUTPUT);
+
+  //SDO / MISO
+  #define SDO_pin     14
+  #define SDO_on      digitalWrite(SDO_pin, HIGH)
+  #define SDO_off     digitalWrite(SDO_pin, LOW)
+  #define SDO_1       (digitalRead(SDO_pin) == HIGH)
+  #define SDO_0       (digitalRead(SDO_pin) == LOW)
+  #define SDO_input   pinMode(SDO_pin, INPUT);
+  #define SDO_output  pinMode(SDO_pin, OUTPUT);
   
-	// SCLK 
-	#define SCLK_port PORTB
-	#define SCLK_ddr DDRB
-	#define SCLK_pin	1								//D4 = PD4
-	#define SCLK_output	SCLK_ddr  |=  _BV(SCLK_pin)
-	#define SCLK_on		SCLK_port |=  _BV(SCLK_pin)
-	#define SCLK_off	SCLK_port &= ~_BV(SCLK_pin)
- 
-	// Chip select CC2500
-	#define CC25_CSN_pin	7								//D7 = PD7
-	#define CC25_CSN_port	PORTE
-	#define CC25_CSN_ddr	DDRE
-	#define CC25_CSN_output	CC25_CSN_ddr  |=  _BV(CC25_CSN_pin)
-	#define CC25_CSN_on		CC25_CSN_port |=  _BV(CC25_CSN_pin)
-	#define CC25_CSN_off	CC25_CSN_port &= ~_BV(CC25_CSN_pin)
+  // SCLK  
+  #define SCLK_pin     15
+  #define SCLK_on      digitalWrite(SCLK_pin, HIGH)
+  #define SCLK_off     digitalWrite(SCLK_pin, LOW)
+  #define SCLK_1       (digitalRead(SCLK_pin) == HIGH)
+  #define SCLK_0       (digitalRead(SCLK_pin) == LOW)
+  #define SCLK_input   pinMode(SCLK_pin, INPUT);
+  #define SCLK_output  pinMode(SCLK_pin, OUTPUT);
+  
+  // Chip select CC2500
+  #define CC25_CSN_pin     7
+  #define CC25_CSN_on      digitalWrite(CC25_CSN_pin, HIGH)
+  #define CC25_CSN_off     digitalWrite(CC25_CSN_pin, LOW)
+  #define CC25_CSN_1       (digitalRead(CC25_CSN_pin) == HIGH)
+  #define CC25_CSN_0       (digitalRead(CC25_CSN_pin) == LOW)
+  #define CC25_CSN_input   pinMode(CC25_CSN_pin, INPUT);
+  #define CC25_CSN_output  pinMode(CC25_CSN_pin, OUTPUT);
 
 //*******************
 //***    Timer    ***

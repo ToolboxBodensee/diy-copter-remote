@@ -163,6 +163,9 @@ void setup()
 			NRF_CSN_output;
 		#endif
 
+		// Timer1 config
+		TCCR1A = 0;
+		TCCR1B = (1 << CS11);	//prescaler8, set timer1 to increment every 0.5us(16Mhz) and start timer
 		// Random
 		//random_init();
 
@@ -244,6 +247,9 @@ void setup()
 	// Set default channels' value
 	InitChannel();
 	InitPPM();
+	// Update LED
+	LED_off;
+	LED_output;
 
 	//Init RF modules
 	modules_reset();
@@ -355,7 +361,7 @@ void setup()
 void loop()
 { 
 	uint16_t next_callback,diff=0xFFFF;
-  debugln("%s:%d",__func__, __LINE__);
+
 	while(1)
 	{
 		if(remote_callback==0 || IS_WAIT_BIND_on || diff>2*200)
@@ -365,34 +371,83 @@ void loop()
 				Update_All();
 			}
 			while(remote_callback==0 || IS_WAIT_BIND_on);
-		}
-   
+		} 
+		#ifndef STM32_BOARD
+			if( (TIFR1 & OCF1A_bm) != 0)
+			{
+				cli();					// Disable global int due to RW of 16 bits registers
+				OCR1A=TCNT1;			// Callback should already have been called... Use "now" as new sync point.
+				sei();					// Enable global int
+			}
+			else
+				while((TIFR1 & OCF1A_bm) == 0); // Wait before callback
+		#else
+			if((TIMER2_BASE->SR & TIMER_SR_CC1IF)!=0)
+			{
+				debugln("Callback miss");
+				cli();
+				OCR1A = TCNT1;
+				sei();
+			}
+			else
+				while((TIMER2_BASE->SR & TIMER_SR_CC1IF )==0); // Wait before callback
+    #endif
 		do
 		{
 			TX_MAIN_PAUSE_on;
 			tx_pause();
-      unsigned long last_call = millis();
 			if(IS_INPUT_SIGNAL_on && remote_callback!=0)
 				next_callback=remote_callback();
 			else
 				next_callback=2000;					// No PPM/serial signal check again in 2ms...
-      
-      unsigned long update_start = millis();
-      update_inputs();
-      unsigned long update_end = millis();
 
-      //debugln("diff = %d", update_end - update_start);
-      //next_abs_call = last_call + next_callback;
-
-      #if 0
-      { // next_callback should not be more than 32767 so we will wait here...
-        uint16_t temp=(next_callback>>10)-2;
-        delayMilliseconds(temp);
-        next_callback-=temp<<10;        // between 2-3ms left at this stage
+#if 0
+      //  15 < 250
+      //  20              250         250
+      if (next_callback > 4000) {
+        next_callback-=2000;
+        Update_All();
+        delayMicroseconds(2000);
       }
-      #else
-        delayMicroseconds(next_callback);
-      #endif
+      delayMicroseconds(next_callback*2);
+#else
+			TX_MAIN_PAUSE_off;
+			tx_resume();
+			while(next_callback>4000)
+			{ // start to wait here as much as we can...
+				next_callback-=2000;				// We will wait below for 2ms
+				cli();								// Disable global int due to RW of 16 bits registers
+				OCR1A += 2000 *2;					// set compare A for callback
+				#ifndef STM32_BOARD	
+					TIFR1=OCF1A_bm;					// clear compare A=callback flag
+				#else
+					TIMER2_BASE->SR = 0x1E5F & ~TIMER_SR_CC1IF;	// Clear Timer2/Comp1 interrupt flag
+				#endif
+				sei();								// enable global int
+				if(Update_All())					// Protocol changed?
+				{
+					next_callback=0;				// Launch new protocol ASAP
+					break;
+				}
+				#ifndef STM32_BOARD	
+					while((TIFR1 & OCF1A_bm) == 0);	// wait 2ms...
+				#else
+					while((TIMER2_BASE->SR & TIMER_SR_CC1IF)==0);//2ms wait
+				#endif
+			}
+			// at this point we have a maximum of 4ms in next_callback
+			next_callback *= 2 ;
+			cli();									// Disable global int due to RW of 16 bits registers
+			OCR1A+= next_callback ;					// set compare A for callback
+			#ifndef STM32_BOARD			
+				TIFR1=OCF1A_bm;						// clear compare A=callback flag
+			#else
+				TIMER2_BASE->SR = 0x1E5F & ~TIMER_SR_CC1IF;	// Clear Timer2/Comp1 interrupt flag
+			#endif		
+			diff=OCR1A-TCNT1;						// compare timer and comparator
+			sei();									// enable global int
+#endif
+      //debugln("next %d diff %lu (%lu to %lu) diff %x ",org_next_call, end__ - start_, end__, start_, diff);
 		}
 		while(diff&0x8000);	 						// Callback did not took more than requested time for next callback
 													// so we can launch Update_All before next callback
@@ -401,8 +456,23 @@ void loop()
 
 uint8_t Update_All()
 {
+	#ifdef ENABLE_SERIAL
+		#ifdef CHECK_FOR_BOOTLOADER
+			if ( (mode_select==MODE_SERIAL) && (NotBootChecking == 0) )
+				pollBoot() ;
+			else
+		#endif
+		if(mode_select==MODE_SERIAL && IS_RX_FLAG_on)		// Serial mode and something has been received
+		{
+			update_serial_data();							// Update protocol and data
+			update_channels_aux();
+			INPUT_SIGNAL_on;								//valid signal received
+			last_signal=millis();
+		}
+	#endif //ENABLE_SERIAL
 	#ifdef ENABLE_PPM
- INPUT_SIGNAL_on;
+ //INPUT_SIGNAL_on;
+    update_inputs();
 		if(mode_select!=MODE_SERIAL && IS_PPM_FLAG_on)		// PPM mode and a full frame has been received
 		{
       debugln("%s:%d",__func__, __LINE__);
@@ -648,11 +718,20 @@ static void protocol_init()
 	WAIT_BIND_off;
 	CHANGE_PROTOCOL_FLAG_off;
 
+	if(next_callback>32000)
 	{ // next_callback should not be more than 32767 so we will wait here...
 		uint16_t temp=(next_callback>>10)-2;
 		delayMilliseconds(temp);
 		next_callback-=temp<<10;				// between 2-3ms left at this stage
 	}
+	cli();										// disable global int
+	OCR1A = TCNT1 + next_callback*2;			// set compare A for callback
+	#ifndef STM32_BOARD
+		TIFR1 = OCF1A_bm ;						// clear compare A flag
+	#else
+		TIMER2_BASE->SR = 0x1E5F & ~TIMER_SR_CC1IF;	// Clear Timer2/Comp1 interrupt flag
+	#endif	
+	sei();										// enable global int
 	BIND_BUTTON_FLAG_off;						// do not bind/reset id anymore even if protocol change
  
   debugln("%s BIND_BUTTON_FLAG_off",__func__);
