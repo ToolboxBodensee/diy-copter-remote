@@ -18,7 +18,7 @@
 #define LED_output
 #define IS_LED_on false
 #define LED_toggle
-#if 1
+#if  0
 
   // SDIO MOSI
   #define SDI_pin     16
@@ -99,6 +99,12 @@
   #define CC25_CSN_0       (digitalRead(CC25_CSN_pin) == LOW)
   #define CC25_CSN_input   pinMode(CC25_CSN_pin, INPUT);
   #define CC25_CSN_output  pinMode(CC25_CSN_pin, OUTPUT);
+
+  #define Throttle_pin  34
+  #define Yaw_pin       35
+  #define Roll_pin      12
+  #define Pitch_pin     13
+  #define Aux2_pin      27
 #endif 
 //*******************
 //***    EEPROM   ***

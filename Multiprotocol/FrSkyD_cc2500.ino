@@ -116,6 +116,7 @@ uint16_t initFrSky_2way()
 		
 uint16_t ReadFrSky_2way()
 { 
+   //debugln("%s",__func__);
 
 	if (state < FRSKY_BIND_DONE)
 	{
@@ -130,6 +131,10 @@ uint16_t ReadFrSky_2way()
       debugln("%s bind done",__func__);
 		} else
 			state++;
+      
+    if(state == FRSKY_BIND_DONE) {
+      debugln("%s bind done fr",__func__);
+    }
 		return 9000;
 	}
 	if (state == FRSKY_BIND_DONE)

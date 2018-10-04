@@ -135,7 +135,7 @@ uint16_t convert_channel_frsky(uint8_t num)
 #if defined(FRSKYD_CC2500_INO) || defined(FRSKYX_CC2500_INO)
 enum {
   FRSKY_BIND		= 0,
-  FRSKY_BIND_DONE	= 300,
+  FRSKY_BIND_DONE	= 1000,
   FRSKY_DATA1,
   FRSKY_DATA2,
   FRSKY_DATA3,

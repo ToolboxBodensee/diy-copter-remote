@@ -358,8 +358,9 @@ enum MultiPacketTypes
 //** Debug messages **
 //********************
 	uint16_t debug_time=0;
-	#define debug(msg, ...)  {char buf[64]; sprintf(buf, msg, ##__VA_ARGS__); Serial.println(buf);}
-	#define debugln(msg, ...)  {char buf[64]; sprintf(buf, msg "\r\n", ##__VA_ARGS__); Serial.println(buf);}
+  char buf[128];
+	#define debug(msg, ...)  { sprintf(buf, msg, ##__VA_ARGS__); Serial.println(buf);}
+	#define debugln(msg, ...)  { sprintf(buf, msg "\r\n", ##__VA_ARGS__); Serial.println(buf);}
 	#define debug_time(msg)  { uint16_t debug_time_TCNT1=TCNT1; debug_time=debug_time_TCNT1-debug_time; debugln(msg "%u", debug_time); debug_time=debug_time_TCNT1; }
 //********************
 //*** Blink timing ***
