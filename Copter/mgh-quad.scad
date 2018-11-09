@@ -4,7 +4,7 @@ with_motor=0;
 with_pcbs=1;
 with_akku=0;
 
-motor_size = 8.47;
+motor_size = 8.465;
 motor_height = 21;
 motor_wall_d = 2.2;
 motor_clamp_cut = 3;
@@ -27,6 +27,8 @@ triangle_cut_height = 10;
 cable_cut_width = 3;
 cable_cut_height = 3;
 
+akku_holder_hight = 9.1;
+akku_holder_width =27;
 motor_body_arm_dist = (motor_body_len - motor_arm_width + 2) / sqrt(2);
 module aligned_cube(size, aligned=[1,1,0])
 {
@@ -37,6 +39,26 @@ module aligned_cube(size, aligned=[1,1,0])
 module triangle(o_len, a_len, depth) {
     linear_extrude(height=depth)
         polygon(points=[[0,0],[a_len,0],[0,o_len]], paths=[[0,1,2]]);
+}
+module triangle_cuts(h=4) {
+    translate([0, -motor_body_len / 3, 0]) {
+        triangle(triangle_cut_height, motor_body_len / 4, h);
+        triangle(triangle_cut_height, -motor_body_len / 4, h);
+    }
+    translate([0, motor_body_len / 3, 0]) {
+        triangle(-triangle_cut_height, motor_body_len / 4, h);
+        triangle(-triangle_cut_height, -motor_body_len / 4, h);
+    }
+    translate([-motor_body_len / 3, 0, 0])
+    rotate([0, 0, -90]) {
+        triangle(triangle_cut_height, motor_body_len / 4, h);
+        triangle(triangle_cut_height, -motor_body_len / 4, h);
+    }
+    translate([motor_body_len / 3, 0, 0])
+    rotate([0, 0, 90]) {
+        triangle(triangle_cut_height, motor_body_len / 4, h);
+        triangle(triangle_cut_height, -motor_body_len / 4, h);
+    }
 }
 
 module fc_pcb() {
@@ -87,7 +109,6 @@ module motor_clamp() {
                 cylinder(d = motor_helper_disc, h = motor_helper_height);
 
             color("blue")
-            //sphere(d = motor_size + motor_wall_d);
 
             translate([0, 0, -2])
                 cylinder(d = motor_size + motor_wall_d,h=7);
@@ -96,6 +117,9 @@ module motor_clamp() {
         // cable hole
         translate([-cable_cut_width / 2, -(motor_size + motor_wall_d) / 2 - cable_cut_height, 0])
             cube([cable_cut_width, cable_cut_height, 25]);
+
+        translate([0, -(motor_size) / 2 , motor_height- cable_cut_height])
+            aligned_cube([cable_cut_width, cable_cut_height, cable_cut_height]);
 
         // motor hole
         translate([0, 0, -1])
@@ -196,25 +220,32 @@ module quad() {
             cube([usb_width, 4, usb_hight]);
 
         // triangle cut-outs
-        translate([0, -motor_body_len / 3, -1]) {
-            triangle(triangle_cut_height, motor_body_len / 4, 4);
-            triangle(triangle_cut_height, -motor_body_len / 4, 4);
+        translate([0, 0, -1])
+            triangle_cuts();
+    }
+}
+module akku_holder() {
+    color([0.5,0.8,0.4,0.5])
+    difference() {
+        union() {
+            aligned_cube([motor_body_len,motor_body_len,akku_holder_hight]);
+            translate([0,0,-1])
+                aligned_cube([motor_body_len-motor_body_wall*2,
+                              motor_body_len-motor_body_wall*2,
+                              akku_holder_hight]);
         }
-        translate([0, motor_body_len / 3, -1]) {
-            triangle(-triangle_cut_height, motor_body_len / 4, 4);
-            triangle(-triangle_cut_height, -motor_body_len / 4, 4);
+        translate([0,0,0.01]) {
+            aligned_cube([akku_holder_width,
+                motor_body_len+1,
+                akku_holder_hight+2]);
         }
-        translate([-motor_body_len / 3, 0, -1])
-        rotate([0, 0, -90]) {
-            triangle(triangle_cut_height, motor_body_len / 4, 4);
-            triangle(triangle_cut_height, -motor_body_len / 4, 4);
-        }
-        translate([motor_body_len / 3, 0, -1])
-        rotate([0, 0, 90]) {
-            triangle(triangle_cut_height, motor_body_len / 4, 4);
-            triangle(triangle_cut_height, -motor_body_len / 4, 4);
-        }
+        translate([0, 0, -2])
+            triangle_cuts(h=6);
     }
 }
 
 quad();
+
+translate([0,0,motor_body_height]) {
+    akku_holder();
+}
