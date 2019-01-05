@@ -1,13 +1,13 @@
-$fn = 25;
-with_props=0;
-with_motor=0;
+$fn = 128;
+with_props=1;
+with_motor=1;
 with_pcbs=1;
 with_akku=0;
 with_frame=1;
 
-name="Toolbox";
+name="phschoen";
 version="v1";
-text_depth=0.75;
+text_depth=0.5;
 
 
 
@@ -26,7 +26,7 @@ usb_width=12;
 usb_hight=8;
 
 motor_helper_disc = 40;
-motor_helper_height = 0.2;
+motor_helper_height = 0.3;
 
 motor_arm_width = 8;
 motor_arm_height = 6;
@@ -36,13 +36,13 @@ body_width = 40;
 body_height = 12;
 body_wall_thickness = 2;
 body_bottom_flange = 5;
-body_bottom_bridge = 3;
+body_bottom_bridge = 6;
 
 triangle_cut_height = 10;
 cable_cut_width = 3;
 cable_cut_height = 3;
 
-akku_holder_hight = 9.1;
+akku_holder_hight = 9.5;
 akku_holder_width =27;
 motor_body_arm_dist = (body_width - motor_arm_width + 2) / sqrt(2);
 eps=0.05;
@@ -78,13 +78,13 @@ module motor() {
     color([0.8,0.2,0.2,0.5]) {
         if (with_motor) {
             translate([0, 0, motor_clamp_extra_hight])
-                cylinder(d = motor_d, h = motor_height );
+                %cylinder(d = motor_d, h = motor_height );
             translate([0, 0, motor_clamp_extra_hight])
-                cylinder(d = 2, h = prop_height);
+                %cylinder(d = 2, h = prop_height);
         }
         if (with_props) {
             translate([0, 0, prop_height])
-                cylinder(d = 66.5, h = 2);
+                %cylinder(d = 66.5, h = 2);
         }
     }
 }
@@ -192,15 +192,24 @@ module body() {
         // text stamp
         union()
         {
-            rotate([0,0,180])
-            translate([0,-body_width/2+text_depth-eps,body_height/2])
-            rotate([90,0,0])
-            linear_extrude(height = text_depth)
-            {
-                translate([0,2,0])
-                text(halign="center",valign="center", $fn=$fn, size=5,font="Linux Libertine O", name);
-                translate([0,-3,0])
-                text(halign="center",valign="center", $fn=$fn, size=2,font="Linux Libertine Mono O", version);
+            rotate([0,0,90]) {
+                translate([0,-body_width/2+text_depth-eps,body_height/2])
+                rotate([90,0,0])
+                linear_extrude(height = text_depth)
+                {
+                    translate([0,2,0])
+                    text(halign="center",valign="center", $fn=$fn, size=5,font="Linux Libertine O", "Toolbox");
+                    translate([0,-3,0])
+                    text(halign="center",valign="center", $fn=$fn, size=3,font="Linux Libertine O", version);
+                }
+            }
+            rotate([0,0,180]) {
+                translate([0,-body_width/2+text_depth-eps,body_height/2])
+                rotate([90,0,0])
+                linear_extrude(height = text_depth)
+                {
+                    text(halign="center",valign="center", $fn=$fn, size=5,font="Linux Libertine O", name);
+                }
             }
         }
 
@@ -237,10 +246,10 @@ module akku_holder() {
                               body_width-body_wall_thickness*2,
                               akku_holder_hight]);
         }
-        translate([0,0,0.01]) {
+        translate([0,0,1+0.01]) {
             aligned_cube([akku_holder_width,
                 body_width+1,
-                akku_holder_hight+2]);
+                akku_holder_hight+eps]);
         }
         translate([0, 0, -2])
             triangle_cuts(h=6);
