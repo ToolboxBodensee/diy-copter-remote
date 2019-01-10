@@ -18,94 +18,50 @@
 #define LED_output
 #define IS_LED_on false
 #define LED_toggle
-#if  0
 
-  // SDIO MOSI
-  #define SDI_pin     16
-  #define SDI_on      digitalWrite(SDI_pin, HIGH)
-  #define SDI_off     digitalWrite(SDI_pin, LOW)
-  #define SDI_1       (digitalRead(SDI_pin) == HIGH)
-  #define SDI_0       (digitalRead(SDI_pin) == LOW)
-  #define SDI_input   pinMode(SDI_pin, INPUT);
-  #define SDI_output  pinMode(SDI_pin, OUTPUT);
+//
+#define SDI_pin       PA0 /* SDIO MOSI */
+#define SCLK_pin      PA1 /* SCLK */
+#define SDO_pin       PA2 /* SDO / MISO */
+#define CC25_CSN_pin  PA3 /* Chip select CC2500 */
 
-  //SDO / MISO
-  #define SDO_pin     14
-  #define SDO_on      digitalWrite(SDO_pin, HIGH)
-  #define SDO_off     digitalWrite(SDO_pin, LOW)
-  #define SDO_1       (digitalRead(SDO_pin) == HIGH)
-  #define SDO_0       (digitalRead(SDO_pin) == LOW)
-  #define SDO_input   pinMode(SDO_pin, INPUT);
-  #define SDO_output  pinMode(SDO_pin, OUTPUT);
-  
-  // SCLK  
-  #define SCLK_pin     15
-  #define SCLK_on      digitalWrite(SCLK_pin, HIGH)
-  #define SCLK_off     digitalWrite(SCLK_pin, LOW)
-  #define SCLK_1       (digitalRead(SCLK_pin) == HIGH)
-  #define SCLK_0       (digitalRead(SCLK_pin) == LOW)
-  #define SCLK_input   pinMode(SCLK_pin, INPUT);
-  #define SCLK_output  pinMode(SCLK_pin, OUTPUT);
-  
-  // Chip select CC2500
-  #define CC25_CSN_pin     7
-  #define CC25_CSN_on      digitalWrite(CC25_CSN_pin, HIGH)
-  #define CC25_CSN_off     digitalWrite(CC25_CSN_pin, LOW)
-  #define CC25_CSN_1       (digitalRead(CC25_CSN_pin) == HIGH)
-  #define CC25_CSN_0       (digitalRead(CC25_CSN_pin) == LOW)
-  #define CC25_CSN_input   pinMode(CC25_CSN_pin, INPUT);
-  #define CC25_CSN_output  pinMode(CC25_CSN_pin, OUTPUT);
+#define Throttle_pin  PA4
+#define Yaw_pin       PA5
+#define Roll_pin      PA6
+#define Pitch_pin     PA7
+#define Aux2_pin      PB0
 
-//*******************
-//***    Timer    ***
-//*******************
-#define OCF1A_bm _BV(OCF1A)
-#define OCF1B_bm _BV(OCF1B)
-#define SET_TIMSK1_OCIE1B	TIMSK1 |= _BV(OCIE1B)
-#define CLR_TIMSK1_OCIE1B	TIMSK1 &=~_BV(OCIE1B)
-#else
-  // SDIO MOSI
-  #define SDI_pin     26
-  #define SDI_on      digitalWrite(SDI_pin, HIGH)
-  #define SDI_off     digitalWrite(SDI_pin, LOW)
-  #define SDI_1       (digitalRead(SDI_pin) == HIGH)
-  #define SDI_0       (digitalRead(SDI_pin) == LOW)
-  #define SDI_input   pinMode(SDI_pin, INPUT);
-  #define SDI_output  pinMode(SDI_pin, OUTPUT);
+#define cli()
+#define sei()
 
-  //SDO / MISO
-  #define SDO_pin     25
-  #define SDO_on      digitalWrite(SDO_pin, HIGH)
-  #define SDO_off     digitalWrite(SDO_pin, LOW)
-  #define SDO_1       (digitalRead(SDO_pin) == HIGH)
-  #define SDO_0       (digitalRead(SDO_pin) == LOW)
-  #define SDO_input   pinMode(SDO_pin, INPUT);
-  #define SDO_output  pinMode(SDO_pin, OUTPUT);
-  
-  // SCLK  
-  #define SCLK_pin     33
-  #define SCLK_on      digitalWrite(SCLK_pin, HIGH)
-  #define SCLK_off     digitalWrite(SCLK_pin, LOW)
-  #define SCLK_1       (digitalRead(SCLK_pin) == HIGH)
-  #define SCLK_0       (digitalRead(SCLK_pin) == LOW)
-  #define SCLK_input   pinMode(SCLK_pin, INPUT);
-  #define SCLK_output  pinMode(SCLK_pin, OUTPUT);
-  
-  // Chip select CC2500
-  #define CC25_CSN_pin     32
-  #define CC25_CSN_on      digitalWrite(CC25_CSN_pin, HIGH)
-  #define CC25_CSN_off     digitalWrite(CC25_CSN_pin, LOW)
-  #define CC25_CSN_1       (digitalRead(CC25_CSN_pin) == HIGH)
-  #define CC25_CSN_0       (digitalRead(CC25_CSN_pin) == LOW)
-  #define CC25_CSN_input   pinMode(CC25_CSN_pin, INPUT);
-  #define CC25_CSN_output  pinMode(CC25_CSN_pin, OUTPUT);
+#define SDI_on      digitalWrite(SDI_pin, HIGH)
+#define SDI_off     digitalWrite(SDI_pin, LOW)
+#define SDI_1       (digitalRead(SDI_pin) == HIGH)
+#define SDI_0       (digitalRead(SDI_pin) == LOW)
+#define SDI_input   pinMode(SDI_pin, INPUT);
+#define SDI_output  pinMode(SDI_pin, OUTPUT);
 
-  #define Throttle_pin  34
-  #define Yaw_pin       35
-  #define Roll_pin      12
-  #define Pitch_pin     13
-  #define Aux2_pin      27
-#endif 
+#define SDO_on      digitalWrite(SDO_pin, HIGH)
+#define SDO_off     digitalWrite(SDO_pin, LOW)
+#define SDO_1       (digitalRead(SDO_pin) == HIGH)
+#define SDO_0       (digitalRead(SDO_pin) == LOW)
+#define SDO_input   pinMode(SDO_pin, INPUT);
+#define SDO_output  pinMode(SDO_pin, OUTPUT);
+
+#define SCLK_on      digitalWrite(SCLK_pin, HIGH)
+#define SCLK_off     digitalWrite(SCLK_pin, LOW)
+#define SCLK_1       (digitalRead(SCLK_pin) == HIGH)
+#define SCLK_0       (digitalRead(SCLK_pin) == LOW)
+#define SCLK_input   pinMode(SCLK_pin, INPUT);
+#define SCLK_output  pinMode(SCLK_pin, OUTPUT);
+
+#define CC25_CSN_on      digitalWrite(CC25_CSN_pin, HIGH)
+#define CC25_CSN_off     digitalWrite(CC25_CSN_pin, LOW)
+#define CC25_CSN_1       (digitalRead(CC25_CSN_pin) == HIGH)
+#define CC25_CSN_0       (digitalRead(CC25_CSN_pin) == LOW)
+#define CC25_CSN_input   pinMode(CC25_CSN_pin, INPUT);
+#define CC25_CSN_output  pinMode(CC25_CSN_pin, OUTPUT);
+
 //*******************
 //***    EEPROM   ***
 //*******************
