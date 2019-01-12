@@ -1,0 +1,540 @@
+
+
+$fn=36;
+Text="4.7k";
+Color1="Red";
+Color2="Red";
+Color3="SaddleBrown";
+Color4="GoldenRod";
+Orientation=1;    //0=Horizontal mounted  1=Vertical mounted
+Type=2;     //0=1/4W   1=1/2W   2=1W
+Solder=1;   // 0=no   1=yes
+
+
+module Resistor(Text,Color1,Color2,Color3,Color4,Orientation,Type,Solder)
+  {
+  
+if(Orientation==0)
+  {
+  if(Type==0)
+  translate([0,0,2.75])
+  {
+  color("Khaki")
+  hull()
+    {
+    translate([-2.5,0,0])
+    sphere(1.25);
+    translate([2.5,0,0])
+      sphere(0.5);
+    }
+color("Khaki")
+hull()
+    {
+    translate([2.5,0,0])
+      sphere(1.25);
+    translate([-2.5,0,0])
+      sphere(1);
+    }
+color("Khaki")
+  translate([0,0,0])
+    rotate([0,90,0])
+      cylinder(r=1.15,h=5,center=true);
+
+  color(Color1)
+    translate([-2,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.25,h=0.5);
+  color(Color2)
+    translate([-1,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.25,h=0.5);
+  color(Color3)
+    translate([0,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.25,h=0.5);
+  color(Color4)
+    translate([1.5,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.25,h=0.5);
+
+  color("Silver")
+  translate([0,0,0])
+    rotate([0,90,0])
+      cylinder(d=0.55,h=2.54*4,center=true);
+  color("Silver")
+  translate([2.54*2,0,-5])
+    rotate([0,0,0])
+      cylinder(d=0.55,h=10,center=true);
+color("Silver")
+  translate([-2.54*2,0,-5])
+    rotate([0,0,0])
+      cylinder(d=0.55,h=10,center=true);
+color("Silver")  
+  translate([-2.54*2,0,0])
+    rotate([0,0,0])
+      sphere(d=0.55);
+color("Silver")
+  translate([2.54*2,0,0])
+    rotate([0,0,0])
+      sphere(d=0.55);
+
+if(Solder==1)
+  {
+  color("Silver")
+      translate([2.54*2,0,-2.75])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  color("Silver")
+      translate([-2.54*2,0,-2.75])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  }
+
+  %color("Black")
+    translate([0,0,0.4])
+      linear_extrude(1)
+        text(Text,size=2,valign="center",halign="center");
+  }
+
+if(Type==1)
+  translate([1.257,0,2.75])
+  {
+  color("Khaki")
+  hull()
+    {
+    translate([-3.25,0,0])
+    sphere(1.5);
+    translate([2.5,0,0])
+      sphere(0.5);
+    }
+color("Khaki")
+hull()
+    {
+    translate([3.25,0,0])
+      sphere(1.5);
+    translate([-2.5,0,0])
+      sphere(1);
+    }
+color("Khaki")
+  translate([0,0,0])
+    rotate([0,90,0])
+      cylinder(r=1.45,h=6,center=true);
+
+  color(Color1)
+    translate([-2,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.5,h=0.5);
+  color(Color2)
+    translate([-1,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.5,h=0.5);
+  color(Color3)
+    translate([0,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.5,h=0.5);
+  color(Color4)
+    translate([1.5,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.5,h=0.5);
+
+  color("Silver")
+  translate([0,0,0])
+    rotate([0,90,0])
+      cylinder(d=0.55,h=2.54*5,center=true);
+  color("Silver")
+  translate([2.54*2.5,0,-5])
+    rotate([0,0,0])
+      cylinder(d=0.55,h=10,center=true);
+color("Silver")
+  translate([-2.54*2.5,0,-5])
+    rotate([0,0,0])
+      cylinder(d=0.55,h=10,center=true);
+color("Silver")  
+  translate([-2.54*2.5,0,0])
+    rotate([0,0,0])
+      sphere(d=0.55);
+color("Silver")
+  translate([2.54*2.5,0,0])
+    rotate([0,0,0])
+      sphere(d=0.55);
+
+if(Solder==1)
+  {
+  color("Silver")
+      translate([2.54*2.5,0,-2.75])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  color("Silver")
+      translate([-2.54*2.5,0,-2.75])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  }
+
+  %color("Black")
+    translate([0,0,0.6])
+      linear_extrude(1)
+        text(Text,size=2,valign="center",halign="center");
+  }
+
+if(Type==2)
+  translate([0,0,3.25])
+  {
+  color("Khaki")
+  hull()
+    {
+    translate([-4.25,0,0])
+    sphere(2);
+    translate([2.5,0,0])
+      sphere(1.5);
+    }
+color("Khaki")
+hull()
+    {
+    translate([4.25,0,0])
+      sphere(2);
+    translate([-2.5,0,0])
+      sphere(1.5);
+    }
+color("Khaki")
+  translate([0,0,0])
+    rotate([0,90,0])
+      cylinder(r=2,h=8,center=true);
+
+  color(Color1)
+    translate([-3.5,0,0])
+      rotate([0,90,0])
+        cylinder(r=2.05,h=0.75);
+  color(Color2)
+    translate([-2,0,0])
+      rotate([0,90,0])
+        cylinder(r=2.05,h=0.75);
+  color(Color3)
+    translate([-0.5,0,0])
+      rotate([0,90,0])
+        cylinder(r=2.05,h=0.75);
+  color(Color4)
+    translate([1,0,0])
+      rotate([0,90,0])
+        cylinder(r=2.05,h=0.75);
+
+  color("Silver")
+  translate([0,0,0])
+    rotate([0,90,0])
+      cylinder(d=0.55,h=2.54*6,center=true);
+  color("Silver")
+  translate([2.54*3,0,-5])
+    rotate([0,0,0])
+      cylinder(d=0.55,h=10,center=true);
+color("Silver")
+  translate([-2.54*3,0,-5])
+    rotate([0,0,0])
+      cylinder(d=0.55,h=10,center=true);
+color("Silver")  
+  translate([-2.54*3,0,0])
+    rotate([0,0,0])
+      sphere(d=0.55);
+color("Silver")
+  translate([2.54*3,0,0])
+    rotate([0,0,0])
+      sphere(d=0.55);
+
+if(Solder==1)
+  {
+  color("Silver")
+      translate([2.54*3,0,-3.25])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  color("Silver")
+      translate([-2.54*3,0,-3.25])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  }
+
+  %color("Black")
+    translate([0,0,0.6])
+      linear_extrude(1)
+        text(Text,size=2,valign="center",halign="center");
+  }
+
+}
+
+if(Orientation==1)
+{
+if(Type==0)
+translate([0,0,6])
+  rotate([0,90,0])
+  {
+  color("Khaki")
+  hull()
+    {
+    translate([-2.5,0,0])
+    sphere(1.25);
+    translate([2.5,0,0])
+      sphere(0.5);
+    }
+color("Khaki")
+hull()
+    {
+    translate([2.5,0,0])
+      sphere(1.25);
+    translate([-2.5,0,0])
+      sphere(1);
+    }
+color("Khaki")
+  translate([0,0,0])
+    rotate([0,90,0])
+      cylinder(r=1.15,h=5,center=true);
+
+  color(Color1)
+    translate([-2,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.25,h=0.5);
+  color(Color2)
+    translate([-1,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.25,h=0.5);
+  color(Color3)
+    translate([0,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.25,h=0.5);
+  color(Color4)
+    translate([1.5,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.25,h=0.5);
+
+  color("Silver")
+  translate([0,0,0])
+    rotate([90,0,90])
+      cylinder(d=0.55,h=2.54*4,center=true);
+  color("Silver")
+  translate([4.9,0,-2.54])
+    rotate([90,0,90])
+      cylinder(d=0.55,h=20,center=true);
+  color("Silver")
+    translate([4.9,0,0])
+      rotate([90,0,90])
+        cylinder(d=0.55,h=20,center=true);
+color("Silver")
+  translate([-2.54*2,0,-1.257])
+    rotate([0,0,0])
+      cylinder(d=0.55,h=2.54,center=true);
+color("Silver")  
+  translate([-2.54*2,0,0])
+    rotate([0,0,0])
+      sphere(d=0.55);
+color("Silver")
+  translate([-2.54*2,0,-2.54])
+    rotate([0,0,0])
+      sphere(d=0.55);
+
+if(Solder==1)
+  {
+  color("Silver")
+      translate([2.54*2.36,0,0])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  color("Silver")
+      translate([2.54*2.36,0,-2.54])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  }
+
+  %color("Black")
+    translate([0,0,0.7])
+      linear_extrude(1)
+        text(Text,size=2,valign="center",halign="center");
+  }
+
+if(Type==1)
+translate([0,0,6])
+  rotate([0,90,0])
+  {
+  translate([-1.5,0,0])
+  {
+  color("Khaki")
+  hull()
+    {
+    translate([-3.25,0,0])
+    sphere(1.5);
+    translate([2.5,0,0])
+      sphere(0.5);
+    }
+color("Khaki")
+hull()
+    {
+    translate([3.25,0,0])
+      sphere(1.5);
+    translate([-2.5,0,0])
+      sphere(1);
+    }
+color("Khaki")
+  translate([0,0,0])
+    rotate([0,90,0])
+      cylinder(r=1.45,h=6,center=true);
+
+  color(Color1)
+    translate([-2,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.5,h=0.5);
+  color(Color2)
+    translate([-1,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.5,h=0.5);
+  color(Color3)
+    translate([0,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.5,h=0.5);
+  color(Color4)
+    translate([1.5,0,0])
+      rotate([0,90,0])
+        cylinder(r=1.5,h=0.5);
+  }
+
+  color("Silver")
+  translate([0,0,0])
+    rotate([90,0,90])
+      cylinder(d=0.55,h=2.54*6,center=true);
+  color("Silver")
+  translate([3.65,0,-2.54])
+    rotate([90,0,90])
+      cylinder(d=0.55,h=22.5,center=true);
+  color("Silver")
+    translate([4.9,0,0])
+      rotate([90,0,90])
+        cylinder(d=0.55,h=20,center=true);
+color("Silver")
+  translate([-2.54*3,0,-1.257])
+    rotate([0,0,0])
+      cylinder(d=0.55,h=2.54,center=true);
+color("Silver")  
+  translate([-2.54*3,0,0])
+    rotate([0,0,0])
+      sphere(d=0.55);
+color("Silver")
+  translate([-2.54*3,0,-2.54])
+    rotate([0,0,0])
+      sphere(d=0.55);
+
+if(Solder==1)
+  {
+  color("Silver")
+      translate([2.54*2.36,0,0])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  color("Silver")
+      translate([2.54*2.36,0,-2.54])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  }
+
+  %color("Black")
+    translate([-1.5,0,0.7])
+      linear_extrude(1)
+        text(Text,size=2,valign="center",halign="center");
+  }
+
+if(Type==2)
+translate([0,0,8])
+  rotate([0,90,0])
+  {
+  translate([-1.5,0,0])
+  {
+  color("Khaki")
+  hull()
+    {
+    translate([-4.25,0,0])
+    sphere(2);
+    translate([2.5,0,0])
+      sphere(1.5);
+    }
+color("Khaki")
+hull()
+    {
+    translate([4.25,0,0])
+      sphere(2);
+    translate([-2.5,0,0])
+      sphere(1.5);
+    }
+color("Khaki")
+  translate([0,0,0])
+    rotate([0,90,0])
+      cylinder(r=2,h=8,center=true);
+
+  color(Color1)
+    translate([-3.5,0,0])
+      rotate([0,90,0])
+        cylinder(r=2.05,h=0.75);
+  color(Color2)
+    translate([-2,0,0])
+      rotate([0,90,0])
+        cylinder(r=2.05,h=0.75);
+  color(Color3)
+    translate([-0.5,0,0])
+      rotate([0,90,0])
+        cylinder(r=2.05,h=0.75);
+  color(Color4)
+    translate([1,0,0])
+      rotate([0,90,0])
+        cylinder(r=2.05,h=0.75);
+  }
+
+  color("Silver")
+  translate([0,0,0])
+    rotate([90,0,90])
+      cylinder(d=0.55,h=2.54*8,center=true);
+  color("Silver")
+  translate([3.65,0,-2.54*2])
+    rotate([90,0,90])
+      cylinder(d=0.55,h=27.6,center=true);
+  color("Silver")
+    translate([4.9,0,0])
+      rotate([90,0,90])
+        cylinder(d=0.55,h=25,center=true);
+color("Silver")
+  translate([-2.54*4,0,-2.54])
+    rotate([0,0,0])
+      cylinder(d=0.55,h=2.54*2,center=true);
+color("Silver")  
+  translate([-2.54*4,0,0])
+    rotate([0,0,0])
+      sphere(d=0.55);
+color("Silver")
+  translate([-2.54*4,0,-2.54*2])
+    rotate([0,0,0])
+      sphere(d=0.55);
+
+if(Solder==1)
+  {
+  color("Silver")
+      translate([2.54*3.15,0,0])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  color("Silver")
+      translate([2.54*3.15,0,-2.54*2])
+        rotate([0,0,0])
+          scale([1,1,1.1])
+            sphere(d=2);
+  }
+
+  %color("Black")
+    translate([-1.5,0,0.7])
+      linear_extrude(1)
+        text(Text,size=2,valign="center",halign="center");
+  }
+}
+}
+                    
+Resistor(Text,Color1,Color2,Color3,Color4,Orientation,Type,Solder);
+
+
