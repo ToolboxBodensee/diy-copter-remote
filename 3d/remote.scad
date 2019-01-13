@@ -10,12 +10,22 @@ use <lib/Arduino_nano.scad>;
 show_switch=1;
 show_lcd=1;
 show_sticks=1;
+show_stm32=1;
+show_antenna=1;
+show_cc2500=1;
+show_battery_charger=1;
 
 name="phschoen";
 
 text_pos=[[-10,-18,0], [10,-18,0], [-55,49,0], [-25,49,0], [0,40,0], [25,49,0], [55,49,0]   ];
 top_text=["on",        "armed",    "some",     "thing",    "needs",  "to be",   "configur"];
 bot_text=["off",       "disarmed", "",         "",         "",       "",        ""          ];
+
+pos_cc2500=[0,10,-3];
+pos_stm32=[48,-15,-1];
+pos_antenna=[0,70,-15];
+pos_lcd=[0,-44,-10];
+pos_batery_charger=[-48,-15,-5];
 
 eps=0.1;
 $fn=32;
@@ -116,8 +126,6 @@ module pin_angled(pins=4, angled=true) {
 
 
 module remote() {
-    bottom_case();
-    top_case();
     if (show_sticks) {
         if($t < 0.25)
             sticks($t*4,0);
@@ -128,6 +136,48 @@ module remote() {
         else
             sticks(0,1-($t-0.75)*4);
     }
+    if(show_stm32) {
+        translate(pos_stm32) {
+            rotate([0,180,180])
+            stm32_bluepill();
+        }
+    }
+
+    if(show_antenna) {
+        translate(pos_antenna) {
+            rotate([90,0,0])
+            color("darkgray")
+            antenna();
+        }
+    }
+    if(show_cc2500) {
+        translate(pos_cc2500) {
+            rotate([0,0,90])
+            cc2500();
+        }
+    }
+    if(show_lcd) {
+        translate(pos_lcd)
+        LCD_1602_I2C(PinsDown,
+                      "RSSI 99     A99 ",
+                      " ARMED      A99 ");
+    }
+
+    if(show_switch){
+            for(i=[0:1:len(text_pos)-1]) {
+                translate(text_pos[i])
+                translate([0,0,-5])
+                switch(thick);
+            }
+    }
+    if(show_battery_charger) {
+        translate(pos_batery_charger)
+        rotate([0,0,-90])
+        battery_charger();
+    }
+
+    top_case();
+    //bottom_case();
 
 }
 
@@ -148,6 +198,7 @@ module sticks(l1,l2)
 module top_case() {
     difference() {
         thick=2.5;
+        color([0.5,0.8,0,0.8])
         union() {
             hull() {
                 remote_top_plate_1=[150,110,1];
@@ -169,7 +220,7 @@ module top_case() {
                 }
             }
             // lcd screw holder
-            translate([0,    -45,0])
+            translate([pos_lcd[0],pos_lcd[1]-1.2,0])
             translate([-40.6,-20.25,0])
             {
                 // screwsholders
@@ -198,21 +249,63 @@ module top_case() {
                 }
             }
             // stm32 holder
-            // TODO
+            {
+                translate(pos_stm32){
 
-            translate([48,-15,0]) {
-                rotate([0,180,180])
-                %stm32_bluepill();
+                    // side holder
+                    pcb_size=[52.3, 22.6, 1.6];
+                    for(y=[-1,1])
+                    for(x=[-1,1]) {
+                        translate([x*(pcb_size[0]/2-10),
+                                   y*(pcb_size[1]/2),
+                                   0.2]){
+                            aligned_cube([5,6.25,pcb_size[2]-0.5],[1,1,0]);
+                        }
+                        translate([x*(pcb_size[0]/2-10),
+                                   y*(pcb_size[1]/2+1.625),
+                                   pcb_size[2]-2-2]){
+                            aligned_cube([5,3.0,2.6],[1,1,0]);
+                        }
+                    }
+                }
             }
-            translate([0,70,-15]) {
-                rotate([90,0,0])
-                color("darkgray")
-                %antenna();
+
+            // cc2500 holder
+            {
+                translate(pos_cc2500){
+                    for(y=[-1,1])
+                    for(x=[-1,1]) {
+                        translate([x*12.75,y*8,1.25]){
+                            aligned_cube([5,5,4],[1,1,0]);
+                        }
+                        translate([x*13.1,y*8,1.25-2]){
+                            aligned_cube([4.3,5,2],[1,1,0]);
+                        }
+                    }
+                }
             }
-            translate([0,10,-3]) {
-                rotate([0,0,90])
-                %cc2500();
+
+            // batery charger holder
+            {
+                pcb_size=[14.75, 26, 1.6];
+                translate(pos_batery_charger){
+                    for(x=[-1,1]) {
+                        translate([0, x*(14.75/2+1),pcb_size[2]+0.2]){
+                            aligned_cube([5,6,5],[1,1,0]);
+                        }
+                        translate([0, x*(14.75/2+2.1),0]){
+                            aligned_cube([5,3.75,2],[1,1,0]);
+                        }
+                    }
+                    translate([ -pcb_size[0]/2-6,0,pcb_size[2]+0.2]){
+                        aligned_cube([5.5,4,5],[1,1,0]);
+                    }
+                    translate([ -pcb_size[0]/2-7.25,0,0]){
+                        aligned_cube([3,4,2],[1,1,0]);
+                    }
+                }
             }
+
         }
         //lcdcutout
         translate([0,-45,-eps]) {
@@ -225,13 +318,6 @@ module top_case() {
                     translate([0,0,0.6+thick])
                         aligned_rounded_cube(size=[65+e,15+e,eps], r=2, rounding=[1,1,0]);
                 }
-            }
-            if(show_lcd)
-            {
-                translate([0,1,-10])
-                %LCD_1602_I2C(PinsDown,
-                         "RSSI 99     A99 ",
-                         " ARMED      A99 ");
             }
         }
         // stick cutouts
@@ -284,10 +370,6 @@ module button_with_text(thick=4,text_size=5, top_text="on",bottom_text="off")
     dist_text=10.5;
     cylinder(d=5.8, h=thick+2*eps);
 
-    translate([0,0,-5])
-    if(show_switch) {
-        %switch(thick);
-    }
 
     //
     color("gray")
@@ -324,27 +406,60 @@ module text_engave(thick, text_size, text_)
 
 module bottom_case() {
 
+    h=25;
+    wall=3*2;
+    remote_top_plate_1=[150,110,h];
+    remote_top_plate_2=[140,120,h];
+    remote_top_plate_3=[100,135,h];
+
+    translate([0,0,-h])
+    color([1,1,1,0.1])
+    difference() {
+        //body itself
+        hull() {
+            aligned_rounded_cube(remote_top_plate_1,2,[1,1,0],[1,1,0]);
+            aligned_rounded_cube(remote_top_plate_2,2,[1,1,0],[1,1,0]);
+            aligned_rounded_cube(remote_top_plate_3,2,[1,1,0],[1,1,0]);
+        }
+
+        translate([0,0,3])
+        hull() {
+            aligned_rounded_cube(remote_top_plate_1-[wall,wall,0],2,[1,1,0],[1,1,0]);
+            aligned_rounded_cube(remote_top_plate_2-[wall,wall,0],2,[1,1,0],[1,1,0]);
+            aligned_rounded_cube(remote_top_plate_3-[wall,wall,0],2,[1,1,0],[1,1,0]);
+        }
+
+    }
+
+
 }
 module switch() {
     // screw
+    color("silver")
     cylinder(d=5.75,h=8.75);
+
+    // stick
+    color("silver")
     translate([0,0,8.75])
     rotate([24,0,0]) {
-        // stick
         sphere(d=3);
         cylinder(d=3,h=8.5);
         translate([0,0,8.5])
             sphere(d=3);
     }
+
     // body
-    aligned_cube([8.05,13,10],[1,1,2]);
+    color([0.3,0.3,0.6,1])
+        aligned_cube([8.05,13,10],[1,1,2]);
+
     // pins
+    color("silver")
     for(i=[1,0,-1]) {
         translate([0, i*4.5,-10])
         difference() {
             aligned_cube([2,0.7, 4.2], [1,1,2]);
             translate([0,0,-3])
-            rotate([0,90,0])
+            rotate([90,0,0])
                 cylinder(d=1, h=2, center=true);
         }
     }
@@ -357,6 +472,7 @@ module switch() {
     /* } */
 
     // top plate
+    color("silver")
     translate([0,0,7])
     difference() {
         union() {
@@ -367,6 +483,7 @@ module switch() {
             cylinder(d=6.1, h=2);
     }
     // top screw
+    color("silver")
     translate([0,0,7.7])
     difference() {
         cylinder($fn=6, d=9.4, h=0.7);
@@ -522,5 +639,47 @@ module cc2500() {
         }
 
     }
+}
+module battery_charger() {
+    eps=0.1;
+    pcb_size=[14.75, 26, 1.6];
+
+    // pcb
+    color("lightblue")
+    aligned_cube(pcb_size);
+
+    // Pins charge
+    color("silver") {
+
+        mirror([1,0,0]) {
+            translate(pcb_size/2)
+            aligned_cube([2.38, 4, pcb_size[2]+eps], [2,2,1]);
+        }
+        translate(pcb_size/2)
+        aligned_cube([2.38, 4, pcb_size[2]+eps], [2,2,1]);
+    }
+
+    // Pins bat
+    color("silver") {
+
+            mirror([1,0,0]) {
+                translate(pcb_size/2 + [-1,-17,0])
+                cylinder(d=1.7,h=pcb_size[2]+eps, center=true);
+                translate(pcb_size/2 + [-1,-19.5,0])
+                cylinder(d=1.7,h=pcb_size[2]+eps, center=true);
+            }
+
+            translate(pcb_size/2 + [-1,-17,0])
+            cylinder(d=1.7,h=pcb_size[2]+eps, center=true);
+
+
+            translate(pcb_size/2 + [-1,-19.5,0])
+            cylinder(d=1.7,h=pcb_size[2]+eps, center=true);
+    }
+
+    translate([0, pcb_size[1]/2-7,pcb_size[2]])
+    rotate([0,0,-90])
+    usb_micro();
+
 }
 remote();

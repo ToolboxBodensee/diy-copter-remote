@@ -9,7 +9,7 @@ module antenna() {
     difference()
     {
         translate([0, 0, -h[0]]) {
-            sphere(d=top_d);
+            sphere(d=d1[len(d1)-1]);
             for (i=[0:len(h)-1]) {
                 translate([0, 0, h[i+1]])
                     cylinder(d1=d1[i], d2=d2[i], h=h[i]-h[i+1]);
