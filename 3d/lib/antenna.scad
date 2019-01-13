@@ -6,6 +6,7 @@ module antenna() {
     d2=[12.8, 12.8, 12.8, 12.8, 5.85, 5.3, 5.85,  5.85,];
     h= [180.8, 172,  154,  81,   44,   12, 10.60, 0,   ];
 
+    color("darkgray")
     difference()
     {
         translate([0, 0, -h[0]]) {
@@ -21,15 +22,17 @@ module antenna() {
     }
 }
 
-module sma_connector_male() {
-    d=[2,    3.2,   9.1,    8,  9.1,    6.15, ];
-    fn=[0,    0,     6,    0,     6,    0   , ];
-    h= [20.5, 16.45, 13.1, 10.75, 8.75, 7.1 , 0];
+module sma_connector_male(thickness=0) {
+    d=[2,    3.2,   9.1,   6.15,  8,               9.1,            6.15, ];
+    fn=[0,    0,     6,    0,     0,               6,              0   , ];
+    h= [20.5, 16.45, 13.1, 10.75, 10.75-thickness, 8.75-thickness, 7.1-thickness , 0];
 
+    l=len(h)-1;
     //translate([0, 0, -h[0]])
+    color("gold")
     {
         difference() {
-            for (i=[0:len(h)-1]) {
+            for (i=[0:l]) {
                 translate([0, 0, h[i+1]]) {
                     if(fn[i] == 0)
                         cylinder(d=d[i], h=h[i]-h[i+1]);

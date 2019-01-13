@@ -2,24 +2,29 @@
 // throttle has different mounting slot at the bottom then the roll stick
 // throttle has a metal stick and roll has a ps2 plastic shaft
 use <lib/cube.scad>
+use <lib/cylinder.scad>
 
 // draw itself
 stick();
 
-module stick(h=25)
+module stick(h=25-10)
 {
     $fn=32;
-    translate([0,0,15]) {
+    translate([0,0,15-3]) {
         cylinder(d=5,h=h);
         translate([0,0,h])
             // top nob to grab
             gabber_part();
     }
     // stick holder with cutout
-    stick_mount();
+    translate([0,0,0]) {
+        stick_mount();
+    }
 
     // dust protector
-    protector_cone();
+    translate([0,0,-3]) {
+        protector_cone(thickness=1.25);
+    }
 }
 
 module gabber_part() {
@@ -70,9 +75,9 @@ module stick_mount(is_ps2_shaft=1) {
     difference() {
         color([1,0,1]) {
             if ( is_ps2_shaft ) {
-                cylinder(d=6.75,h=15);
+                cylinder(d=6.75,h=10);
             } else {
-                cylinder(d=6,h=15);
+                cylinder(d=6,h=10);
             }
         }
         translate([0,0,-eps])
@@ -88,17 +93,22 @@ module stick_mount(is_ps2_shaft=1) {
         }
     }
 }
-module protector_cone() {
+module protector_cone(thickness) {
     //dust protector
     difference() {
         union() {
             sphere(d=30);
-            translate([0,0,12])
-            cylinder(d2=3,d1=17.5,h=7);
+            translate([0,0,12.1])
+            //cylinder(d2=3,d1=17.5,h=7);
+            cylinder_flange_sphere($fn=32,r2=4/2, r1=17.5/2, h=20);
         }
+
+        // cut lower half
         translate([-15,-15,-30])
-        cube([30,30,30]);
-        sphere(d=26);
+            cube([30,30,30]);
+
+        // cut innerpart so its a shell
+        sphere(d=30-2*thickness);
     }
 }
 

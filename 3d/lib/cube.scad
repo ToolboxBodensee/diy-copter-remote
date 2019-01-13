@@ -35,9 +35,9 @@ module aligned_rounded_cube(size, r=5, rounding=[1,1,1], aligned=[1,1,0])
         }else if( rounding == [0,1,1] ) {
             //cylinder rounding x/z
             minkowski() {
-                translate([ 0,-r,0])
-                    cube([size[0] - 2*r, size[1] - 2*eps, size[2]- 2*r]);
-                rotate([90,0]) {
+                translate([-r,0,0])
+                    cube([size[0] - 2*eps , size[1] - 2*r, size[2]- 2*r]);
+                rotate([0,90]) {
                     cylinder(r=r,h=eps);
                 }
             }
