@@ -21,21 +21,35 @@ show_top            =1;
 show_bottom         =1;
 
 
+top_bottom_screws=[
+    [-50,-50,0],
+    [ 50,-50,0],
+    [-50, 50,0],
+    [ 50, 50,0],
+    [ 18, 10,0],
+    [-18, 10,0],
+];
+
 name="phschoen";
 
-text_pos=[[-8.5,-15,0], [8.5,-15,0], [-54,45,0], [-20,45,0], [0,40,0], [20,45,0], [54,45,0]   ];
-top_text=["on",        "armed",    "mode",     "beeper",    "failsave",  "led",   "turtle"];
-bot_text=["off",       "disarmed", "",         "",          "",          "",      ""    ];
+text_pos=[[-8.5,-15,0], [8.5,-15,0], [-40,50,0], [-20,50,0], [0,39,0], [20,50,0], [40,50,0]   ];
+top_text=["on",        "armed",      "mode",     "beeper",    "failsave",  "led",   "turtle"];
+bot_text=["off",       "disarmed",    "",         "",          "",          "",      ""    ];
 
 pos_cc2500=[0,10,-3];
-pos_stm32=[40.5,-10,-3];
-pos_antenna=[0,75.20,-15];
-pos_lcd=[0,-40,-10];
+pos_stm32=[40.5,-14,-3];
+pos_antenna=[0,125/2+8.20,-15];
+pos_lcd=[0,-43,-10];
 pos_batery_charger=[-48,-15,-5];
+
+remote_top_plate_1=[140,110,0];
+remote_top_plate_2=[130,110,0];
+remote_top_plate_3=[100,131,0];
+
+ps2_pcb_size=[26.15, 34.15, 1.6];
 
 eps=0.1;
 $fn=32;
-
 
 module remote() {
 
@@ -123,13 +137,9 @@ module top_case() {
         color([0.5,0.8,0,0.8])
         union() {
             hull() {
-                remote_top_plate_1=[140,110,1];
-                remote_top_plate_2=[130,110,thick];
-                remote_top_plate_3=[100,125,thick];
-
-                aligned_rounded_cube(remote_top_plate_1,2,[1,1,0],[1,1,0]);
-                aligned_rounded_cube(remote_top_plate_2,2,[1,1,0],[1,1,0]);
-                aligned_rounded_cube(remote_top_plate_3,2,[1,1,0],[1,1,0]);
+                aligned_rounded_cube(remote_top_plate_1+[0,0,1],2,[1,1,0],[1,1,0]);
+                aligned_rounded_cube(remote_top_plate_2+[0,0,thick],2,[1,1,0],[1,1,0]);
+                aligned_rounded_cube(remote_top_plate_3+[0,0,thick],2,[1,1,0],[1,1,0]);
 
             }
             // lcd screw holder
@@ -216,6 +226,17 @@ module top_case() {
                     translate([ -pcb_size[0]/2-7.25,0,0]){
                         aligned_cube([3,4,2],[1,1,0]);
                     }
+                }
+            }
+            // top_bottom_srews
+            {
+                h=20;
+                for(i=[0:1:len(top_bottom_screws)-1]) {
+                    translate(top_bottom_screws[i]-[0,0,h])
+                        difference() {
+                            cylinder(d=5,  h=h);
+                            cylinder(d=2.6,  h=h);
+                        }
                 }
             }
 
@@ -320,9 +341,65 @@ module bottom_case() {
 
     h=20;
     wall=3*2;
-    remote_top_plate_1=[140,110,h];
-    remote_top_plate_2=[130,110,h];
-    remote_top_plate_3=[100,125,h];
+    // ps2 holder
+    for(i=[1,-1]) {
+        h=6;
+        translate([0,0,-h])
+        translate([40*i,20,-10]) {
+            translate([0,0,-8]) {
+
+                /* for(x=[-1,1]) { */
+                /* translate([x*(ps2_pcb_size[0]/2-10), */
+                /*            (ps2_pcb_size[1]/2), */
+                /*            0.2]){ */
+                /*             aligned_cube([5,6.25,pcb_size[2]-pos_stm32[2]],[1,1,0]); */
+                /* } */
+                /* translate([x*(pcb_size[0]/2-10), */
+                /*            y*(pcb_size[1]/2+1.625), */
+                /*            pcb_size[2]-2-2]){ */
+                /*     aligned_cube([5,3.0,2.6],[1,1,0]); */
+                /* } */
+
+                color("lightbrown")
+                for(x=[1,-1]) {
+                        // screwholes near pin
+                        translate([x*(ps2_pcb_size[0]/2-2.7), ps2_pcb_size[1]/2-4.5,-eps])
+                        difference() {
+                            cylinder(d=5,h=h);
+                            translate([0,0,h-3])
+                            cylinder(d=2.6,h=3+eps);
+                        }
+                        // screwholes other side
+                        translate([x*(ps2_pcb_size[0]/2-2.7), 2.9-ps2_pcb_size[1]/2,-eps])
+                        difference() {
+                            cylinder(d=5,h=h);
+                            translate([0,0,h-3])
+                            cylinder(d=2.6,h=3+eps);
+                        }
+                }
+            }
+        }
+    }
+    // ps2 dust wall
+    color("orange")
+    for(i=[1,-1]) {
+        w=42;
+        h=24;
+        r=14;
+        translate([40*i-i*1,20,-0.5-h-eps]) {
+            difference() {
+                aligned_rounded_cube(size=[w,w,h], r=r, rounding=[1,1,0]);
+
+                translate([0,0,+eps])
+                aligned_rounded_cube(size=[w-1.5,w-1.5,h+45], r=r, rounding=[1,1,0]);
+
+                // cable hole
+                translate([1*i,w/2,5])
+                aligned_rounded_cube([10,10,3], r=1, rounding=[1,0,1]);
+
+            }
+        }
+    }
 
     translate([0,0,-h])
     difference() {
@@ -330,55 +407,38 @@ module bottom_case() {
         union() {
             //body itself
             hull() {
-                aligned_rounded_cube(remote_top_plate_1,2,[1,1,0],[1,1,0]);
-                aligned_rounded_cube(remote_top_plate_2,2,[1,1,0],[1,1,0]);
-                aligned_rounded_cube(remote_top_plate_3,2,[1,1,0],[1,1,0]);
-
-                translate([0,0,-5]) {
-                aligned_rounded_cube(remote_top_plate_3,2,[1,1,0],[1,1,0]);
-                }
+                aligned_rounded_cube(remote_top_plate_1+[0,0,h],2,[1,1,0],[1,1,0]);
+                aligned_rounded_cube(remote_top_plate_2+[0,0,h],2,[1,1,0],[1,1,0]);
+                // middle plate extended a bit lower
+                translate([0,0,-5])
+                aligned_rounded_cube(remote_top_plate_3+[0,0,h+5],2,[1,1,0],[1,1,0]);
             }
+
+            // left and right grip
             for(i=[1,-1]) {
                 hull() {
                     union() {
                         translate([i*(remote_top_plate_1[1]/2)-i*0,0,-14]) {
-                            aligned_rounded_cube([remote_top_plate_3[2],100,20],6 );
+                            aligned_rounded_cube([h,100,20],6 );
                         }
                     }
                     translate([i*remote_top_plate_1[1]/2-i*5,0,0]) {
-                        aligned_rounded_cube([remote_top_plate_3[2]+20,110,0.1],6,[1,1,0]);
+                        aligned_rounded_cube([h+20,110,0.1],6,[1,1,0]);
                     }
                 }
             }
         }
 
-        s=[wall,wall,0];
         // inner cutout
         color([0.8,0.8,0.8,0.8])
         translate([0,0,3])
         hull() {
-            aligned_rounded_cube(remote_top_plate_1 - s,2,[1,1,0],[1,1,0]);
-            aligned_rounded_cube(remote_top_plate_2 - s,2,[1,1,0],[1,1,0]);
-            aligned_rounded_cube(remote_top_plate_3 - s,2,[1,1,0],[1,1,0]);
-            translate([0,0,-5]) {
-            aligned_rounded_cube(remote_top_plate_3 - s,2,[1,1,0],[1,1,0]);
-            }
-        }
+            s=[wall,wall,0];
+            aligned_rounded_cube(remote_top_plate_1 +[0,0,h] - s,2,[1,1,0],[1,1,0]);
+            aligned_rounded_cube(remote_top_plate_2 +[0,0,h]- s,2,[1,1,0],[1,1,0]);
+            translate([0,0,-5])
+            aligned_rounded_cube(remote_top_plate_3 +[0,0,h+5]- s,2,[1,1,0],[1,1,0]);
 
-        // left and right holder
-        color([0.7,0.7,0.7,0.8])
-        translate([0,0,wall/2])
-        for(i=[1,-1]) {
-            hull() {
-                union() {
-                    translate([i*remote_top_plate_1[1]/2-i*0,0,-14]) {
-                        aligned_rounded_cube([remote_top_plate_3[2],100,20],6 );
-                    }
-                }
-                translate([i*remote_top_plate_1[1]/2-i*5,0,0]) {
-                    aligned_rounded_cube([remote_top_plate_3[2]+20,110,0.1],6,[1,1,0]);
-                }
-            }
         }
 
         translate([0,0,h]) // undo moveing
@@ -393,11 +453,15 @@ module bottom_case() {
             }
             // usb connector cutout
             pcb_size=[52.3, 22.6, 1.6];
-            color("red")
-            {
+            color("red") {
+                w=1.5;
                 translate(pos_stm32)
-                translate([pcb_size[0]/2, 0,-2-5]) // undo moveing
-                aligned_rounded_cube([10,12,8], 3, [0,1,1]);
+                translate([pcb_size[0]/2+4+w, 0,-1.75-5]) // undo moveing
+                {
+                    aligned_rounded_cube([8,12,8], 3, [0,1,1]);
+                    translate([-w-eps, 0,4]) // undo moveing
+                        aligned_cube([8,7,3], [1,1,1]);
+                }
             }
         }
     }
@@ -656,7 +720,6 @@ module battery_charger() {
 
 module ps2_joystick(l1,l2)
 {
-    pcb_size=[26.15, 34.15, 1.6];
     eps=0.1;
     max_angle=30;
 
@@ -665,7 +728,7 @@ module ps2_joystick(l1,l2)
     /* translate([0,8.75]) */
     // jostick module iself
     color("silver")
-    translate(pcb_size/2)
+    translate(ps2_pcb_size/2)
     translate([-4.1,-9,0]) {
         aligned_cube([16,16, 12.5], [2,2,0]);
         translate([-8,-8,3.5])
@@ -675,12 +738,12 @@ module ps2_joystick(l1,l2)
     }
     // potties
     color("darkgray")
-    translate(pcb_size/2)
+    translate(ps2_pcb_size/2)
     translate([-0.5,-12.4,0]) {
         aligned_cube([3.8, 9.52, 12], [2,2,0]);
     }
     color("darkgray")
-    translate(pcb_size/2)
+    translate(ps2_pcb_size/2)
     translate([-7.35,-25,0]) {
         aligned_cube([9.52, 3.8,12], [2,2,0]);
     }
@@ -698,16 +761,16 @@ module ps2_joystick(l1,l2)
         {
             // pcb
             color("lightblue")
-            aligned_rounded_cube(pcb_size, r=1, rounding=[1,1,0]);
+            aligned_rounded_cube(ps2_pcb_size, r=1, rounding=[1,1,0]);
 
             //pinpads
             for(i=[0:len(pin_x)-1]) {
-                translate([pin_x[i]*(2), pcb_size[1]/2-4.5,-eps]) {
+                translate([pin_x[i]*(2), ps2_pcb_size[1]/2-4.5,-eps]) {
                     color("silver")
-                    cylinder(d=1.5,h=pcb_size[2]+2*eps);
+                    cylinder(d=1.5,h=ps2_pcb_size[2]+2*eps);
 
                     color("black")
-                    translate([0,-1,pcb_size[2]])
+                    translate([0,-1,ps2_pcb_size[2]])
                     linear_extrude(height = 2*eps)
                     rotate([0,0,-90])
                     text(
@@ -725,19 +788,19 @@ module ps2_joystick(l1,l2)
 
         // pins
         for(i=[0:len(pin_x)-1]) {
-            translate([pin_x[i]*(2), pcb_size[1]/2-4.5,-2*eps]) {
-                cylinder(d=1,h=pcb_size[2]+4*eps);
+            translate([pin_x[i]*(2), ps2_pcb_size[1]/2-4.5,-2*eps]) {
+                cylinder(d=1,h=ps2_pcb_size[2]+4*eps);
             }
         }
         // screwholes near pin
         for(x=[1,-1]) {
-            translate([x*(pcb_size[0]/2-2.7), pcb_size[1]/2-4.5,-eps])
-            cylinder(d=2.9,h=pcb_size[2]+2*eps);
+            translate([x*(ps2_pcb_size[0]/2-2.7), ps2_pcb_size[1]/2-4.5,-eps])
+            cylinder(d=2.9,h=ps2_pcb_size[2]+2*eps);
         }
         // screwholes other side
         for(x=[1,-1]) {
-            translate([x*(pcb_size[0]/2-2.7), 2.9-pcb_size[1]/2,-eps])
-            cylinder(d=2.9,h=pcb_size[2]+2*eps);
+            translate([x*(ps2_pcb_size[0]/2-2.7), 2.9-ps2_pcb_size[1]/2,-eps])
+            cylinder(d=2.9,h=ps2_pcb_size[2]+2*eps);
         }
 
     }
