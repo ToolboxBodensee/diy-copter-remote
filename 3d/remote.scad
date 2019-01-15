@@ -19,6 +19,7 @@ show_joysticks_pcb  =1;
 
 show_top            =1;
 show_bottom         =1;
+show_strapholder    =1;
 
 
 top_bottom_screws=[
@@ -26,21 +27,23 @@ top_bottom_screws=[
     [ 50,-50,0],
     [-50, 50,0],
     [ 50, 50,0],
-    [ 18, 10,0],
-    [-18, 10,0],
+    [ 15.5, 13,0],
+    [-15.5, 13,0],
 ];
 
 name="phschoen";
 
 text_pos=[[-8.5,-15,0], [8.5,-15,0], [-40,50,0], [-20,50,0], [0,39,0], [20,50,0], [40,50,0]   ];
-top_text=["on",        "armed",      "mode",     "beeper",    "failsave",  "led",   "turtle"];
-bot_text=["off",       "disarmed",    "",         "",          "",          "",      ""    ];
+top_text=["on",        "armed",      "mode",     "beeper",   "failsave",  "led",   "prearm"];
+bot_text=["off",       "disarmed",    "",         "",        "",          "",      ""    ];
 
-pos_cc2500=[0,10,-3];
+pos_cc2500=[0,14,-7];
 pos_stm32=[40.5,-14,-3];
 pos_antenna=[0,125/2+8.20,-15];
 pos_lcd=[0,-43,-10];
 pos_batery_charger=[-48,-15,-5];
+pos_strap_holder=[0,0,3];
+strap_screw_dist=15;
 
 remote_top_plate_1=[140,110,0];
 remote_top_plate_2=[130,110,0];
@@ -85,9 +88,7 @@ module remote() {
     }
     if(show_lcd) {
         translate(pos_lcd)
-        LCD_1602_I2C(PinsDown,
-                      "RSSI 99     A99 ",
-                      " ARMED      A99 ");
+        LCD_1602_I2C(3, "RSSI 99     A99 ", " ARMED      A99 ");
     }
 
     if(show_switch){
@@ -108,6 +109,40 @@ module remote() {
     if(show_bottom)
         bottom_case();
 
+    if(show_strapholder)
+        strapholder();
+}
+module strapholder() {
+    eps=0.1;
+    translate(pos_strap_holder)
+    {
+        difference() {
+            union() {
+                aligned_rounded_cube([2*(strap_screw_dist+5),15,2], r=2, rounding=[1,1,0]);
+                aligned_rounded_cube([2*(strap_screw_dist+5),15,6], r=2, rounding=[1,1,1]);
+                translate([0,0,5])
+                hull() {
+                    aligned_rounded_cube([20,15,eps], r=2, rounding=[1,1,0]);
+                    aligned_rounded_cube([15,10,5], r=2, rounding=[1,1,1]);
+                }
+            }
+            // strap holder
+            translate([0,0,12])
+            rotate([0,90,0]) {
+                h_off=10;
+                rotate_extrude()
+                    translate([8,0])
+                            circle(d=4);
+            }
+            // screw mount
+            for (i=[-1,1]) {
+                translate([i*strap_screw_dist,0,-eps])
+                    cylinder(d=3.5, h=100);
+                translate([i*strap_screw_dist,0,4-eps])
+                    cylinder(d=6, h=100);
+            }
+        }
+    }
 }
 
 module sticks(l1,l2)
@@ -133,7 +168,7 @@ module sticks(l1,l2)
 
 module top_case() {
     difference() {
-        thick=2.5;
+        thick=3;
         color([0.5,0.8,0,0.8])
         union() {
             hull() {
@@ -159,6 +194,7 @@ module top_case() {
                     difference() {cylinder(d=5.1,h=h); translate([0,0,-eps]) cylinder(d=2.9, h=4);};
                 }
             }
+
             // button holders
             {
                 for(i=[0:1:len(text_pos)-1]) {
@@ -171,10 +207,10 @@ module top_case() {
                     }
                 }
             }
+
             // stm32 holder
             {
                 translate(pos_stm32){
-
                     // side holder
                     pcb_size=[52.3, 22.6, 1.6];
                     for(y=[-1,1])
@@ -199,10 +235,10 @@ module top_case() {
                     for(y=[-1,1])
                     for(x=[-1,1]) {
                         translate([x*12.75,y*8,1.25]){
-                            aligned_cube([5,5,4],[1,1,0]);
+                            aligned_cube([5,5,-pos_cc2500[2]],[1,1,0]);
                         }
-                        translate([x*13.1,y*8,1.25-2]){
-                            aligned_cube([4.3,5,2],[1,1,0]);
+                        translate([x*13.05,y*8,1.25-2]){
+                            aligned_cube([4.4,5,2],[1,1,0]);
                         }
                     }
                 }
@@ -231,12 +267,33 @@ module top_case() {
             // top_bottom_srews
             {
                 h=20;
+                d=6;
                 for(i=[0:1:len(top_bottom_screws)-1]) {
                     translate(top_bottom_screws[i]-[0,0,h])
                         difference() {
-                            cylinder(d=5,  h=h);
-                            cylinder(d=2.6,  h=h);
+                            translate([0,0,0])
+                            {
+                                cylinder_flange_sphere($fn=32,r1=d/2, r2=d, h=h);
+                                cylinder(d=d,  h=h);
+                            }
+                            translate([0,0,-eps])
+                            cylinder(d=2.6,  h=5);
                         }
+                }
+            }
+            // stap screw cutouts
+            translate(pos_strap_holder)
+            {
+                // screw mount
+                for (i=[-1,1]) {
+                    translate([i*strap_screw_dist,0,-6])
+                    difference(){
+                        {
+                            aligned_rounded_cube([10,10,4],1,[1,1,1]);
+                        }
+                        w=6;
+                        cylinder($fn=6, r=w / 2 / cos(180 / 6) + 0.05, h=100);
+                    }
                 }
             }
 
@@ -252,6 +309,16 @@ module top_case() {
                     translate([0,0,0.6+thick])
                         aligned_rounded_cube(size=[65+e,15+e,eps], r=2, rounding=[1,1,0]);
                 }
+            }
+        }
+
+        // stap screw cutouts
+        translate(pos_strap_holder)
+        {
+            // screw mount
+            for (i=[-1,1]) {
+                translate([i*strap_screw_dist,0,-7-eps])
+                    cylinder(d=3.5, h=100);
             }
         }
         // stick cutouts
@@ -323,16 +390,14 @@ module text_engave(thick, text_size, text_)
     color("black")
     translate([0,0,thick-0.5]) {
         linear_extrude(height = 0.75) {
-            translate([0,dist_text,0]) {
-                text(
-                        halign="center",
-                        valign="center",
-                        $fn=$fn,
-                        size=text_size,
-                        font="Linux Libertine O",
-                        text_
-                );
-            }
+            text(
+                    halign="center",
+                    valign="center",
+                    $fn=$fn,
+                    size=text_size,
+                    font="Linux Libertine O",
+                    text_
+            );
         }
     }
 }
@@ -341,107 +406,97 @@ module bottom_case() {
 
     h=20;
     wall=3*2;
-    // ps2 holder
-    for(i=[1,-1]) {
-        h=6;
-        translate([0,0,-h])
-        translate([40*i,20,-10]) {
-            translate([0,0,-8]) {
 
-                /* for(x=[-1,1]) { */
-                /* translate([x*(ps2_pcb_size[0]/2-10), */
-                /*            (ps2_pcb_size[1]/2), */
-                /*            0.2]){ */
-                /*             aligned_cube([5,6.25,pcb_size[2]-pos_stm32[2]],[1,1,0]); */
-                /* } */
-                /* translate([x*(pcb_size[0]/2-10), */
-                /*            y*(pcb_size[1]/2+1.625), */
-                /*            pcb_size[2]-2-2]){ */
-                /*     aligned_cube([5,3.0,2.6],[1,1,0]); */
-                /* } */
-
-                color("lightbrown")
-                for(x=[1,-1]) {
-                        // screwholes near pin
-                        translate([x*(ps2_pcb_size[0]/2-2.7), ps2_pcb_size[1]/2-4.5,-eps])
-                        difference() {
-                            cylinder(d=5,h=h);
-                            translate([0,0,h-3])
-                            cylinder(d=2.6,h=3+eps);
-                        }
-                        // screwholes other side
-                        translate([x*(ps2_pcb_size[0]/2-2.7), 2.9-ps2_pcb_size[1]/2,-eps])
-                        difference() {
-                            cylinder(d=5,h=h);
-                            translate([0,0,h-3])
-                            cylinder(d=2.6,h=3+eps);
-                        }
-                }
-            }
-        }
-    }
-    // ps2 dust wall
-    color("orange")
-    for(i=[1,-1]) {
-        w=42;
-        h=24;
-        r=14;
-        translate([40*i-i*1,20,-0.5-h-eps]) {
-            difference() {
-                aligned_rounded_cube(size=[w,w,h], r=r, rounding=[1,1,0]);
-
-                translate([0,0,+eps])
-                aligned_rounded_cube(size=[w-1.5,w-1.5,h+45], r=r, rounding=[1,1,0]);
-
-                // cable hole
-                translate([1*i,w/2,5])
-                aligned_rounded_cube([10,10,3], r=1, rounding=[1,0,1]);
-
-            }
-        }
-    }
-
-    translate([0,0,-h])
     difference() {
         color([1,1,1,0.8])
         union() {
             //body itself
-            hull() {
-                aligned_rounded_cube(remote_top_plate_1+[0,0,h],2,[1,1,0],[1,1,0]);
-                aligned_rounded_cube(remote_top_plate_2+[0,0,h],2,[1,1,0],[1,1,0]);
-                // middle plate extended a bit lower
-                translate([0,0,-5])
-                aligned_rounded_cube(remote_top_plate_3+[0,0,h+5],2,[1,1,0],[1,1,0]);
-            }
-
-            // left and right grip
-            for(i=[1,-1]) {
-                hull() {
-                    union() {
-                        translate([i*(remote_top_plate_1[1]/2)-i*0,0,-14]) {
-                            aligned_rounded_cube([h,100,20],6 );
+            translate([0,0,-h])
+            difference() {
+                union() {
+                    // top hull
+                    hull() {
+                        aligned_rounded_cube(remote_top_plate_1+[0,0,h],2,[1,1,0],[1,1,0]);
+                        aligned_rounded_cube(remote_top_plate_2+[0,0,h],2,[1,1,0],[1,1,0]);
+                        // middle plate extended a bit lower
+                        translate([0,0,-5])
+                        aligned_rounded_cube(remote_top_plate_3+[0,0,h+5],2,[1,1,0],[1,1,0]);
+                    }
+                    // left and right grip
+                    for(i=[1,-1]) {
+                        hull() {
+                            union() {
+                                translate([i*(remote_top_plate_1[1]/2)-i*0,0,-14]) {
+                                    aligned_rounded_cube([h,100,20],6 );
+                                }
+                            }
+                            translate([i*remote_top_plate_1[1]/2-i*5,0,0]) {
+                                aligned_rounded_cube([h+20,110,0.1],6,[1,1,0]);
+                            }
                         }
                     }
-                    translate([i*remote_top_plate_1[1]/2-i*5,0,0]) {
-                        aligned_rounded_cube([h+20,110,0.1],6,[1,1,0]);
+                }
+                // inner cutout
+                color([0.8,0.8,0.8,0.8])
+                translate([0,0,wall/2+1])
+                hull() {
+                    extra_lower_in_mid=5;
+                    s=[wall,wall,0];
+                    aligned_rounded_cube(remote_top_plate_1 +[0,0,h] - s,2,[1,1,0],[1,1,0]);
+                    aligned_rounded_cube(remote_top_plate_2 +[0,0,h]- s,2,[1,1,0],[1,1,0]);
+                    translate([0,0,-extra_lower_in_mid])
+                    aligned_rounded_cube(remote_top_plate_3 +[0,0,h+extra_lower_in_mid]- s,2,[1,1,0],[1,1,0]);
+
+                }
+            }
+
+            // ps2 dust wall
+            for(i=[1,-1]) {
+                w=42;
+                h=24;
+                r=10;
+                translate([40*i-i*1,20,-0.5-h-eps]) {
+                    difference() {
+                        aligned_rounded_cube(size=[w-5,w,h], r=r, rounding=[1,1,0]);
+
+                        translate([0,0,+eps])
+                        aligned_rounded_cube(size=[w-5-1.5,w-1.5,h+45], r=r, rounding=[1,1,0]);
+
+                        // cable hole
+                        translate([1*i,w/2,5])
+                        aligned_rounded_cube([10,10,3], r=1, rounding=[1,0,1]);
+
+                    }
+                }
+            }
+            // ps2 holder
+            for(i=[1,-1]) {
+                h=6;
+                translate([0,0,-h])
+                translate([40*i,20,-10]) {
+                    translate([0,0,-8]) {
+                        color("yellow")
+                        for(x=[1,-1]) {
+                                // screwholes near pin
+                                translate([x*(ps2_pcb_size[0]/2-2.7), ps2_pcb_size[1]/2-4.5,-eps])
+                                difference() {
+                                    cylinder(d=5,h=h);
+                                    translate([0,0,h-3])
+                                    cylinder(d=2.6,h=3+eps);
+                                }
+                                // screwholes other side
+                                translate([x*(ps2_pcb_size[0]/2-2.7), 2.9-ps2_pcb_size[1]/2,-eps])
+                                difference() {
+                                    cylinder(d=5,h=h);
+                                    translate([0,0,h-3])
+                                    cylinder(d=2.6,h=3+eps);
+                                }
+                        }
                     }
                 }
             }
         }
 
-        // inner cutout
-        color([0.8,0.8,0.8,0.8])
-        translate([0,0,3])
-        hull() {
-            s=[wall,wall,0];
-            aligned_rounded_cube(remote_top_plate_1 +[0,0,h] - s,2,[1,1,0],[1,1,0]);
-            aligned_rounded_cube(remote_top_plate_2 +[0,0,h]- s,2,[1,1,0],[1,1,0]);
-            translate([0,0,-5])
-            aligned_rounded_cube(remote_top_plate_3 +[0,0,h+5]- s,2,[1,1,0],[1,1,0]);
-
-        }
-
-        translate([0,0,h]) // undo moveing
         {
             // sma connector cutout
             color("gold") {
@@ -462,6 +517,19 @@ module bottom_case() {
                     translate([-w-eps, 0,4]) // undo moveing
                         aligned_cube([8,7,3], [1,1,1]);
                 }
+            }
+        }
+
+        //bot_screw holes
+        {
+            d=6;
+            for(i=[0:1:len(top_bottom_screws)-1]) {
+                h_screw=30;
+                h_screw2=10;
+                translate(top_bottom_screws[i] + [0,0,-h_screw-h-eps])
+                    cylinder(d=3,  h=h_screw);
+                translate(top_bottom_screws[i] + [0,0, -h_screw2-h-1-2.5])
+                    cylinder(d=6,  h=h_screw2);
             }
         }
     }

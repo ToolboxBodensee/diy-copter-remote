@@ -10,35 +10,48 @@ module aligned_rounded_cube(size, r=5, rounding=[1,1,1], aligned=[1,1,0])
                      ( size[1]*aligned[1] -2*r),
                      ( size[2]*aligned[2] -2*r)])
     {
-        eps=0.001;
+
+        _eps=min([size[0]/2,size[1]/2,size[2]/2, 0.001]);
         if( rounding == [1,1,1] ) {
+            if(r>=min(size)) {
+                echo("warning r is smaller than thickness for aligned cube");
+            }
             minkowski() {
                 cube([size[0] - 2*r, size[1] - 2*r, size[2]- 2*r]);
                 sphere(r);
             }
         }else if( rounding == [1,1,0] ) {
             //cylinder rounding x/y
+            if(r*2>=size[0] || r*2>=size[1] ) {
+                echo("warning r is smaller than thickness for aligned cube");
+            }
             minkowski() {
                 translate([ 0,0,-r])
-                    cube([size[0] - 2*r, size[1] - 2*r, size[2]-2*eps]);
-                cylinder(r=r,h=eps);
+                    cube([size[0] - 2*r, size[1] - 2*r, size[2]-2*_eps]);
+                cylinder(r=r,h=_eps);
             }
         }else if( rounding == [1,0,1] ) {
             //cylinder rounding x/z
+            if(r*2>=size[0] || r*2>=size[2] ) {
+                echo("warning r is smaller than thickness for aligned cube");
+            }
             minkowski() {
                 translate([ 0,-r,0])
-                    cube([size[0] - 2*r, size[1] - 2*eps, size[2]- 2*r]);
+                    cube([size[0] - 2*r, size[1] - 2*_eps, size[2]- 2*r]);
                 rotate([90,0]) {
-                    cylinder(r=r,h=eps);
+                    cylinder(r=r,h=_eps);
                 }
             }
         }else if( rounding == [0,1,1] ) {
             //cylinder rounding x/z
+            if(r*2>=size[1] || r*2>=size[2] ) {
+                echo("warning r is smaller than thickness for aligned cube");
+            }
             minkowski() {
                 translate([-r,0,0])
-                    cube([size[0] - 2*eps , size[1] - 2*r, size[2]- 2*r]);
+                    cube([size[0] - 2*_eps , size[1] - 2*r, size[2]- 2*r]);
                 rotate([0,90]) {
-                    cylinder(r=r,h=eps);
+                    cylinder(r=r,h=_eps);
                 }
             }
         }
