@@ -1,9 +1,9 @@
 $fn = 128;
 with_props=1;
-with_motor=1;
+with_motor=0;
 with_pcbs=1;
-with_akku=0;
-with_frame=1;
+with_akku=1;
+with_frame=0;
 
 name="phschoen";
 version="v1";
@@ -47,7 +47,7 @@ akku_holder_width =27;
 motor_body_arm_dist = (body_width - motor_arm_width + 2) / sqrt(2);
 eps=0.05;
 
-include <lib/aligned_cube.scad>;
+use <lib/cube.scad>;
 include <lib/triangle.scad>;
 
 module triangle_cuts(h=4) {
@@ -253,6 +253,9 @@ module akku_holder() {
         }
         translate([0, 0, -2])
             triangle_cuts(h=6);
+        translate([-body_width/2-10,0,0]) {
+            aligned_cube([9,14,4],[-2,1,1]);
+        }
     }
 }
 

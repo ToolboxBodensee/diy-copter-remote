@@ -7,7 +7,7 @@ use <lib/cylinder.scad>
 // draw itself
 stick();
 
-module stick(h=25-10)
+module stick(h=20)
 {
     $fn=32;
     translate([0,0,15-3]) {
@@ -66,7 +66,7 @@ module gabber_part() {
     }
 }
 
-module stick_mount(is_ps2_shaft=1) {
+module stick_mount(is_ps2_shaft=0) {
     ps2_dia=4*1.269;
     ps2_hight=5;
     ps2_width=3*1.276;
@@ -89,7 +89,7 @@ module stick_mount(is_ps2_shaft=1) {
             translate([0,0,ps2_hight])
                 cylinder(d1=ps2_dia,d2=1.5,h=1.5);
         } else {
-            aligned_cube([1.9,1.15,6],[0,0,0]);
+            aligned_cube([1.9,1.15,6]);
         }
     }
 }

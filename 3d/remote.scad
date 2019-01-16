@@ -7,19 +7,19 @@ use <lib/LCD_1602_I2C.scad>;
 use <lib/PCB.scad>;
 use <lib/Arduino_nano.scad>;
 
-show_switch         =1;
-show_lcd            =1;
-show_sticks         =1;
-show_stm32          =1;
-show_antenna        =1;
-show_cc2500         =1;
-show_battery_charger=1;
-show_joysticks      =1;
-show_joysticks_pcb  =1;
+show_switch         =0;
+show_lcd            =0;
+show_sticks         =0;
+show_stm32          =0;
+show_antenna        =0;
+show_cc2500         =0;
+show_battery_charger=0;
+show_joysticks_pcb  =0;
 
-show_top            =1;
-show_bottom         =1;
-show_strapholder    =1;
+show_top            =0;
+show_bottom         =0;
+show_strapholder    =0;
+show_joysticks      =1;
 
 
 top_bottom_screws=[
@@ -27,8 +27,8 @@ top_bottom_screws=[
     [ 50,-50,0],
     [-50, 50,0],
     [ 50, 50,0],
-    [ 15.5, 13,0],
-    [-15.5, 13,0],
+    [ 14.5, 30,0],
+    [-14.5, 30,0],
 ];
 
 name="phschoen";
@@ -37,13 +37,13 @@ text_pos=[[-8.5,-15,0], [8.5,-15,0], [-40,50,0], [-20,50,0], [0,39,0], [20,50,0]
 top_text=["on",        "armed",      "mode",     "beeper",   "failsave",  "led",   "prearm"];
 bot_text=["off",       "disarmed",    "",         "",        "",          "",      ""    ];
 
-pos_cc2500=[0,14,-7];
-pos_stm32=[40.5,-14,-3];
+pos_cc2500=[0,12,-7];
+pos_stm32=[40.5,-14,-4.5];
 pos_antenna=[0,125/2+8.20,-15];
 pos_lcd=[0,-43,-10];
 pos_batery_charger=[-48,-15,-5];
-pos_strap_holder=[0,0,3];
-strap_screw_dist=15;
+pos_strap_holder=[0,10,3];
+strap_screw_dist=13.5;
 
 remote_top_plate_1=[140,110,0];
 remote_top_plate_2=[130,110,0];
@@ -53,9 +53,9 @@ ps2_pcb_size=[26.15, 34.15, 1.6];
 
 eps=0.1;
 $fn=32;
+$t=1;
 
 module remote() {
-
     // animate sticks
     if($t < 0.25)
         sticks($t*4,0);
@@ -63,8 +63,11 @@ module remote() {
         sticks(1,($t-0.25)*4);
     else if($t < 0.75)
         sticks(1-($t-0.5)*4,1);
-    else
+    else if($t < 1)
         sticks(0,1-($t-0.75)*4);
+    else
+        sticks(0.5,0.5);
+
 
     if(show_stm32) {
         translate(pos_stm32) {
@@ -150,7 +153,7 @@ module sticks(l1,l2)
     max_angle=30;
     for(i=[1,-1]) {
         translate([40*i,20,-10]) {
-            if (show_sticks) {
+            if (show_joysticks) {
                 color("orange")
                 rotate([max_angle*(l1*2-1),max_angle*(l2*2-1),0])
                 translate([0,0,7]) {
@@ -182,7 +185,7 @@ module top_case() {
             translate([-40.6,-20.25,0])
             {
                 // screwsholders
-                h=9.75;
+                h=10.3;
                 translate([0,1,thick-h]){
                     translate([2.5,4,-1]) rotate([0,0,0])
                     difference() {cylinder(d=5.1,h=h); translate([0,0,-eps]) cylinder(d=2.9, h=4);};
@@ -267,13 +270,13 @@ module top_case() {
             // top_bottom_srews
             {
                 h=20;
-                d=6;
+                d=7;
                 for(i=[0:1:len(top_bottom_screws)-1]) {
                     translate(top_bottom_screws[i]-[0,0,h])
                         difference() {
                             translate([0,0,0])
                             {
-                                cylinder_flange_sphere($fn=32,r1=d/2, r2=d, h=h);
+                                cylinder_flange_sphere($fn=32,r1=d/2.5, r2=d/2+2, h=h);
                                 cylinder(d=d,  h=h);
                             }
                             translate([0,0,-eps])
