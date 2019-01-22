@@ -6,6 +6,15 @@ use <stick.scad>;
 use <lib/LCD_1602_I2C.scad>;
 use <lib/PCB.scad>;
 use <lib/Arduino_nano.scad>;
+$fn=64;
+
+show_top            =0;
+show_bottom         =0;
+show_strapholder    =1;
+show_joysticks      =0;
+show_electronics    =0;
+
+enable_text_engrave =0;
 
 show_switch         =0;
 show_lcd            =0;
@@ -13,47 +22,60 @@ show_sticks         =0;
 show_stm32          =0;
 show_antenna        =0;
 show_cc2500         =0;
-show_battery_charger=0;
+show_batery_charger =0;
+show_batery         =0;
 show_joysticks_pcb  =0;
 
-show_top            =0;
-show_bottom         =0;
-show_strapholder    =0;
-show_joysticks      =1;
-
+screw_d      = 2.85;
+screw_d_loos = 3.1;
+screw_head_d = 6.25;
 
 top_bottom_screws=[
-    [-50,-50,0],
-    [ 50,-50,0],
-    [-50, 50,0],
-    [ 50, 50,0],
+    [-44,-57,0],
+    [ 44,-57,0],
+    [-52, 53,0],
+    [ 52, 53,0],
     [ 14.5, 30,0],
     [-14.5, 30,0],
 ];
 
+
+font="Go Mono:style=Bold";
+font="Go Mono";
+font_size=3.5;
+font_spaceing=1.25;
+
 name="phschoen";
 
-text_pos=[[-8.5,-15,0], [8.5,-15,0], [-40,50,0], [-20,50,0], [0,39,0], [20,50,0], [40,50,0]   ];
-top_text=["on",        "armed",      "mode",     "beeper",   "failsave",  "led",   "prearm"];
-bot_text=["off",       "disarmed",    "",         "",        "",          "",      ""    ];
+text_pos=[[-6.75,-17,0], [6.75,-17,0], [-43,55,0], [-20,55,0], [0,39,0],    [20,55,0], [43,55,0]   ];
+top_text=["on",          "arm",        "mode",     "beeper",   "failsave",  "led",     "prearm"    ];
+bot_text=["off",         "",           "",         "",         "",          "",        ""          ];
 
+pos_sticks=[40,26,0];
 pos_cc2500=[0,12,-7];
 pos_stm32=[40.5,-14,-4.5];
-pos_antenna=[0,125/2+8.20,-15];
+pos_antenna=[0,130/2+8.20,-15];
 pos_lcd=[0,-43,-10];
-pos_batery_charger=[-48,-15,-5];
+pos_batery_charger=[-50,-40,-7];
+rot_batery_charger=[0,0,90];
+pos_batery=[-40,-10.25,-20];
+rot_batery=[0,0,90];
 pos_strap_holder=[0,10,3];
 strap_screw_dist=13.5;
 
 remote_top_plate_1=[140,110,0];
 remote_top_plate_2=[130,110,0];
-remote_top_plate_3=[100,131,0];
+remote_top_plate_3=[100,136,0];
+bottom_wall=3;
 
 ps2_pcb_size=[26.15, 34.15, 1.6];
+charger_pcb_size=[18, 26.6, 1.6];
+stm32_pcb_size=[52.3, 22.6, 1.6];
+cc2500_pcb_size=[34.3, 21.4, 0.9];
+batery_size=[24, 50, 15];
 
 eps=0.1;
-$fn=32;
-$t=1;
+//$t=1;
 
 module remote() {
     // animate sticks
@@ -101,10 +123,22 @@ module remote() {
                 switch(thick);
             }
     }
-    if(show_battery_charger) {
+    if(show_batery_charger) {
         translate(pos_batery_charger)
+        rotate(rot_batery_charger)
         rotate([0,0,-90])
-        battery_charger();
+        batery_charger();
+    }
+
+    // batery box
+    if(show_batery)
+    {
+        translate(pos_batery)
+        rotate(rot_batery) {
+            // side holder
+            color("red")
+                aligned_rounded_cube(batery_size,2,[1,1,1],[1,1,0]);
+        }
     }
 
     if(show_top)
@@ -121,28 +155,36 @@ module strapholder() {
     {
         difference() {
             union() {
-                aligned_rounded_cube([2*(strap_screw_dist+5),15,2], r=2, rounding=[1,1,0]);
-                aligned_rounded_cube([2*(strap_screw_dist+5),15,6], r=2, rounding=[1,1,1]);
+                translate([0,5,0])
+                {
+                    aligned_rounded_cube([2*(strap_screw_dist+5),15+15,2], r=2, rounding=[1,1,0]);
+                    aligned_rounded_cube([2*(strap_screw_dist+5),15+15,6], r=2, rounding=[1,1,1]);
+                }
                 translate([0,0,5])
                 hull() {
                     aligned_rounded_cube([20,15,eps], r=2, rounding=[1,1,0]);
                     aligned_rounded_cube([15,10,5], r=2, rounding=[1,1,1]);
                 }
             }
+
+            // name
+            translate([0,13,5])
+                text_engave(thick,font_size=4.5, text_=name);
+
             // strap holder
-            translate([0,0,12])
-            rotate([0,90,0]) {
-                h_off=10;
-                rotate_extrude()
-                    translate([8,0])
+            translate([0,0,12]) {
+                rotate([0,90,0]) {
+                    rotate_extrude()
+                        translate([8,0])
                             circle(d=4);
+                }
             }
             // screw mount
             for (i=[-1,1]) {
                 translate([i*strap_screw_dist,0,-eps])
-                    cylinder(d=3.5, h=100);
+                    cylinder(d=screw_d_loos, h=100);
                 translate([i*strap_screw_dist,0,4-eps])
-                    cylinder(d=6, h=100);
+                    cylinder(d=screw_head_d, h=100);
             }
         }
     }
@@ -152,7 +194,7 @@ module sticks(l1,l2)
 {
     max_angle=30;
     for(i=[1,-1]) {
-        translate([40*i,20,-10]) {
+        translate([pos_sticks[0]*i,pos_sticks[1],-10]) {
             if (show_joysticks) {
                 color("orange")
                 rotate([max_angle*(l1*2-1),max_angle*(l2*2-1),0])
@@ -171,30 +213,54 @@ module sticks(l1,l2)
 
 module top_case() {
     difference() {
-        thick=3;
+        thick=4;
         color([0.5,0.8,0,0.8])
         union() {
             hull() {
-                aligned_rounded_cube(remote_top_plate_1+[0,0,1],2,[1,1,0],[1,1,0]);
-                aligned_rounded_cube(remote_top_plate_2+[0,0,thick],2,[1,1,0],[1,1,0]);
-                aligned_rounded_cube(remote_top_plate_3+[0,0,thick],2,[1,1,0],[1,1,0]);
+                aligned_rounded_cube(remote_top_plate_1+[0,0,1],    7,[1,1,0],[1,1,0]);
+                aligned_rounded_cube(remote_top_plate_2+[0,0,thick],    2,[1,1,0],[1,1,0]);
+                aligned_rounded_cube(remote_top_plate_3+[0,0,thick],    2,[1,1,0],[1,1,0]);
 
+            }
+            // inner wall
+            {
+                b1=2*(bottom_wall+0.5);//bot_wall_width
+                b2=2*(2);// top_innerwall width
+                h1=2;    // top_innerwall hight
+                translate([0,0,-h1+eps])
+                difference()
+                {
+                    union() {
+                        hull() {
+                            aligned_rounded_cube(remote_top_plate_1+[-b1,-b1,h1],7,[1,1,0],[1,1,0]);
+                            aligned_rounded_cube(remote_top_plate_2+[-b1,-b1,h1],2,[1,1,0],[1,1,0]);
+                            aligned_rounded_cube(remote_top_plate_3+[-b1,-b1,h1],2,[1,1,0],[1,1,0]);
+                        }
+                    }
+                    union() {
+                        hull() {
+                            aligned_rounded_cube(remote_top_plate_1+[-b1-b2,-b1-b2,h1*3],7,[1,1,0],[1,1,1]);
+                            aligned_rounded_cube(remote_top_plate_2+[-b1-b2,-b1-b2,h1*3],2,[1,1,0],[1,1,1]);
+                            aligned_rounded_cube(remote_top_plate_3+[-b1-b2,-b1-b2,h1*3],2,[1,1,0],[1,1,1]);
+                        }
+                    }
+                }
             }
             // lcd screw holder
             translate([pos_lcd[0],pos_lcd[1]-1.2,0])
             translate([-40.6,-20.25,0])
             {
                 // screwsholders
-                h=10.3;
+                h=10;
                 translate([0,1,thick-h]){
                     translate([2.5,4,-1]) rotate([0,0,0])
-                    difference() {cylinder(d=5.1,h=h); translate([0,0,-eps]) cylinder(d=2.9, h=4);};
+                    difference() {cylinder(d=6,h=h); translate([0,0,-eps]) cylinder(d=screw_d, h=4);};
                     translate([2.5,35,-1]) rotate([0,0,0])
-                    difference() {cylinder(d=5.1,h=h); translate([0,0,-eps]) cylinder(d=2.9, h=4);};
+                    difference() {cylinder(d=6,h=h); translate([0,0,-eps]) cylinder(d=screw_d, h=4);};
                     translate([78.5,4,-1]) rotate([0,0,0])
-                    difference() {cylinder(d=5.1,h=h); translate([0,0,-eps]) cylinder(d=2.9, h=4);};
+                    difference() {cylinder(d=6,h=h); translate([0,0,-eps]) cylinder(d=screw_d, h=4);};
                     translate([78.5,35,-1]) rotate([0,0,0])
-                    difference() {cylinder(d=5.1,h=h); translate([0,0,-eps]) cylinder(d=2.9, h=4);};
+                    difference() {cylinder(d=6,h=h); translate([0,0,-eps]) cylinder(d=screw_d, h=4);};
                 }
             }
 
@@ -204,7 +270,7 @@ module top_case() {
                     translate([0,0,thick-10])
                     translate(text_pos[i])
                     difference() {
-                        aligned_cube([11,10,8]);
+                        aligned_cube([15,10,8]);
                         translate([0,0,-7.25])
                             aligned_cube([8.5,13,10]);
                     }
@@ -215,17 +281,17 @@ module top_case() {
             {
                 translate(pos_stm32){
                     // side holder
-                    pcb_size=[52.3, 22.6, 1.6];
+                    stm32_pcb_size=[52.3, 22.6, 1.6];
                     for(y=[-1,1])
                     for(x=[-1,1]) {
-                        translate([x*(pcb_size[0]/2-10),
-                                   y*(pcb_size[1]/2),
+                        translate([x*(stm32_pcb_size[0]/2-10),
+                                   y*(stm32_pcb_size[1]/2),
                                    0.2]){
-                            aligned_cube([5,6.25,pcb_size[2]-pos_stm32[2]],[1,1,0]);
+                            aligned_cube([5,6.25,stm32_pcb_size[2]-pos_stm32[2]],[1,1,0]);
                         }
-                        translate([x*(pcb_size[0]/2-10),
-                                   y*(pcb_size[1]/2+1.625),
-                                   pcb_size[2]-2-2]){
+                        translate([x*(stm32_pcb_size[0]/2-10),
+                                   y*(stm32_pcb_size[1]/2+1.625),
+                                   stm32_pcb_size[2]-2-2]){
                             aligned_cube([5,3.0,2.6],[1,1,0]);
                         }
                     }
@@ -240,8 +306,8 @@ module top_case() {
                         translate([x*12.75,y*8,1.25]){
                             aligned_cube([5,5,-pos_cc2500[2]],[1,1,0]);
                         }
-                        translate([x*13.05,y*8,1.25-2]){
-                            aligned_cube([4.4,5,2],[1,1,0]);
+                        translate([x*13.2,y*8,1.25-2]){
+                            aligned_cube([4.1,5,2],[1,1,0]);
                         }
                     }
                 }
@@ -249,58 +315,89 @@ module top_case() {
 
             // batery charger holder
             {
-                pcb_size=[14.75, 26, 1.6];
-                translate(pos_batery_charger){
+                translate(pos_batery_charger)
+                rotate(rot_batery_charger)
+                {
                     for(x=[-1,1]) {
-                        translate([0, x*(14.75/2+1),pcb_size[2]+0.2]){
-                            aligned_cube([5,6,5],[1,1,0]);
+                        translate([0, x*(charger_pcb_size[0]/2+1),charger_pcb_size[2]+0.2]){
+                            aligned_cube([5,6,-pos_batery_charger[2]],[1,1,0]);
                         }
-                        translate([0, x*(14.75/2+2.1),0]){
-                            aligned_cube([5,3.75,2],[1,1,0]);
+                        translate([0, x*(charger_pcb_size[0]/2+2.1),0]){
+                            aligned_cube([5,3.75,2-pos_batery_charger[2]],[1,1,0]);
                         }
                     }
-                    translate([ -pcb_size[0]/2-6,0,pcb_size[2]+0.2]){
-                        aligned_cube([5.5,4,5],[1,1,0]);
+                    translate([ -charger_pcb_size[0]/2-5,0,charger_pcb_size[2]+0.2]){
+                        aligned_cube([5.5,4,-pos_batery_charger[2]],[1,1,0]);
                     }
-                    translate([ -pcb_size[0]/2-7.25,0,0]){
-                        aligned_cube([3,4,2],[1,1,0]);
+                    translate([ -charger_pcb_size[0]/2-6.25,0,0]){
+                        aligned_cube([3,4,2-pos_batery_charger[2]],[1,1,0]);
                     }
                 }
             }
+
+            // batery holder
+            {
+                translate(pos_batery-[0,0,0])
+                rotate(rot_batery) {
+                    wall=2.5;
+                    difference() {
+                        translate([0, 0,5])
+                        aligned_rounded_cube(size=batery_size+[2*wall,-10,-wall-pos_batery[2]-batery_size[2]], r=2, rounding=[1,1,0]);
+                        translate([0, -(eps+wall),0])
+                        aligned_rounded_cube(size=batery_size, r=2, rounding=[1,1,0]);
+
+                        for(i=[1,-1])
+                        {
+                            hull() {
+                                for(j=[0.5,-0.5])
+                                translate([0, j+i*batery_size[1]/4,8])
+                                rotate([0,90,0])
+                                cylinder (d=2, h=batery_size[0]*2,center=true);
+                            }
+                            hull() {
+                                for(j=[0,-3])
+                                translate([0, i*batery_size[1]/4,8+j])
+                                rotate([0,90,0])
+                                cylinder (d=2, h=batery_size[0]*2,center=true);
+                            }
+                        }
+                    }
+                }
+            }
+
             // top_bottom_srews
             {
                 h=20;
                 d=7;
                 for(i=[0:1:len(top_bottom_screws)-1]) {
-                    translate(top_bottom_screws[i]-[0,0,h])
+                    translate(top_bottom_screws[i]-[0,0,h]) {
                         difference() {
-                            translate([0,0,0])
-                            {
+                            translate([0,0,0]) {
                                 cylinder_flange_sphere($fn=32,r1=d/2.5, r2=d/2+2, h=h);
                                 cylinder(d=d,  h=h);
                             }
                             translate([0,0,-eps])
                             cylinder(d=2.6,  h=5);
                         }
+                    }
                 }
             }
             // stap screw cutouts
-            translate(pos_strap_holder)
-            {
+            translate(pos_strap_holder) {
                 // screw mount
                 for (i=[-1,1]) {
                     translate([i*strap_screw_dist,0,-6])
                     difference(){
-                        {
-                            aligned_rounded_cube([10,10,4],1,[1,1,1]);
-                        }
+                        aligned_rounded_cube([10,10,4],1,[1,1,1]);
                         w=6;
-                        cylinder($fn=6, r=w / 2 / cos(180 / 6) + 0.05, h=100);
+                        cylinder($fn=6, r=w / 2 / cos(180 / 6) + 0.05, h=20, center=true);
                     }
                 }
             }
 
-        }
+        }//end of shape
+        // begin of cutouts
+
         //lcdcutout
         translate([pos_lcd[0],pos_lcd[1],-eps]) {
             color("green") {
@@ -316,21 +413,20 @@ module top_case() {
         }
 
         // stap screw cutouts
-        translate(pos_strap_holder)
-        {
+        translate(pos_strap_holder) {
             // screw mount
             for (i=[-1,1]) {
                 translate([i*strap_screw_dist,0,-7-eps])
-                    cylinder(d=3.5, h=100);
+                    cylinder(d=screw_d_loos, h=100);
             }
         }
+
         // stick cutouts
         color("orange")
         for(i=[1,-1]) {
             w=32;
             r=14;
-            translate([40*i,20,-eps]) {
-                //aligned_rounded_cube(size=[w,w,thick+2*eps], r=2, rounding=[1,1,0]);
+            translate([pos_sticks[0]*i,pos_sticks[1],-eps]) {
                 aligned_rounded_cube(size=[w,w,thick+2*eps], r=r, rounding=[1,1,0]);
                 hull() {
                     e=5;
@@ -348,57 +444,59 @@ module top_case() {
                 }
             }
         }
-        // buttons cutouts and naming
-        translate([0,0,-eps]) {
-            translate([0,26,0])
-                text_engave(thick, text_size=5, text_=name);
 
-            translate([0,pos_lcd[1]-15,0])
-                text_engave(thick, text_size=5, text_="toolbox v1");
+        // switches cutouts and naming
+        {
+            translate([0,pos_lcd[1]-17,eps])
+                text_engave(thick, font_size=6, text_="toolbox v1");
 
-            // buttons
+            // switches
             for(i=[0:1:len(text_pos)-1]) {
-                translate(text_pos[i])
-                button_with_text(thick=thick+2*eps,
-                                text_size=4.2,
-                                top_text=top_text[i],
-                                bottom_text=bot_text[i]);
+                translate(text_pos[i]) {
+                    switch_with_text(thick=thick+2*eps,
+                                     top_text=top_text[i],
+                                     bottom_text=bot_text[i]);
+                }
             }
         }
 
     }
 }
 
-module button_with_text(thick=4,text_size=5, top_text="on",bottom_text="off")
+module switch_with_text(thick=4,top_text="on",bottom_text="off")
 {
-    dist_text=10.5;
-    cylinder(d=5.8, h=5*thick+2*eps, center=true);
+    dist_text=9.5;
+    cylinder(d=6.2, h=5*thick+2*eps, center=true);
 
 
     color("gray")
-    translate([0,0,thick-1])
+    translate([0,0,thick-1.5-0.19])
     union() {
-        cylinder(d=12, h=1);
-        aligned_cube([2.6,8,1],[1,0,0]);
+        cylinder(d=12, h=1.5);
+        translate([0,-2,0])
+        aligned_cube([2.6,12,1.5],[1,1,0]);
     }
 
-    translate([0,dist_text,0])
-        text_engave(thick, text_size=text_size, text_=top_text);
-    translate([0,1-dist_text,0])
-        text_engave(thick, text_size=text_size, text_=bottom_text);
+    if(enable_text_engrave) {
+        translate([0,dist_text,0])
+            text_engave(thick, text_=top_text);
+        translate([0,1-dist_text-2.5,0])
+            text_engave(thick,  text_=bottom_text);
+    }
 }
 
-module text_engave(thick, text_size, text_)
+module text_engave(thick, text_)
 {
-    color("black")
-    translate([0,0,thick-0.5]) {
-        linear_extrude(height = 0.75) {
+    h=1;
+    translate([0,0,thick-h]) {
+        linear_extrude(height = h) {
             text(
                     halign="center",
                     valign="center",
                     $fn=$fn,
-                    size=text_size,
-                    font="Linux Libertine O",
+                    size=font_size,
+                    font=font,
+                    spacing=font_spaceing,
                     text_
             );
         }
@@ -406,24 +504,22 @@ module text_engave(thick, text_size, text_)
 }
 
 module bottom_case() {
-
     h=20;
-    wall=3*2;
-
     difference() {
         color([1,1,1,0.8])
         union() {
+            extra_lower_in_mid=5;
             //body itself
             translate([0,0,-h])
             difference() {
                 union() {
                     // top hull
                     hull() {
-                        aligned_rounded_cube(remote_top_plate_1+[0,0,h],2,[1,1,0],[1,1,0]);
+                        aligned_rounded_cube(remote_top_plate_1+[0,0,h],7,[1,1,0],[1,1,0]);
                         aligned_rounded_cube(remote_top_plate_2+[0,0,h],2,[1,1,0],[1,1,0]);
                         // middle plate extended a bit lower
-                        translate([0,0,-5])
-                        aligned_rounded_cube(remote_top_plate_3+[0,0,h+5],2,[1,1,0],[1,1,0]);
+                        translate([0,0,-extra_lower_in_mid])
+                        aligned_rounded_cube(remote_top_plate_3+[0,0,h+extra_lower_in_mid],2,[1,1,0],[1,1,0]);
                     }
                     // left and right grip
                     for(i=[1,-1]) {
@@ -439,31 +535,32 @@ module bottom_case() {
                         }
                     }
                 }
-                // inner cutout
+                // inner cutout should be flat so move all down
                 color([0.8,0.8,0.8,0.8])
-                translate([0,0,wall/2+1])
+                translate([0,0,bottom_wall+1])
+                translate([0,0,-extra_lower_in_mid+1])
                 hull() {
-                    extra_lower_in_mid=5;
-                    s=[wall,wall,0];
-                    aligned_rounded_cube(remote_top_plate_1 +[0,0,h] - s,2,[1,1,0],[1,1,0]);
-                    aligned_rounded_cube(remote_top_plate_2 +[0,0,h]- s,2,[1,1,0],[1,1,0]);
-                    translate([0,0,-extra_lower_in_mid])
-                    aligned_rounded_cube(remote_top_plate_3 +[0,0,h+extra_lower_in_mid]- s,2,[1,1,0],[1,1,0]);
+                    s=[2*bottom_wall,2*bottom_wall,0];
+                    aligned_rounded_cube(remote_top_plate_1 +[0,0,h+extra_lower_in_mid] - s,7,[1,1,0],[1,1,0]);
+                    aligned_rounded_cube(remote_top_plate_2 +[0,0,h+extra_lower_in_mid] - s,2,[1,1,0],[1,1,0]);
+                    aligned_rounded_cube(remote_top_plate_3 +[0,0,h+extra_lower_in_mid] - s,2,[1,1,0],[1,1,0]);
 
                 }
             }
 
             // ps2 dust wall
             for(i=[1,-1]) {
-                w=42;
+                w=40;
+                b=36;
                 h=24;
-                r=10;
-                translate([40*i-i*1,20,-0.5-h-eps]) {
+                r=5;
+                wall_thickness=2.5;
+                translate([pos_sticks[0]*i+i*0,pos_sticks[1],-0.5-h-eps]) {
                     difference() {
-                        aligned_rounded_cube(size=[w-5,w,h], r=r, rounding=[1,1,0]);
+                        aligned_rounded_cube(size=[b+wall_thickness,w+wall_thickness,h], r=r, rounding=[1,1,0]);
 
                         translate([0,0,+eps])
-                        aligned_rounded_cube(size=[w-5-1.5,w-1.5,h+45], r=r, rounding=[1,1,0]);
+                        aligned_rounded_cube(size=[b,w,h+45], r=r, rounding=[1,1,0]);
 
                         // cable hole
                         translate([1*i,w/2,5])
@@ -476,25 +573,38 @@ module bottom_case() {
             for(i=[1,-1]) {
                 h=6;
                 translate([0,0,-h])
-                translate([40*i,20,-10]) {
+                translate([pos_sticks[0]*i,pos_sticks[1],-10]) {
                     translate([0,0,-8]) {
                         color("yellow")
                         for(x=[1,-1]) {
                                 // screwholes near pin
                                 translate([x*(ps2_pcb_size[0]/2-2.7), ps2_pcb_size[1]/2-4.5,-eps])
-                                difference() {
-                                    cylinder(d=5,h=h);
-                                    translate([0,0,h-3])
-                                    cylinder(d=2.6,h=3+eps);
-                                }
+                                    cylinder(d=10,h=h);
                                 // screwholes other side
                                 translate([x*(ps2_pcb_size[0]/2-2.7), 2.9-ps2_pcb_size[1]/2,-eps])
-                                difference() {
-                                    cylinder(d=5,h=h);
-                                    translate([0,0,h-3])
-                                    cylinder(d=2.6,h=3+eps);
-                                }
+                                    cylinder(d=10,h=h);
                         }
+                    }
+                }
+            }
+        }
+        // ps2 holder
+        for(i=[1,-1]) {
+            h=6;
+            h_screw=6;
+            translate([0,0,-h])
+            translate([pos_sticks[0]*i,pos_sticks[1],-10]) {
+                translate([0,0,-8]) {
+                    color("yellow")
+                    for(x=[1,-1]) {
+                            // screwholes near pin
+                            translate([x*(ps2_pcb_size[0]/2-2.7), ps2_pcb_size[1]/2-4.5,-eps])
+                            translate([0,0,h-h_screw])
+                                cylinder(d=screw_d,h=h_screw+eps);
+                            // screwholes other side
+                            translate([x*(ps2_pcb_size[0]/2-2.7), 2.9-ps2_pcb_size[1]/2,-eps])
+                            translate([0,0,h-h_screw])
+                                cylinder(d=screw_d,h=h_screw+eps);
                     }
                 }
             }
@@ -510,11 +620,10 @@ module bottom_case() {
                 }
             }
             // usb connector cutout
-            pcb_size=[52.3, 22.6, 1.6];
             color("red") {
                 w=1.5;
                 translate(pos_stm32)
-                translate([pcb_size[0]/2+4+w, 0,-1.75-5]) // undo moveing
+                translate([stm32_pcb_size[0]/2+4+w, 0,-1.75-5]) // undo moveing
                 {
                     aligned_rounded_cube([8,12,8], 3, [0,1,1]);
                     translate([-w-eps, 0,4]) // undo moveing
@@ -527,12 +636,15 @@ module bottom_case() {
         {
             d=6;
             for(i=[0:1:len(top_bottom_screws)-1]) {
-                h_screw=30;
+                th=2.5;
+                h_screw=10;
                 h_screw2=10;
                 translate(top_bottom_screws[i] + [0,0,-h_screw-h-eps])
-                    cylinder(d=3,  h=h_screw);
-                translate(top_bottom_screws[i] + [0,0, -h_screw2-h-1-2.5])
-                    cylinder(d=6,  h=h_screw2);
+                    cylinder(d=screw_d_loos,  h=h_screw);
+                translate(top_bottom_screws[i] + [0,0, -h_screw2-h-1-th])
+                    cylinder(d=screw_head_d,  h=h_screw2);
+                translate(top_bottom_screws[i] + [0,0, -h_screw2-h-1+10+eps/10])
+                    cylinder(d=10,  h=10);
             }
         }
     }
@@ -542,7 +654,7 @@ module bottom_case() {
 module switch() {
     // screw
     color("silver")
-    cylinder(d=5.75,h=8.75);
+    cylinder(d=6.2,h=8.75);
 
     // stick
     color("silver")
@@ -570,13 +682,6 @@ module switch() {
         }
     }
 
-    // screw place
-    /* difference() { */
-    /*     cylinder(d=10.2, h=1); */
-    /*     translate([0,0,-0.1]) */
-    /*         cylinder(d=6.1, h=2); */
-    /* } */
-
     // top plate
     color("silver")
     translate([0,0,7])
@@ -601,7 +706,6 @@ module stm32_bluepill() {
     eps=0.1;
     pitch=2.54;
 
-    pcb_size=[52.3, 22.6, 1.6];
     pin_offset=[ [2.35,3.65], [2.35, 18.6]];
 
     pin_names=[ [
@@ -616,41 +720,41 @@ module stm32_bluepill() {
         union() {
             //pcb
             color("LightBlue") {
-                aligned_cube(pcb_size);
+                aligned_cube(stm32_pcb_size);
             }
             // IC
             color("black")
             rotate([0,0,45])
-            translate([0,0,pcb_size[2]])
+            translate([0,0,stm32_pcb_size[2]])
             aligned_cube([7,7,2],[1,1,0]);
 
             // IC pins
             color("silver")
             rotate([0,0,45])
-            translate([0,0,pcb_size[2]])
+            translate([0,0,stm32_pcb_size[2]])
             aligned_cube([8,8,1],[1,1,0]);
 
-            translate([pcb_size[0]/2,0 ,pcb_size[2]])
+            translate([stm32_pcb_size[0]/2,0 ,stm32_pcb_size[2]])
             usb_micro();
 
             // pins pads
             for(p=[0,1])
             for(i=[0:1:len(pin_names[p])-1]) {
-                translate([-pcb_size[0]/2+pin_offset[p][0]+i*pitch,
-                           -pcb_size[1]/2+pin_offset[p][1],-eps])
+                translate([-stm32_pcb_size[0]/2+pin_offset[p][0]+i*pitch,
+                           -stm32_pcb_size[1]/2+pin_offset[p][1],-eps])
                 {
                     color("silver") {
-                        cylinder(d=1.5,h=pcb_size[2]+2*eps);
+                        cylinder(d=1.5,h=stm32_pcb_size[2]+2*eps);
                     }
                     color("black") {
-                        translate([0,(p-0.5)*2*2,pcb_size[2]+eps])
+                        translate([0,(p-0.5)*2*2,stm32_pcb_size[2]+eps])
                         linear_extrude(height = eps)
                         text(
                                 halign="center",
                                 valign="center",
                                 $fn=$fn,
                                 size=1,
-                                font="Linux Libertine O",
+                                font=font,
                                 pin_names[p][i]
                         );
                     }
@@ -660,10 +764,10 @@ module stm32_bluepill() {
         // pin drill hole
         for(p=[0,1])
         for(i=[0:1:len(pin_names[p])-1]) {
-            translate([-pcb_size[0]/2+pin_offset[p][0]+i*pitch,
-                       -pcb_size[1]/2+pin_offset[p][1],-2*eps])
+            translate([-stm32_pcb_size[0]/2+pin_offset[p][0]+i*pitch,
+                       -stm32_pcb_size[1]/2+pin_offset[p][1],-2*eps])
             color("Silver") {
-                cylinder(d=0.7,h=pcb_size[2]+4*eps);
+                cylinder(d=0.7,h=stm32_pcb_size[2]+4*eps);
             }
         }
 
@@ -683,7 +787,6 @@ module cc2500() {
     eps=0.1;
     pitch=2;
 
-    pcb_size=[34.3, 21.4, 0.9];
     pin_offset=[0.25,2];
 
     pin_names=[
@@ -703,20 +806,20 @@ module cc2500() {
         union() {
             //pcb
             color("LightBlue") {
-                aligned_cube(pcb_size);
+                aligned_cube(cc2500_pcb_size);
             }
             // hf cage
             color("silver")
-            translate([0,0,pcb_size[2]])
+            translate([0,0,cc2500_pcb_size[2]])
             aligned_cube([26.84,19.75,3.2],[1,1,0]);
 
             // pins pads
             for(i=[0:1:len(pin_names)-1]) {
-                translate([-pcb_size[0]/2+pin_offset[0],
-                           -pcb_size[1]/2+pin_offset[1]+i*pitch,-eps])
+                translate([-cc2500_pcb_size[0]/2+pin_offset[0],
+                           -cc2500_pcb_size[1]/2+pin_offset[1]+i*pitch,-eps])
                 {
                     color("silver") {
-                        cylinder(d=1.5,h=pcb_size[2]+2*eps);
+                        cylinder(d=1.5,h=cc2500_pcb_size[2]+2*eps);
                     }
                     color("black") {
                         rotate([180,0])
@@ -727,7 +830,7 @@ module cc2500() {
                                 valign="center",
                                 $fn=$fn,
                                 size=1,
-                                font="Linux Libertine O",
+                                font=font,
                                 pin_names[i]
                         );
                     }
@@ -737,53 +840,52 @@ module cc2500() {
         // pin drill hole
         for(p=[0,1])
         for(i=[0:1:len(pin_names)-1]) {
-            translate([-pcb_size[0]/2+pin_offset[0],
-                       -pcb_size[1]/2+pin_offset[1]+i*pitch,-2*eps])
+            translate([-cc2500_pcb_size[0]/2+pin_offset[0],
+                       -cc2500_pcb_size[1]/2+pin_offset[1]+i*pitch,-2*eps])
             color("Silver") {
-                cylinder(d=0.7,h=pcb_size[2]+4*eps);
+                cylinder(d=0.7,h=cc2500_pcb_size[2]+4*eps);
             }
         }
 
     }
 }
-module battery_charger() {
+module batery_charger() {
     eps=0.1;
-    pcb_size=[14.75, 26, 1.6];
 
     // pcb
     color("lightblue")
-    aligned_cube(pcb_size);
+    aligned_cube(charger_pcb_size);
 
     // Pins charge
     color("silver") {
 
         mirror([1,0,0]) {
-            translate(pcb_size/2)
-            aligned_cube([2.38, 4, pcb_size[2]+eps], [2,2,1]);
+            translate(charger_pcb_size/2)
+            aligned_cube([2.38, 4, charger_pcb_size[2]+eps], [2,2,1]);
         }
-        translate(pcb_size/2)
-        aligned_cube([2.38, 4, pcb_size[2]+eps], [2,2,1]);
+        translate(charger_pcb_size/2)
+        aligned_cube([2.38, 4, charger_pcb_size[2]+eps], [2,2,1]);
     }
 
     // Pins bat
     color("silver") {
 
             mirror([1,0,0]) {
-                translate(pcb_size/2 + [-1,-17,0])
-                cylinder(d=1.7,h=pcb_size[2]+eps, center=true);
-                translate(pcb_size/2 + [-1,-19.5,0])
-                cylinder(d=1.7,h=pcb_size[2]+eps, center=true);
+                translate(charger_pcb_size/2 + [-1,-17,0])
+                cylinder(d=1.7,h=charger_pcb_size[2]+eps, center=true);
+                translate(charger_pcb_size/2 + [-1,-19.5,0])
+                cylinder(d=1.7,h=charger_pcb_size[2]+eps, center=true);
             }
 
-            translate(pcb_size/2 + [-1,-17,0])
-            cylinder(d=1.7,h=pcb_size[2]+eps, center=true);
+            translate(charger_pcb_size/2 + [-1,-17,0])
+            cylinder(d=1.7,h=charger_pcb_size[2]+eps, center=true);
 
 
-            translate(pcb_size/2 + [-1,-19.5,0])
-            cylinder(d=1.7,h=pcb_size[2]+eps, center=true);
+            translate(charger_pcb_size/2 + [-1,-19.5,0])
+            cylinder(d=1.7,h=charger_pcb_size[2]+eps, center=true);
     }
 
-    translate([0, pcb_size[1]/2-7,pcb_size[2]])
+    translate([0, charger_pcb_size[1]/2-7,charger_pcb_size[2]])
     rotate([0,0,-90])
     usb_micro();
 
@@ -849,7 +951,7 @@ module ps2_joystick(l1,l2)
                             valign="center",
                             $fn=$fn,
                             size=1,
-                            font="Linux Libertine O",
+                            font=font,
                             pin_names[i]
                     );
                 }

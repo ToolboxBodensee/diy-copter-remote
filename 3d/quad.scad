@@ -1,17 +1,19 @@
 $fn = 128;
-with_props=1;
-with_motor=0;
-with_pcbs=1;
-with_akku=1;
-with_frame=0;
+with_frame=1;
+with_akku=0;
+with_outer_brim=1;
+
+with_props=0;
+with_motor=1;
+with_pcbs=0;
 
 name="phschoen";
-version="v1";
+version="v1.1";
 text_depth=0.5;
 
 
 
-motor_d = 8.465;
+motor_d = 8.620;
 motor_r=motor_d/2;
 motor_height = 20;
 
@@ -25,7 +27,7 @@ motor_clamp_hight = motor_height + motor_clamp_extra_hight;
 usb_width=12;
 usb_hight=8;
 
-motor_helper_disc = 40;
+motor_helper_disc = 18;
 motor_helper_height = 0.3;
 
 motor_arm_width = 8;
@@ -75,6 +77,7 @@ module pcb_rx_radio() {
 
 module motor() {
     prop_height=motor_height + 5;
+    translate([0, 0, -1])
     color([0.8,0.2,0.2,0.5]) {
         if (with_motor) {
             translate([0, 0, motor_clamp_extra_hight])
@@ -97,15 +100,18 @@ module motor_clamp() {
             color("blue")
             // motor stand
             hull() {
-                cylinder(d = motor_d + motor_clamp_wall_thickness, h = motor_clamp_hight);
+                cylinder(d = motor_d + 2*motor_clamp_wall_thickness, h = motor_clamp_hight);
 
-                translate([0, -(motor_d + motor_clamp_wall_thickness) / 2 - 2, 0])
+                translate([0, -(motor_d + 4*motor_clamp_wall_thickness) / 2 - 2, 0])
                     aligned_cube([motor_arm_width, eps, motor_arm_height]);
             }
 
             // print support
-            color("green")
-            cylinder(d = motor_helper_disc, h = motor_helper_height);
+            if(with_outer_brim)
+            {
+                color("green")
+                cylinder(d = motor_helper_disc, h = motor_helper_height);
+            }
         }
 
         // cable hole
@@ -142,7 +148,7 @@ module cable_cuts() {
         union() {
             // vertical cut
             translate([0, motor_arm_length, -eps])
-                aligned_cube([cable_cut_width, cable_cut_height, motor_clamp_hight+2*eps]);
+                aligned_cube([cable_cut_width, cable_cut_height, cable_cut_height*2+2*eps]);
 
             // lower cut
             translate([0, motor_arm_length , -eps])
@@ -198,9 +204,9 @@ module body() {
                 linear_extrude(height = text_depth)
                 {
                     translate([0,2,0])
-                    text(halign="center",valign="center", $fn=$fn, size=5,font="Linux Libertine O", "Toolbox");
+                    text(halign="center",valign="center", $fn=$fn, size=5,font="Linux Libertine:style=Bold", "Toolbox");
                     translate([0,-3,0])
-                    text(halign="center",valign="center", $fn=$fn, size=3,font="Linux Libertine O", version);
+                    text(halign="center",valign="center", $fn=$fn, size=3,font="Linux Libertine:style=Bold", version);
                 }
             }
             rotate([0,0,180]) {
@@ -208,7 +214,7 @@ module body() {
                 rotate([90,0,0])
                 linear_extrude(height = text_depth)
                 {
-                    text(halign="center",valign="center", $fn=$fn, size=5,font="Linux Libertine O", name);
+                    text(halign="center",valign="center", $fn=$fn, size=5,font="Linux Libertine:style=Bold", name);
                 }
             }
         }
