@@ -113,9 +113,9 @@ translate([-2.54*16,-2.54*7-1.27,0])
             cylinder(d=3.5,h=1.6);
 
     color("Black")
-      translate([40.5,19.5,9.5])
+      translate([40.5,19.5,8])
         rotate([0,180,0])
-          Component(71.5,27,8);
+          Component(71.5,27-3,7);
         }
 
      translate([Pitch*11,Pitch*14,0.5])
