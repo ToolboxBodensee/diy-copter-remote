@@ -7,17 +7,15 @@ with_props=0;
 with_motor=1;
 with_pcbs=0;
 
-name="phschoen";
-version="v1.1";
+name="malaika";
+version="v1.2";
 text_depth=0.5;
 
-
-
-motor_d = 8.620;
+motor_d = 8.75;//8.620;
 motor_r=motor_d/2;
 motor_height = 20;
 
-motor_clamp_wall_thickness = 2.2;
+motor_clamp_wall_thickness = 1.75;
 motor_clamp_d= motor_d + 2*motor_clamp_wall_thickness;
 motor_clamp_r= motor_clamp_d /2;
 motor_clamp_cut = 3;
@@ -27,7 +25,7 @@ motor_clamp_hight = motor_height + motor_clamp_extra_hight;
 usb_width=12;
 usb_hight=8;
 
-motor_helper_disc = 18;
+motor_helper_disc = 3;
 motor_helper_height = 0.3;
 
 motor_arm_width = 8;

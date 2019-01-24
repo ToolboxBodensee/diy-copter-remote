@@ -28,7 +28,7 @@ show_joysticks_pcb  =0;
 
 show_stands=1;
 
-screw_d      = 2.90;
+screw_d      = 2.98;
 screw_d_loos = 3.25;
 screw_head_d = 6.25;
 
@@ -515,7 +515,7 @@ module top_case() {
 module switch_with_text(thick=4,top_text="on",bottom_text="off")
 {
     dist_text=9.5;
-    cylinder(d=6.2, h=5*thick+2*eps, center=true);
+    cylinder(d=6.35, h=5*thick+2*eps, center=true);
 
 
     color("gray")
