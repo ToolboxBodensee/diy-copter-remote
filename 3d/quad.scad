@@ -7,7 +7,7 @@ with_props=0;
 with_motor=1;
 with_pcbs=0;
 
-name="malaika";
+name="Malaika";
 version="v1.2";
 text_depth=0.5;
 
