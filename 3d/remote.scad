@@ -8,10 +8,11 @@ use <lib/PCB.scad>;
 use <lib/Arduino_nano.scad>;
 $fn=64;
 
-show_top            =1;
+show_top            =0;
 show_bottom         =1;
 show_strapholder    =1;
 show_joysticks      =0;
+show_grip           =1;
 show_electronics    =0;
 
 enable_text_engrave =0;
@@ -40,6 +41,12 @@ top_bottom_screws=[
     [ 14.5, 30,0],
     [-14.5, 30,0],
 ];
+grip_bottom_screws=[
+    [-55,-45,0],
+    [ 55,-45,0],
+    [-55, 28,0],
+    [ 55, 28,0],
+];
 
 
 font="Go Mono:style=Bold";
@@ -50,6 +57,7 @@ font_size_name=6.5;
 font_spaceing=1.25;
 
 
+grip_h=14;
 
 name="";
 
@@ -57,6 +65,7 @@ text_pos=[[-6.75,-17,0], [6.75,-17,0], [-43,55,0], [-20,55,0], [0,39,0],    [20,
 top_text=["on",          "arm",        "mode",     "beeper",   "failsave",  "prearm",  "led"    ];
 bot_text=["off",         "",           "",         "",         "",          "",        ""          ];
 
+bottom_h=20;
 pos_sticks=[40,26,0];
 pos_cc2500=[0,12,-7];
 pos_stm32=[40.5,-13.5,-4.5];
@@ -168,6 +177,8 @@ module remote() {
         top_case();
     if(show_bottom)
         bottom_case();
+    if(show_grip)
+        left_right_grip();
 
     if(show_strapholder)
         strapholder();
@@ -553,35 +564,21 @@ module text_engave(thick, text_)
 }
 
 module bottom_case() {
-    h=20;
     difference() {
         color([1,1,1,0.8])
         union() {
             extra_lower_in_mid=5;
             //body itself
-            translate([0,0,-h])
+            translate([0,0,-bottom_h])
             difference() {
                 union() {
                     // top hull
+                    translate([0,0,-extra_lower_in_mid])
                     hull() {
-                        aligned_rounded_cube(remote_top_plate_1+[0,0,h],7,[1,1,0],[1,1,0]);
-                        aligned_rounded_cube(remote_top_plate_2+[0,0,h],2,[1,1,0],[1,1,0]);
+                        aligned_rounded_cube(remote_top_plate_1+[0,0,bottom_h+extra_lower_in_mid],7,[1,1,0],[1,1,0]);
+                        aligned_rounded_cube(remote_top_plate_2+[0,0,bottom_h+extra_lower_in_mid],2,[1,1,0],[1,1,0]);
                         // middle plate extended a bit lower
-                        translate([0,0,-extra_lower_in_mid])
-                        aligned_rounded_cube(remote_top_plate_3+[0,0,h+extra_lower_in_mid],2,[1,1,0],[1,1,0]);
-                    }
-                    // left and right grip
-                    for(i=[1,-1]) {
-                        hull() {
-                            union() {
-                                translate([i*(remote_top_plate_1[1]/2)-i*0,0,-14]) {
-                                    aligned_rounded_cube([h,100,20],6 );
-                                }
-                            }
-                            translate([i*remote_top_plate_1[1]/2-i*5,0,0]) {
-                                aligned_rounded_cube([h+20,110,0.1],6,[1,1,0]);
-                            }
-                        }
+                        aligned_rounded_cube(remote_top_plate_3+[0,0,bottom_h+extra_lower_in_mid],2,[1,1,0],[1,1,0]);
                     }
                 }
                 // inner cutout should be flat so move all down
@@ -590,9 +587,9 @@ module bottom_case() {
                 translate([0,0,-extra_lower_in_mid+1])
                 hull() {
                     s=[2*bottom_wall,2*bottom_wall,0];
-                    aligned_rounded_cube(remote_top_plate_1 +[0,0,h+extra_lower_in_mid] - s,7,[1,1,0],[1,1,0]);
-                    aligned_rounded_cube(remote_top_plate_2 +[0,0,h+extra_lower_in_mid] - s,2,[1,1,0],[1,1,0]);
-                    aligned_rounded_cube(remote_top_plate_3 +[0,0,h+extra_lower_in_mid]- s,2,[1,1,0],[1,1,0]);
+                    aligned_rounded_cube(remote_top_plate_1 +[0,0,bottom_h+extra_lower_in_mid] - s,7,[1,1,0],[1,1,0]);
+                    aligned_rounded_cube(remote_top_plate_2 +[0,0,bottom_h+extra_lower_in_mid] - s,2,[1,1,0],[1,1,0]);
+                    aligned_rounded_cube(remote_top_plate_3 +[0,0,bottom_h+extra_lower_in_mid]- s,2,[1,1,0],[1,1,0]);
 
                 }
             }
@@ -1032,4 +1029,74 @@ module ps2_dust_wall() {
         }
     }
 }
+
+module left_right_grip() {
+    // left and right grip
+    translate ([0,0,-bottom_h-5])
+    for(i=[1,-1]) {
+        difference() {
+            hull() {
+                union() {
+                    translate([i*(remote_top_plate_1[1]/2),0,-grip_h]) {
+                        aligned_rounded_cube([bottom_h,100,grip_h],6 );
+                    }
+                }
+                translate([i*remote_top_plate_1[1]/2-i*5,0,0]) {
+                    aligned_rounded_cube([bottom_h+20,110,0.1],6,[1,1,0]);
+                }
+            }
+            for(i=[0:1:len(grip_bottom_screws)-1]) {
+                translate(grip_bottom_screws[i]-[0,0,0]) {
+                    translate([0,0,-eps-grip_h]) {
+                        cylinder(d=screw_d_loos,  h=grip_h+2*eps);
+                        cylinder(d=screw_head_d,  h=grip_h/2+2*eps);
+                    }
+                }
+            }
+        }
+    }
+}
+module left_right_srews() {
+    // left and right grip
+    translate ([0,0,-bottom_h-5])
+    for(i=[1,-1]) {
+        difference() {
+            for(i=[0:1:len(grip_bottom_screws)-1]) {
+                translate(grip_bottom_screws[i]-[0,0,0]) {
+                    translate([0,0,-eps-grip_h]) {
+                        cylinder(d=screw_d_loos,  h=20+2*eps);
+                        cylinder(d=screw_head_d,  h=grip_h/2+2*eps);
+                    }
+                    difference(){
+                        w=6;
+                        aligned_rounded_cube([10,10,4],1,[1,1,1]);
+                        cylinder($fn=6, r=w / 2 / cos(180 / 6) + 0.05, h=20, center=true);
+                    }
+                }
+            }
+        }
+    }
+}
+module left_right_grip_srews() {
+    // left and right grip
+    translate ([0,0,-bottom_h])
+    for(i=[1,-1]) {
+        difference() {
+            for(i=[0:1:len(grip_bottom_screws)-1]) {
+                translate(grip_bottom_screws[i]-[0,0,0]) {
+                    translate([0,0,-eps-grip_h]) {
+                        cylinder(d=screw_d_loos,  h=20+2*eps);
+                        cylinder(d=screw_head_d,  h=grip_h/2+2*eps);
+                    }
+                    difference(){
+                        w=6;
+                        aligned_rounded_cube([10,10,4],1,[1,1,1]);
+                        cylinder($fn=6, r=w / 2 / cos(180 / 6) + 0.05, h=20, center=true);
+                    }
+                }
+            }
+        }
+    }
+}
 remote();
+left_right_grip_srews();
