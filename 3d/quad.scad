@@ -1,11 +1,11 @@
 $fn = 128;
 with_frame=1;
 with_akku=0;
-with_outer_brim=1;
 
-with_props=0;
+with_props=1;
 with_motor=1;
-with_pcbs=0;
+with_pcbs=1;
+with_motor_brim=1;
 
 name="Malaika";
 version="v1.2";
@@ -15,18 +15,18 @@ motor_d = 8.75;//8.620;
 motor_r=motor_d/2;
 motor_height = 20;
 
-motor_clamp_wall_thickness = 1.75;
+motor_clamp_wall_thickness = 1.5;
 motor_clamp_d= motor_d + 2*motor_clamp_wall_thickness;
 motor_clamp_r= motor_clamp_d /2;
-motor_clamp_cut = 3;
+motor_clamp_cut_width = 3;
 motor_clamp_extra_hight = 3;
 motor_clamp_hight = motor_height + motor_clamp_extra_hight;
 
 usb_width=12;
 usb_hight=8;
 
-motor_helper_disc = 3;
-motor_helper_height = 0.3;
+motor_brim_d = 5;
+motor_brim_h = 0.3;
 
 motor_arm_width = 8;
 motor_arm_height = 6;
@@ -100,15 +100,14 @@ module motor_clamp() {
             hull() {
                 cylinder(d = motor_d + 2*motor_clamp_wall_thickness, h = motor_clamp_hight);
 
-                translate([0, -(motor_d + 4*motor_clamp_wall_thickness) / 2 - 2, 0])
+                translate([0, -(motor_d + 2*motor_clamp_wall_thickness) / 2 - 2, 0])
                     aligned_cube([motor_arm_width, eps, motor_arm_height]);
             }
 
             // print support
-            if(with_outer_brim)
-            {
+            if(with_motor_brim) {
                 color("green")
-                cylinder(d = motor_helper_disc, h = motor_helper_height);
+                cylinder(d = motor_clamp_d+motor_brim_d, h = motor_brim_h);
             }
         }
 
@@ -118,7 +117,7 @@ module motor_clamp() {
             cylinder(d = motor_d, h = motor_height + 2 +eps);
         // clamp cutout
         translate([0, motor_r, -eps])
-            aligned_cube([motor_clamp_cut, 2 * motor_clamp_wall_thickness, motor_clamp_hight+2*eps]);
+            aligned_cube([motor_clamp_cut_width, 2 * motor_clamp_wall_thickness, motor_clamp_hight+2*eps]);
         // motor top hole
         translate([0, 0, motor_clamp_hight - motor_clamp_wall_thickness+eps])
             cylinder(d = 6.5, h = motor_clamp_wall_thickness);
@@ -133,7 +132,7 @@ module motor_clamp() {
 module motor_arm() {
     difference() {
         union() {
-            translate([0, motor_arm_length+motor_clamp_r, 0])
+            translate([0, motor_arm_length+motor_d/2, 0])
                 motor_clamp();
             color("blue") {
                 aligned_cube([motor_arm_width, motor_arm_length, motor_arm_height],[1,0,0]);

@@ -6,28 +6,29 @@ use <stick.scad>;
 use <lib/LCD_1602_I2C.scad>;
 use <lib/PCB.scad>;
 use <lib/Arduino_nano.scad>;
+use <lib/threads.scad>;
 $fn=64;
 
-show_top            =0;
+show_top            =1;
 show_bottom         =1;
 show_strapholder    =1;
-show_joysticks      =0;
+show_joysticks      =1;
 show_grip           =1;
-show_electronics    =0;
+show_electronics    =1;
 
 enable_text_engrave =0;
 
-show_switch         =0;
-show_lcd            =0;
-show_sticks         =0;
-show_stm32          =0;
-show_antenna        =0;
-show_cc2500         =0;
-show_batery_charger =0;
-show_batery         =0;
-show_joysticks_pcb  =0;
+show_switch         =1;
+show_lcd            =1;
+show_sticks         =1;
+show_stm32          =1;
+show_antenna        =1;
+show_cc2500         =1;
+show_batery_charger =1;
+show_batery         =1;
+show_joysticks_pcb  =1;
 
-show_stands=1;
+show_stands=0;
 
 screw_d      = 2.98;
 screw_d_loos = 3.25;
@@ -42,10 +43,12 @@ top_bottom_screws=[
     [-14.5, 30,0],
 ];
 grip_bottom_screws=[
-    [-55,-45,0],
-    [ 55,-45,0],
-    [-55, 28,0],
-    [ 55, 28,0],
+    [-54,-45,0],
+    [ 54,-45,0],
+    [-54, 31,0],
+    [ 54, 31,0],
+    [-54, -7,0],
+    [ 54, -7,0],
 ];
 
 
@@ -65,7 +68,7 @@ text_pos=[[-6.75,-17,0], [6.75,-17,0], [-43,55,0], [-20,55,0], [0,39,0],    [20,
 top_text=["on",          "arm",        "mode",     "beeper",   "failsave",  "prearm",  "led"    ];
 bot_text=["off",         "",           "",         "",         "",          "",        ""          ];
 
-bottom_h=20;
+bottom_h=25;
 pos_sticks=[40,26,0];
 pos_cc2500=[0,12,-7];
 pos_stm32=[40.5,-13.5,-4.5];
@@ -408,24 +411,6 @@ module top_case() {
                 // ps2 dust wall
             }
 
-            // top_bottom_srews
-            if(0==show_stands)
-            {
-                h=20;
-                d=screw_head_d;
-                for(i=[0:1:len(top_bottom_screws)-1]) {
-                    translate(top_bottom_screws[i]-[0,0,h]) {
-                        difference() {
-                            translate([0,0,0]) {
-                                cylinder_flange_sphere($fn=32,r1=d/2.5, r2=d/2+2, h=h);
-                                cylinder(d=d,  h=h);
-                            }
-                            translate([0,0,-eps])
-                            cylinder(d=screw_d,  h=5);
-                        }
-                    }
-                }
-            }
             // stap screw cutouts
             translate(pos_strap_holder) {
                 // screw mount
@@ -441,7 +426,6 @@ module top_case() {
 
         }//end of shape
         // begin of cutouts
-        if(show_stands)
         {
             // screw place
             for(i=[0:1:len(top_bottom_screws)-1]) {
@@ -567,29 +551,27 @@ module bottom_case() {
     difference() {
         color([1,1,1,0.8])
         union() {
-            extra_lower_in_mid=5;
             //body itself
             translate([0,0,-bottom_h])
             difference() {
                 union() {
                     // top hull
-                    translate([0,0,-extra_lower_in_mid])
                     hull() {
-                        aligned_rounded_cube(remote_top_plate_1+[0,0,bottom_h+extra_lower_in_mid],7,[1,1,0],[1,1,0]);
-                        aligned_rounded_cube(remote_top_plate_2+[0,0,bottom_h+extra_lower_in_mid],2,[1,1,0],[1,1,0]);
+                        aligned_rounded_cube(remote_top_plate_1+[0,0,bottom_h],7,[1,1,0],[1,1,0]);
+                        aligned_rounded_cube(remote_top_plate_2+[0,0,bottom_h],2,[1,1,0],[1,1,0]);
                         // middle plate extended a bit lower
-                        aligned_rounded_cube(remote_top_plate_3+[0,0,bottom_h+extra_lower_in_mid],2,[1,1,0],[1,1,0]);
+                        aligned_rounded_cube(remote_top_plate_3+[0,0,bottom_h],2,[1,1,0],[1,1,0]);
                     }
                 }
                 // inner cutout should be flat so move all down
                 color([0.8,0.8,0.8,0.8])
                 translate([0,0,bottom_wall+1])
-                translate([0,0,-extra_lower_in_mid+1])
+                translate([0,0,+1])
                 hull() {
                     s=[2*bottom_wall,2*bottom_wall,0];
-                    aligned_rounded_cube(remote_top_plate_1 +[0,0,bottom_h+extra_lower_in_mid] - s,7,[1,1,0],[1,1,0]);
-                    aligned_rounded_cube(remote_top_plate_2 +[0,0,bottom_h+extra_lower_in_mid] - s,2,[1,1,0],[1,1,0]);
-                    aligned_rounded_cube(remote_top_plate_3 +[0,0,bottom_h+extra_lower_in_mid]- s,2,[1,1,0],[1,1,0]);
+                    aligned_rounded_cube(remote_top_plate_1 +[0,0,bottom_h] - s,7,[1,1,0],[1,1,0]);
+                    aligned_rounded_cube(remote_top_plate_2 +[0,0,bottom_h] - s,2,[1,1,0],[1,1,0]);
+                    aligned_rounded_cube(remote_top_plate_3 +[0,0,bottom_h]- s,2,[1,1,0],[1,1,0]);
 
                 }
             }
@@ -612,6 +594,17 @@ module bottom_case() {
                                     cylinder(d=10,h=h);
                                 }
                         }
+                }
+            }
+            // grip female screw holder
+            for(i=[1,-1]) {
+                difference() {
+                    for(i=[0:1:len(grip_bottom_screws)-1]) {
+                        translate([0,0,bottom_wall-bottom_h])
+                        translate(grip_bottom_screws[i]) {
+                            aligned_rounded_cube([10,10,1.7],2,[1,1,0],[1,1,-2]);
+                        }
+                    }
                 }
             }
         }
@@ -661,20 +654,11 @@ module bottom_case() {
 
         //bot_screw holes
         {
-            w=6;
-            for(i=[0:1:len(top_bottom_screws)-1]) {
-                th=2.5;
-                h_screw=10;
-                h_screw2=10;
-                translate(top_bottom_screws[i] + [0,0,-h_screw-h-eps])
-                    cylinder(d=screw_d_loos,  h=h_screw);
-                translate(top_bottom_screws[i] + [0,0, -h_screw2-h-1-th])
-                    //cylinder(d=screw_head_d,  h=h_screw2);
-                    cylinder($fn=6, r=w / 2 / cos(180 / 6) + 0.05, h=20, center=true);
-                translate(top_bottom_screws[i] + [0,0, -h_screw2-h-1+10+eps/10])
-                    cylinder(d=10,  h=10);
-            }
+            top_bottom_case_srews();
         }
+
+        // grip holes for screws
+        left_right_grip_srews();
     }
 
 
@@ -1032,9 +1016,9 @@ module ps2_dust_wall() {
 
 module left_right_grip() {
     // left and right grip
-    translate ([0,0,-bottom_h-5])
     for(i=[1,-1]) {
         difference() {
+            translate ([-i*2.5,0,-bottom_h])
             hull() {
                 union() {
                     translate([i*(remote_top_plate_1[1]/2),0,-grip_h]) {
@@ -1042,61 +1026,63 @@ module left_right_grip() {
                     }
                 }
                 translate([i*remote_top_plate_1[1]/2-i*5,0,0]) {
-                    aligned_rounded_cube([bottom_h+20,110,0.1],6,[1,1,0]);
+                    aligned_rounded_cube([bottom_h+20,109,0.1],6,[1,1,0]);
                 }
             }
+
+            left_right_grip_srews();
+        }
+    }
+}
+module left_right_grip_srews(l=15,head=50, h=-21+3) {
+    w=6;
+    eps=0.1;
+    // left and right grip
+    translate ([0,0,h])
+    for(i=[1,-1]) {
+        difference() {
             for(i=[0:1:len(grip_bottom_screws)-1]) {
-                translate(grip_bottom_screws[i]-[0,0,0]) {
-                    translate([0,0,-eps-grip_h]) {
-                        cylinder(d=screw_d_loos,  h=grip_h+2*eps);
-                        cylinder(d=screw_head_d,  h=grip_h/2+2*eps);
+                translate(grip_bottom_screws[i]) {
+                    color("darkgray")
+                    translate([0,0,-l]) {
+                        cylinder(d=screw_d_loos,  h=l+2*eps);
+                    }
+                    color("darkgray")
+                    translate([0,0,eps-l-head]) {
+                        cylinder(d=screw_head_d,  h=head);
+                    }
+                    color("lightgray")
+                    translate([0,0,-4]) {
+                    cylinder($fn=6, r=w / 2 / cos(180 / 6) + 0.05, h=4+eps);
                     }
                 }
             }
         }
     }
 }
-module left_right_srews() {
-    // left and right grip
-    translate ([0,0,-bottom_h-5])
-    for(i=[1,-1]) {
-        difference() {
-            for(i=[0:1:len(grip_bottom_screws)-1]) {
-                translate(grip_bottom_screws[i]-[0,0,0]) {
-                    translate([0,0,-eps-grip_h]) {
-                        cylinder(d=screw_d_loos,  h=20+2*eps);
-                        cylinder(d=screw_head_d,  h=grip_h/2+2*eps);
-                    }
-                    difference(){
-                        w=6;
-                        aligned_rounded_cube([10,10,4],1,[1,1,1]);
-                        cylinder($fn=6, r=w / 2 / cos(180 / 6) + 0.05, h=20, center=true);
-                    }
-                }
-            }
-        }
-    }
-}
-module left_right_grip_srews() {
-    // left and right grip
-    translate ([0,0,-bottom_h])
-    for(i=[1,-1]) {
-        difference() {
-            for(i=[0:1:len(grip_bottom_screws)-1]) {
-                translate(grip_bottom_screws[i]-[0,0,0]) {
-                    translate([0,0,-eps-grip_h]) {
-                        cylinder(d=screw_d_loos,  h=20+2*eps);
-                        cylinder(d=screw_head_d,  h=grip_h/2+2*eps);
-                    }
-                    difference(){
-                        w=6;
-                        aligned_rounded_cube([10,10,4],1,[1,1,1]);
-                        cylinder($fn=6, r=w / 2 / cos(180 / 6) + 0.05, h=20, center=true);
-                    }
-                }
-            }
-        }
+module top_bottom_case_srews(l=26+2.5,head=50, h=2.1) {
+    w=6;
+    eps=0.1;
+    translate([0,0,h])
+    for(i=[0:1:len(top_bottom_screws)-1]) {
+        th=2.5;
+        h_screw_head=10;
+        h_female_screw=20;
+        //head
+        translate(top_bottom_screws[i])
+            cylinder(d=screw_head_d,  h=h+1);
+        // thread
+        translate(top_bottom_screws[i] + [0,0,-l+eps])
+            cylinder(d=screw_d_loos,  h=l);
+
+        translate(top_bottom_screws[i] + [0,0, -l+eps-h_female_screw+4])
+            //cylinder(d=screw_head_d,  h=h_screw2);
+            cylinder($fn=6, r=w / 2 / cos(180 / 6) + 0.05, h=h_female_screw);
     }
 }
 remote();
-left_right_grip_srews();
+///left_right_grip_srews();
+//bottom_case();
+//top_bottom_case_srews();
+
+
