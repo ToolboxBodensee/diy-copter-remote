@@ -1,0 +1,22 @@
+EESchema-LIBRARY Version 2.4
+#encoding utf-8
+#
+# LI_Charger-remote
+#
+DEF LI_Charger-remote U 0 40 Y Y 1 F N
+F0 "U" 300 200 50 H V C CNN
+F1 "LI_Charger-remote" -150 200 50 H V C CNN
+F2 "" 300 200 50 H I C CNN
+F3 "" 300 200 50 H I C CNN
+DRAW
+S 350 150 -350 -200 0 1 0 N
+X BAT ~ 50 -300 100 U 50 50 1 1 U
+X GND ~ -150 -300 100 U 50 50 1 1 U
+X GND ~ -50 -300 100 U 50 50 1 1 U
+X Key ~ 250 -300 100 U 50 50 1 1 U
+X VIN ~ -250 -300 100 U 50 50 1 1 U
+X Vout ~ 150 -300 100 U 50 50 1 1 U
+ENDDRAW
+ENDDEF
+#
+#End Library
