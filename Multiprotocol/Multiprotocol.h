@@ -354,14 +354,7 @@ enum MultiPacketTypes
 #define FAILSAFE_CHANNEL_HOLD		2047
 #define	FAILSAFE_CHANNEL_NOPULSES	0
 
-//********************
-//** Debug messages **
-//********************
-	uint16_t debug_time=0;
-  char buf[128];
-	#define debug(msg, ...)  { sprintf(buf, msg, ##__VA_ARGS__); Serial.println(buf);}
-	#define debugln(msg, ...)  { sprintf(buf, msg "\r\n", ##__VA_ARGS__); Serial.println(buf);}
-	#define debug_time(msg)  { uint16_t debug_time_TCNT1=TCNT1; debug_time=debug_time_TCNT1-debug_time; debugln(msg "%u", debug_time); debug_time=debug_time_TCNT1; }
+#include "debug.h"
 //********************
 //*** Blink timing ***
 //********************
