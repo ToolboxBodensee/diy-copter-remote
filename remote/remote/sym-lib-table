@@ -1,4 +1,4 @@
 (sym_lib_table
-  (lib (name remote)(type Legacy)(uri /home/phschoen/git/diy-copter-remote/remote/remote/library/remote.lib)(options "")(descr ""))
+  (lib (name remote)(type Legacy)(uri ./library/remote.lib)(options "")(descr ""))
   (lib (name remote-rescue)(type Legacy)(uri ${KIPRJMOD}/remote-rescue.lib)(options "")(descr ""))
 )
