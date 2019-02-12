@@ -13,6 +13,11 @@
 //*******************
 //***   Pinouts   ***
 //*******************
+#ifndef _PINS_H_
+#define _PINS_H_
+
+#include "Arduino.h"
+
 #define LED_off
 #define LED_on
 #define LED_output
@@ -29,10 +34,18 @@
 #define Yaw_pin       PA5
 #define Roll_pin      PA6
 #define Pitch_pin     PA7
+
+#define Aux1_pin      PB0
 #define Aux2_pin      PB0
+#define Aux3_pin      PB0
+#define Aux4_pin      PB0
+#define Aux5_pin      PB0
+#define Aux6_pin      PB0
+#define Menu_pin      PB0
 
 #define cli()
 #define sei()
+#define NOP() __asm__ __volatile__("nop")
 
 #define SDI_on      digitalWrite(SDI_pin, HIGH)
 #define SDI_off     digitalWrite(SDI_pin, LOW)
@@ -66,3 +79,5 @@
 //***    EEPROM   ***
 //*******************
 #define EE_ADDR uint8_t*
+
+#endif

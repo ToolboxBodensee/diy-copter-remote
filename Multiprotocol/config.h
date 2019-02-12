@@ -12,7 +12,10 @@
  You should have received a copy of the GNU General Public License
  along with Multiprotocol.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
 
+#include <stdint.h>
 /**********************************************/
 /** Multiprotocol module configuration file ***/
 /**********************************************/
@@ -33,7 +36,7 @@
 //Comment to globaly disable the bind feature from a channel.
 #define ENABLE_BIND_CH
 //Set the channel number used for bind. Default is 16.
-#define BIND_CH	16
+#define BIND_CH 16
 
 //Comment to disable the wait for bind feature. If Autobind is enabled in the model config, this feature will not activate
 // the selected protocol unless a bind is requested using bind from channel or the GUI "Bind" button.
@@ -59,9 +62,9 @@
 //Once a good tuning value is found it can be set here and will override the radio's 'option' setting for all existing and new models which use that protocol.
 //For more information: https://github.com/pascallanger/DIY-Multiprotocol-TX-Module/tree/master/docs/Frequency_Tuning.md
 //Uncomment the lines below (remove the "//") and set an appropriate value (replace the "0") to enable. Valid range is -127 to +127.
-//#define FORCE_FRSKYD_TUNING	0
-//#define FORCE_FRSKYV_TUNING	0
-//#define FORCE_FRSKYX_TUNING	0
+//#define FORCE_FRSKYD_TUNING   0
+//#define FORCE_FRSKYV_TUNING   0
+//#define FORCE_FRSKYX_TUNING   0
 
 /** Low Power **/
 //Low power is reducing the transmit power of the multi module. This setting is configurable per model in PPM (table below) or Serial mode (radio GUI).
@@ -78,13 +81,13 @@
 //If you have 2 Multi modules which you want to share the same ID so you can use either to control the same RC model
 // then you can force the ID to a certain known value using the lines below.
 //Default is commented, you should uncoment only for test purpose or if you know exactly what you are doing!!!
-#define FORCE_GLOBAL_ID	0x12345678
+#define FORCE_GLOBAL_ID 0x12345678
 
 //Protocols using the CYRF6936 (DSM, Devo, Walkera...) are using the CYRF ID instead which should prevent duplicated IDs.
 //If you have 2 Multi modules which you want to share the same ID so you can use either to control the same RC model
 // then you can force the ID to a certain known value using the lines below.
 //Default is commented, you should uncoment only for test purpose or if you know exactly what you are doing!!!
-//#define FORCE_CYRF_ID	"\x12\x34\x56\x78\x9A\xBC"
+//#define FORCE_CYRF_ID "\x12\x34\x56\x78\x9A\xBC"
 
 
 /****************************/
@@ -95,9 +98,9 @@
 //Comment the protocols you are not using with "//" to save Flash space.
 
 //The protocols below need a CC2500 to be installed
-#define	FRSKYD_CC2500_INO
-#define	FRSKYV_CC2500_INO
-#define	FRSKYX_CC2500_INO
+#define FRSKYD_CC2500_INO
+#define FRSKYV_CC2500_INO
+#define FRSKYX_CC2500_INO
 
 
 /**************************/
@@ -147,17 +150,17 @@
 //#define MULTI_TELEMETRY
 
 //Comment a line to disable a specific protocol telemetry
-//#define DSM_TELEMETRY				// Forward received telemetry packet directly to TX to be decoded by er9x, ersky9x and OpenTX
-//#define SPORT_TELEMETRY				// Use FrSkyX SPORT format to send telemetry to TX
-//#define AFHDS2A_FW_TELEMETRY		// Forward received telemetry packet directly to TX to be decoded by ersky9x and OpenTX
-//#define AFHDS2A_HUB_TELEMETRY		// Use FrSkyD Hub format to send basic telemetry to TX like er9x
-//#define HUB_TELEMETRY				// Use FrSkyD Hub format to send telemetry to TX
-//#define BAYANG_HUB_TELEMETRY		// Use FrSkyD Hub format to send telemetry to TX
-//#define BUGS_HUB_TELEMETRY			// Use FrSkyD Hub format to send telemetry to TX
-//#define HUBSAN_HUB_TELEMETRY		// Use FrSkyD Hub format to send telemetry to TX
-//#define CABELL_HUB_TELEMETRY		// Use FrSkyD Hub format to send telemetry to TX
-//#define HITEC_HUB_TELEMETRY			// Use FrSkyD Hub format to send basic telemetry to the radios which can decode it like er9x, ersky9x and OpenTX
-//#define HITEC_FW_TELEMETRY			// Under development: Forward received telemetry packets to be decoded by ersky9x and OpenTX
+//#define DSM_TELEMETRY             // Forward received telemetry packet directly to TX to be decoded by er9x, ersky9x and OpenTX
+//#define SPORT_TELEMETRY               // Use FrSkyX SPORT format to send telemetry to TX
+//#define AFHDS2A_FW_TELEMETRY      // Forward received telemetry packet directly to TX to be decoded by ersky9x and OpenTX
+//#define AFHDS2A_HUB_TELEMETRY     // Use FrSkyD Hub format to send basic telemetry to TX like er9x
+//#define HUB_TELEMETRY             // Use FrSkyD Hub format to send telemetry to TX
+//#define BAYANG_HUB_TELEMETRY      // Use FrSkyD Hub format to send telemetry to TX
+//#define BUGS_HUB_TELEMETRY            // Use FrSkyD Hub format to send telemetry to TX
+//#define HUBSAN_HUB_TELEMETRY      // Use FrSkyD Hub format to send telemetry to TX
+//#define CABELL_HUB_TELEMETRY      // Use FrSkyD Hub format to send telemetry to TX
+//#define HITEC_HUB_TELEMETRY           // Use FrSkyD Hub format to send basic telemetry to the radios which can decode it like er9x, ersky9x and OpenTX
+//#define HITEC_FW_TELEMETRY            // Under development: Forward received telemetry packets to be decoded by ersky9x and OpenTX
 
 //SPORT_POLLING is an implementation of the same polling routine as XJT module for sport telemetry bidirectional communication.
 //This is useful for passing sport control frames from TX to RX(ex: changing Betaflight PID or VTX channels on the fly using LUA scripts with OpentX).
@@ -188,13 +191,13 @@
 //It is important for the module to know the endpoints of your radio.
 //Below are some standard transmitters already preconfigured.
 //Uncomment only the one which matches your transmitter.
-#define TX_ER9X			//ER9X/ERSKY9X/OpenTX	( 988<->2012 microseconds)
-//#define TX_DEVO7		//DEVO					(1120<->1920 microseconds)
-//#define TX_SPEKTRUM	//Spektrum				(1100<->1900 microseconds)
-//#define TX_HISKY		//HISKY					(1120<->1920 microseconds)
-//#define TX_MPX		//Multiplex MC2020		(1250<->1950 microseconds)
-//#define TX_WALKERA	//Walkera PL0811-01H	(1000<->1800 microseconds)
-//#define TX_CUSTOM		//Custom
+#define TX_ER9X         //ER9X/ERSKY9X/OpenTX   ( 988<->2012 microseconds)
+//#define TX_DEVO7      //DEVO                  (1120<->1920 microseconds)
+//#define TX_SPEKTRUM   //Spektrum              (1100<->1900 microseconds)
+//#define TX_HISKY      //HISKY                 (1120<->1920 microseconds)
+//#define TX_MPX        //Multiplex MC2020      (1250<->1950 microseconds)
+//#define TX_WALKERA    //Walkera PL0811-01H    (1000<->1800 microseconds)
+//#define TX_CUSTOM     //Custom
 
 // The lines below are used to set the end points in microseconds if you have selected TX_CUSTOM.
 // A few things to consider:
@@ -202,10 +205,6 @@
 //  - If you put too low values you won't be able to use your full stick range, it will be maxed out before reaching the ends
 //  - Centered stick value is usually 1500. It should match the middle between MIN and MAX, ie Center=(MAX+MIN)/2. If your TX is not centered you can adjust the value MIN or MAX.
 //  - 100% is referred as the value when the TX is set to default with no trims
-#if defined(TX_CUSTOM)
-	#define PPM_MAX_100	1900	//	100%
-	#define PPM_MIN_100	1100	//	100%
-#endif
 
 /** Number of PPM Channels **/
 // The line below is used to set the minimum number of channels which the module should receive to consider a PPM frame valid.
@@ -215,240 +214,82 @@
 // The default value is 16 to receive all possible channels but you might want to filter some "bad" channels from the PPM frame like the ones above 6 on the Walkera PL0811.
 #define MAX_PPM_CHANNELS 16
 
-/** Rotary Switch Protocol Selector Settings **/
-//The table below indicates which protocol to run when a specific position on the rotary switch has been selected.
-//All fields and values are explained below. Everything is configurable from here like in the Serial mode.
-//Tip: You can associate multiple times the same protocol to different rotary switch positions to take advantage of the model match based on RX_Num
-
-//A system of banks enable the access to more protocols than positions on the rotary switch. Banks can be selected by placing the rotary switch on position 15, power up the module and
-// short press the bind button multiple times until you reach the desired one. The bank number currently selected is indicated by the number of LED flash.
-// Full procedure is located here: https://github.com/pascallanger/DIY-Multiprotocol-TX-Module/blob/master/Protocols_Details.md#protocol-selection-in-ppm-mode
-
-//The parameter below indicates the number of desired banks between 1 and 5. Default is 5.
 #define NBR_BANKS 3
-uint8_t curr_bank = 0;
-const PPM_Parameters PPM_prot[14*NBR_BANKS]=	{
-#if NBR_BANKS > 0
-//******************************       BANK 1       ******************************
-//	Switch	Protocol 	    	Sub protocol	RX_Num	Power		Auto Bind		Option
-/*  1 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 0   },
-/*  2 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 20   },
-/*  3 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 40   },
-/*  4 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 60  },
-/*  5 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 80  },
-/*  6 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 100  },
-/*  7 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 120  },
-/*  8 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 140  },
-/*  9 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 160  },
-/*  10  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 180  },
-/*  11  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 200  },
-/*  12  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 220  }, // option=fine freq tuning
-/*  13  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 240   },
-/*  14  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 255   },
-#endif
-#if NBR_BANKS > 1
-//******************************       BANK 2       ******************************
-//	Switch	Protocol 		Sub protocol	RX_Num	Power		Auto Bind		Option
-/*  1 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -120    },
-/*  2 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -100   },
-/*  3 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -80   },
-/*  4 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -60   },
-/*  5 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -40   },
-/*  6 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -20   },
-/*  7 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,   0   },
-/*  8 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  10   },
-/*  9 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  20   },
-/*  10  */  {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  40   },
-/*  11  */  {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  60   },
-/*  12  */  {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  80   }, // option=fine freq tuning
-/*  13  */  {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  100   },
-/*  14  */  {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  120   },
-#endif
-#if NBR_BANKS > 2
-//******************************       BANK 3       ******************************
-//	Switch	Protocol 		Sub protocol	RX_Num	Power		Auto Bind		Option
-/*  1 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -120    },
-/*  2 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -100   },
-/*  3 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -80   },
-/*  4 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -60   },
-/*  5 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -40   },
-/*  6 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -20   },
-/*  7 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,   0   },
-/*  8 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  10   },
-/*  9 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  20   },
-/*  10  */  {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  40   },
-/*  11  */  {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  60   },
-/*  12  */  {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  80   }, // option=fine freq tuning
-/*  13  */  {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  100   },
-/*  14  */  {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  120   },
-#endif
+extern uint8_t curr_bank;
+
+struct PPM_Parameters
+{
+    uint8_t protocol : 6;
+    uint8_t sub_proto : 3;
+    uint8_t rx_num : 4;
+
+#define P_HIGH      1
+#define P_LOW       0
+    uint8_t power : 1;
+
+#define AUTOBIND    1
+#define NO_AUTOBIND 0
+    uint8_t autobind : 1;
+
+    uint8_t option;
 };
-/* Available protocols and associated sub protocols to pick and choose from
-	PROTO_FLYSKY
-		Flysky
-		V9X9
-		V6X6
-		V912
-		CX20
-	PROTO_HUBSAN
-		H107
-		H301
-		H501
-	PROTO_FRSKYV
-		NONE
-	PROTO_FRSKYD
-		NONE
-	PROTO_FRSKYX
-		CH_16
-		CH_8
-		EU_16
-		EU_8
-	PROTO_HISKY
-		Hisky
-		HK310
-	PROTO_V2X2
-		V2X2
-		JXD506
-	PROTO_DSM
-		DSM2_22
-		DSM2_11
-		DSMX_22
-		DSMX_11
-	PROTO_DEVO
-		NONE
-	PROTO_YD717
-		YD717
-		SKYWLKRP_LOW
-		SYMAX4
-		XINXUN
-		NIHUI
-	PROTO_KN
-		WLTOYS
-		FEILUN
-	PROTO_SYMAX
-		SYMAX
-		SYMAX5C
-	PROTO_SLT
-		NONE
-	PROTO_CX10
-		CX10_GREEN
-		CX10_BLUE
-		DM007
-		JC3015_1
-		JC3015_2
-		MK33041
-	PROTO_Q2X2
-		Q222
-		Q242
-		Q282
-	PROTO_SLT
-		SLT
-		VISTA
-	PROTO_CG023
-		CG023
-		YD829
-	PROTO_BAYANG
-		BAYANG
-		H8S3D
-		X16_AH
-		IRDRONE
-	PROTO_ESKY
-		NONE
-	PROTO_MT99XX
-		MT99
-		H7
-		YZ
-		LS
-		FY805
-	PROTO_MJXQ
-		WLH08
-		X600
-		X800
-		H26D
-		E010
-		H26WH
-	PROTO_SHENQI
-		NONE
-	PROTO_FY326
-		FY326
-		FY319
-	PROTO_SFHSS
-		NONE
-	PROTO_J6PRO
-		NONE
-	PROTO_FQ777
-		NONE
-	PROTO_ASSAN
-		NONE
-	PROTO_HONTAI
-		HONTAI
-		JJRCX1
-		X5C1
-		FQ777_951
-	PROTO_AFHDS2A
-		PWM_IBUS
-		PPM_IBUS
-		PWM_SBUS
-		PPM_SBUS
-	PROTO_WK2x01
-		WK2801
-		WK2401
-		W6_5_1
-		W6_6_1
-		W6_HEL
-		W6_HEL_I
-	PROTO_Q303
-		Q303
-		CX35
-		CX10D
-		CX10WD
-	PROTO_GW008
-		NONE
-	PROTO_DM002
-		NONE
-	PROTO_CABELL
-		CABELL_V3
-		CABELL_V3_TELEMETRY
-		CABELL_SET_FAIL_SAFE
-		CABELL_UNBIND
-	PROTO_ESKY150
-	PROTO_H8_3D
-		H8_3D
-		H20H
-		H20MINI
-		H30MINI
-	PROTO_CORONA
-		COR_V1
-		COR_V2
-		FD_V3
-	PROTO_CFLIE
-		NONE
-	PROTO_HITEC
-		OPT_FW
-		OPT_HUB
-		MINIMA
-	PROTO_WFLY
-		NONE
-	PROTO_BUGS
-		NONE
-	PROTO_SLT
-		SLT_V1
-		SLT_V2
-		Q100
-		Q200
-		MR100
-*/
 
-// RX_Num is used for TX & RX match. Using different RX_Num values for each receiver will prevent starting a model with the false config loaded...
-// RX_Num value is between 0 and 15.
+//******************
+// Protocols
+//******************
+enum PROTOCOLS
+{
+    MODE_SERIAL     = 0,    // Serial commands
+    PROTO_FLYSKY    = 1,    // =>A7105
+    PROTO_HUBSAN    = 2,    // =>A7105
+    PROTO_FRSKYD    = 3,    // =>CC2500
+    PROTO_HISKY     = 4,    // =>NRF24L01
+    PROTO_V2X2      = 5,    // =>NRF24L01
+    PROTO_DSM       = 6,    // =>CYRF6936
+    PROTO_DEVO      = 7,    // =>CYRF6936
+    PROTO_YD717     = 8,    // =>NRF24L01
+    PROTO_KN        = 9,    // =>NRF24L01
+    PROTO_SYMAX     = 10,   // =>NRF24L01
+    PROTO_SLT       = 11,   // =>NRF24L01
+    PROTO_CX10      = 12,   // =>NRF24L01
+    PROTO_CG023     = 13,   // =>NRF24L01
+    PROTO_BAYANG    = 14,   // =>NRF24L01
+    PROTO_FRSKYX    = 15,   // =>CC2500
+    PROTO_ESKY      = 16,   // =>NRF24L01
+    PROTO_MT99XX    = 17,   // =>NRF24L01
+    PROTO_MJXQ      = 18,   // =>NRF24L01
+    PROTO_SHENQI    = 19,   // =>NRF24L01
+    PROTO_FY326     = 20,   // =>NRF24L01
+    PROTO_SFHSS     = 21,   // =>CC2500
+    PROTO_J6PRO     = 22,   // =>CYRF6936
+    PROTO_FQ777     = 23,   // =>NRF24L01
+    PROTO_ASSAN     = 24,   // =>NRF24L01
+    PROTO_FRSKYV    = 25,   // =>CC2500
+    PROTO_HONTAI    = 26,   // =>NRF24L01
+    PROTO_OPENLRS   = 27,   // =>OpenLRS hardware
+    PROTO_AFHDS2A   = 28,   // =>A7105
+    PROTO_Q2X2      = 29,   // =>NRF24L01, extension of CX-10 protocol
+    PROTO_WK2x01    = 30,   // =>CYRF6936
+    PROTO_Q303      = 31,   // =>NRF24L01
+    PROTO_GW008     = 32,   // =>NRF24L01
+    PROTO_DM002     = 33,   // =>NRF24L01
+    PROTO_CABELL    = 34,   // =>NRF24L01
+    PROTO_ESKY150   = 35,   // =>NRF24L01
+    PROTO_H8_3D     = 36,   // =>NRF24L01
+    PROTO_CORONA    = 37,   // =>CC2500
+    PROTO_CFLIE     = 38,   // =>NRF24L01
+    PROTO_HITEC     = 39,   // =>CC2500
+    PROTO_WFLY      = 40,   // =>CYRF6936
+    PROTO_BUGS      = 41,   // =>A7105
+};
 
-// Power P_HIGH or P_LOW: High or low power setting for the transmission.
-// For indoor P_LOW is more than enough.
+enum FRSKYX_SUP_PROTOCOL
+{
+    CH_16   = 0,
+    CH_8    = 1,
+    EU_16   = 2,
+    EU_8    = 3,
+};
 
-// Auto Bind	AUTOBIND or NO_AUTOBIND
-// For protocols which does not require binding at each power up (like Flysky, FrSky...), you might still want a bind to be initiated each time you power up the TX.
-// As an example, it's usefull for the WLTOYS F929/F939/F949/F959 (all using the Flysky protocol) which requires a bind at each power up.
-// It also enables the Bind from channel feature, allowing to execute a bind by toggling a designated channel.
-
-// Option: the value is between -128 and +127.
-// The option value is only valid for some protocols, read this page for more information: https://github.com/pascallanger/DIY-Multiprotocol-TX-Module/blob/master/Protocols_Details.md
+extern const PPM_Parameters PPM_prot[14*NBR_BANKS];
+#endif

@@ -32,32 +32,36 @@
     #include "MultiOrange.h"
 #endif
 
+#include "config.h"
+#include "tx_def.h"
 #include "Multiprotocol.h"
 
 //Multiprotocol module configuration file
-#include "_Config.h"
 
-#include "Pins.h"
-#include "TX_Def.h"
+#include "pins.h"
 #include "Validate.h"
+#include "common.h"
 #include "state.h"
+#include "input.h"
+#include "cc2500_spi.h"
+
+#include "FrSkyX_cc2500.h"
+#include "FrSkyV_cc2500.h"
+#include "FrSkyD_cc2500.h"
 
 //Global constants/variables
 uint32_t MProtocol_id;//tx id,
 uint32_t MProtocol_id_master;
 uint32_t blink=0,last_signal=0;
+uint8_t protocol_flags=0,protocol_flags2=0;
 //
 uint16_t counter;
 uint8_t  channel;
 uint8_t  packet[40];
 
-#define NUM_CHN 16
 // Servo data
 uint16_t Channel_data[NUM_CHN];
 uint8_t  Channel_AUX;
-#ifdef FAILSAFE_ENABLE
-    uint16_t Failsafe_data[NUM_CHN];
-#endif
 
 // Protocol variables
 uint8_t  cyrfmfg_id[6];//for dsm2 and devo
@@ -96,7 +100,6 @@ const uint8_t CH_EATR[]={ELEVATOR, AILERON, THROTTLE, RUDDER, CH5, CH6, CH7, CH8
 
 // Mode_select variables
 uint8_t mode_select;
-uint8_t protocol_flags=0,protocol_flags2=0;
 
 #ifdef ENABLE_PPM
 // PPM variable
@@ -126,7 +129,6 @@ volatile uint8_t rx_ok_buff[RXBUFFER_SIZE];
 volatile uint8_t discard_frame = 0;
 
 // Telemetry
-#define MAX_PKT 29
 uint8_t pkt[MAX_PKT];//telemetry receiving packets
 float TIMER_PRESCALE = 5.82;
 // Callback
@@ -140,8 +142,8 @@ void setup()
     #ifdef DEBUG_SERIAL
         Serial.begin(115200,SERIAL_8N1);
         while (!Serial); // Wait for ever for the serial port to connect...
-        debugln("Multiprotocol version: %d.%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_PATCH_LEVEL);
-    debugln("time %s ", __TIME__);
+        debugln("Multiprotocol startup");
+        debugln("time %s ", __TIME__);
     #endif
 
     // General pinout
@@ -307,7 +309,7 @@ void setup()
     else
 #endif //ENABLE_PPM
   debugln("Init complete");
-  update_inputs();
+  input.update();
   init_state();
 }
 
@@ -315,121 +317,55 @@ void setup()
 // Protocol scheduler
 void loop()
 {
-  uint32_t next_callback;
-    uint16_t diff=0xFFFF;
+    uint32_t next_callback;
 
-  uint32_t end__ = micros();
-  uint32_t start = micros();
-  if(remote_callback==0 || IS_WAIT_BIND_on || diff>2*200)
-  {
-    do
-    {
-      Update_All();
+    if(remote_callback==0 || IS_WAIT_BIND_on ) {
+        do {
+            Update_All();
+        } while(remote_callback==0 || IS_WAIT_BIND_on);
     }
-    while(remote_callback==0 || IS_WAIT_BIND_on);
-  }
-    while(1)
-    {
-    #if 0
-            if( (TIFR1 & OCF1A_bm) != 0)
-            {
-                cli();                  // Disable global int due to RW of 16 bits registers
-                OCR1A=TCNT1;            // Callback should already have been called... Use "now" as new sync point.
-                sei();                  // Enable global int
-            }
-            else
-                while((TIFR1 & OCF1A_bm) == 0); // Wait before callback
 
-    #endif
+    uint32_t end__ = micros();
+    uint32_t start = micros();
 
+    while(1) {
+        start = end__;
+        next_callback = remote_callback();
 
-    end__ = micros();
-        do
-        {
-            //TX_MAIN_PAUSE_on;
-            //tx_pause();
-      start = end__;
-            next_callback=remote_callback();
-
-#if 0
-            TX_MAIN_PAUSE_off;
-            tx_resume();
-            while(next_callback>4000)
-            { // start to wait here as much as we can...
-                next_callback-=2000;                // We will wait below for 2ms
-                cli();                              // Disable global int due to RW of 16 bits registers
-                OCR1A += 2000 * TIMER_PRESCALE;                 // set compare A for callback
-                TIFR1=OCF1A_bm;                 // clear compare A=callback flag
-                sei();                              // enable global int
-                if(Update_All())                    // Protocol changed?
-                {
-                    next_callback=0;                // Launch new protocol ASAP
-                    break;
-                }
-                while((TIFR1 & OCF1A_bm) == 0); // wait 2ms...
-            }
-            // at this point we have a maximum of 4ms in next_callback
-            cli();                                  // Disable global int due to RW of 16 bits registers
-            OCR1A+= next_callback*TIMER_PRESCALE ;                  // set compare A for callback
-            TIFR1=OCF1A_bm;                     // clear compare A=callback flag
-            diff=OCR1A-TCNT1;                       // compare timer and comparator
-            sei();                                  // enable global int
-#else
-
-      if (next_callback > 4000) {
-        update_inputs();
-        update_state();
-      }
-      uint32_t wait_until = start + next_callback;
-      end__ = micros();
-      if (end__-start < next_callback) {
-        uint32_t wait = next_callback;
-        wait -= ((end__-start));
-        //wait -= 1000;
-          delayMicroseconds(wait);
-          //debugln("%lu vs %lu",wait,next_callback);
-
-        /*
-        debugln("took %lu (%lu - %lu) vs %lu wait %lu wait until %lu",
-                end__-start, start, end__,
-                next_callback,
-                wait, wait_until);
-                */
-        end__ += wait;
-      }
-#endif
-      end__ = micros();
-      //debugln("%lu vs %lu",end__-start,next_callback);
-      //debugln("next %d diff %lu (%lu to %lu) diff %x ",org_next_call, end__ - start_, end__, start_, diff);
-
+        if (next_callback > 4000) {
+            input.update();
+            update_state();
         }
-        while(diff&0x8000);                         // Callback did not took more than requested time for next callback
-                                                    // so we can launch Update_All before next callback
+
+        uint32_t wait_until = start + next_callback;
+        end__ = micros();
+
+        if (end__-start < next_callback) {
+            uint32_t wait = next_callback;
+            wait -= ((end__-start));
+            delayMicroseconds(wait);
+            end__ += wait;
+        }
+        end__ = micros();
     }
 }
 
 uint8_t Update_All()
 {
     #ifdef ENABLE_SERIAL
-        #ifdef CHECK_FOR_BOOTLOADER
-            if ( (mode_select==MODE_SERIAL) && (NotBootChecking == 0) )
-                pollBoot() ;
-            else
-        #endif
         if(mode_select==MODE_SERIAL && IS_RX_FLAG_on)       // Serial mode and something has been received
         {
             update_serial_data();                           // Update protocol and data
             update_channels_aux();
-            INPUT_SIGNAL_on;                                //valid signal received
             last_signal=millis();
         }
     #endif //ENABLE_SERIAL
     #ifdef ENABLE_PPM
         if(mode_select!=MODE_SERIAL && IS_PPM_FLAG_on)      // PPM mode and a full frame has been received
         {
-      debugln("%s:%d",__func__, __LINE__);
-            for(uint8_t i=0;i<PPM_chan_max;i++)
-            { // update servo data without interrupts to prevent bad read
+            debugln("%s:%d",__func__, __LINE__);
+            for(uint8_t i=0;i<PPM_chan_max;i++) {
+                // update servo data without interrupts to prevent bad read
                 uint16_t val;
                 cli();                                      // disable global int
                 val = PPM_data[i];
@@ -441,7 +377,6 @@ uint8_t Update_All()
             }
             PPM_FLAG_off;                                   // wait for next frame before update
             update_channels_aux();
-            INPUT_SIGNAL_on;                                // valid signal received
             last_signal=millis();
         }
     #endif //ENABLE_PPM
@@ -470,14 +405,12 @@ uint8_t Update_All()
         }
     #endif //ENABLE_BIND_CH
 
-
-  update_inputs();
-
+    input.update();
 
     if(IS_CHANGE_PROTOCOL_FLAG_on)
     {
-    debugln("%s:%d set bind prog",__func__, __LINE__);
-      // Protocol needs to be changed or relaunched for bind
+        debugln("%s:%d set bind prog",__func__, __LINE__);
+        // Protocol needs to be changed or relaunched for bind
         protocol_init();                                    //init new protocol
         return 1;
     }
@@ -641,26 +574,18 @@ static void protocol_init()
 
         switch(protocol)                // Init the requested protocol
         {
-            #ifdef CC2500_INSTALLED
-                #if defined(FRSKYD_CC2500_INO)
-                    case PROTO_FRSKYD:
-                        next_callback = initFrSky_2way();
-                        remote_callback = ReadFrSky_2way;
-                        break;
-                #endif
-                #if defined(FRSKYV_CC2500_INO)
-                    case PROTO_FRSKYV:
-                        next_callback = initFRSKYV();
-                        remote_callback = ReadFRSKYV;
-                        break;
-                #endif
-                #if defined(FRSKYX_CC2500_INO)
-                    case PROTO_FRSKYX:
-                        next_callback = initFrSkyX();
-                        remote_callback = ReadFrSkyX;
-                        break;
-                #endif
-            #endif
+        case PROTO_FRSKYD:
+            next_callback = initFrSky_2way();
+            remote_callback = ReadFrSky_2way;
+            break;
+        case PROTO_FRSKYV:
+            next_callback = initFRSKYV();
+            remote_callback = ReadFRSKYV;
+            break;
+        case PROTO_FRSKYX:
+            next_callback = initFrSkyX();
+            remote_callback = ReadFrSkyX;
+            break;
         }
     }
 
@@ -889,84 +814,10 @@ void modules_reset()
     }
 #endif
 
-#ifdef CHECK_FOR_BOOTLOADER
-void pollBoot()
-{
-    uint8_t rxchar ;
-    uint8_t lState = BootState ;
-    uint8_t millisTime = millis();              // Call this once only
-
-    #ifdef ORANGE_TX
-    if ( USARTC0.STATUS & USART_RXCIF_bm )
-    #elif defined STM32_BOARD
-    if ( USART2_BASE->SR & USART_SR_RXNE )
-    #else
-    if ( UCSR0A & ( 1 << RXC0 ) )
-    #endif
-    {
-        rxchar = UDR0 ;
-        BootCount += 1 ;
-        if ( ( lState == BOOT_WAIT_30_IDLE ) || ( lState == BOOT_WAIT_30_DATA ) )
-        {
-            if ( lState == BOOT_WAIT_30_IDLE )  // Waiting for 0x30
-                BootTimer = millisTime ;        // Start timeout
-            if ( rxchar == 0x30 )
-                lState = BOOT_WAIT_20 ;
-            else
-                lState = BOOT_WAIT_30_DATA ;
-        }
-        else
-            if ( lState == BOOT_WAIT_20 && rxchar == 0x20 ) // Waiting for 0x20
-                lState = BOOT_READY ;
-    }
-    else // No byte received
-    {
-        if ( lState != BOOT_WAIT_30_IDLE )      // Something received
-        {
-            uint8_t time = millisTime - BootTimer ;
-            if ( time > 5 )
-            {
-                #ifdef  STM32_BOARD
-                if ( BootCount > 4 )
-                #else
-                if ( BootCount > 2 )
-                #endif
-                { // Run normally
-                    NotBootChecking = 0xFF ;
-                    Mprotocol_serial_init( 0 ) ;
-                }
-                else if ( lState == BOOT_READY )
-                {
-                    #ifdef  STM32_BOARD
-                        nvic_sys_reset();
-                        while(1);                       /* wait until reset */
-                    #else
-                        cli();                          // Disable global int due to RW of 16 bits registers
-                        void (*p)();
-                        #ifndef ORANGE_TX
-                            p = (void (*)())0x3F00 ;    // Word address (0x7E00 byte)
-                        #else
-                            p = (void (*)())0x4000 ;    // Word address (0x8000 byte)
-                        #endif
-                        (*p)() ;                        // go to boot
-                    #endif
-                }
-                else
-                {
-                    lState = BOOT_WAIT_30_IDLE ;
-                    BootCount = 0 ;
-                }
-            }
-        }
-    }
-    BootState = lState ;
-}
-#endif //CHECK_FOR_BOOTLOADER
-
 #if defined(TELEMETRY)
 void PPM_Telemetry_serial_init()
 {
-    if( (protocol==PROTO_FRSKYD) || (protocol==PROTO_HUBSAN) || (protocol==PROTO_AFHDS2A) || (protocol==PROTO_BAYANG) || (protocol==PROTO_CABELL)  || (protocol==PROTO_HITEC) || (protocol==PROTO_BUGS))
+    if( (protocol==PROTO_FRSKYD))
         initTXSerial( SPEED_9600 ) ;
     if(protocol==PROTO_FRSKYX)
         initTXSerial( SPEED_57600 ) ;
@@ -976,7 +827,7 @@ void PPM_Telemetry_serial_init()
 #endif
 
 // Convert 32b id to rx_tx_addr
-static void set_rx_tx_addr(uint32_t id)
+void set_rx_tx_addr(uint32_t id)
 { // Used by almost all protocols
     rx_tx_addr[0] = (id >> 24) & 0xFF;
     rx_tx_addr[1] = (id >> 16) & 0xFF;
@@ -985,7 +836,7 @@ static void set_rx_tx_addr(uint32_t id)
     rx_tx_addr[4] = (rx_tx_addr[2]&0xF0)|(rx_tx_addr[3]&0x0F);
 }
 
-static uint32_t random_id(uint16_t address, uint8_t create_new)
+uint32_t random_id(uint16_t address, uint8_t create_new)
 {
     #ifndef FORCE_GLOBAL_ID
         uint32_t id=0;

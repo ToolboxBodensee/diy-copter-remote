@@ -13,21 +13,12 @@
  along with Multiprotocol.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(FRSKYV_CC2500_INO)
-
 #define FRSKYV_BIND_COUNT 200
+#include "FrSkyV_cc2500.h"
+#include "cc2500_spi.h"
+#include "common.h"
 
-enum {
-    FRSKYV_DATA1=0,
-    FRSKYV_DATA2,
-    FRSKYV_DATA3,
-    FRSKYV_DATA4,
-    FRSKYV_DATA5
-};
-
-
-#include "iface_cc2500.h"
-static uint8_t __attribute__((unused)) FRSKYV_crc8(uint8_t result, uint8_t *data, uint8_t len)
+uint8_t FRSKYV_crc8(uint8_t result, uint8_t *data, uint8_t len)
 {
     for(uint8_t i = 0; i < len; i++)
     {
@@ -41,7 +32,7 @@ static uint8_t __attribute__((unused)) FRSKYV_crc8(uint8_t result, uint8_t *data
     return result;
 }
 
-static uint8_t __attribute__((unused)) FRSKYV_crc8_le(uint8_t *data, uint8_t len)
+uint8_t FRSKYV_crc8_le(uint8_t *data, uint8_t len)
 {
     uint8_t result = 0xD6;
 
@@ -57,7 +48,7 @@ static uint8_t __attribute__((unused)) FRSKYV_crc8_le(uint8_t *data, uint8_t len
     return result;
 }
 
-static void __attribute__((unused)) FRSKYV_build_bind_packet()
+void FRSKYV_build_bind_packet()
 {
     //0e 03 01 57 12 00 06 0b 10 15 1a 00 00 00 61
     packet[0] = 0x0e;                //Length
@@ -77,7 +68,7 @@ static void __attribute__((unused)) FRSKYV_build_bind_packet()
     packet[14] = FRSKYV_crc8(0x93, packet, 14);
 }
 
-static uint8_t __attribute__((unused)) FRSKYV_calc_channel()
+uint8_t FRSKYV_calc_channel()
 {
     uint32_t temp=seed;
     temp = (temp * 0xaa) % 0x7673;
@@ -85,7 +76,7 @@ static uint8_t __attribute__((unused)) FRSKYV_calc_channel()
     return (seed & 0xff) % 0x32;
 }
 
-static void __attribute__((unused)) FRSKYV_build_data_packet()
+void FRSKYV_build_data_packet()
 {
     uint8_t idx = 0;            // transmit lower channels
 
@@ -162,4 +153,3 @@ uint16_t initFRSKYV()
     return 10000;
 }
 
-#endif

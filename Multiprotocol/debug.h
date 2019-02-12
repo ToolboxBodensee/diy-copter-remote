@@ -1,5 +1,7 @@
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef _DEBUG_H_
+#define _DEBUG_H_
+#include "Arduino.h"
+#include <stdio.h>
 
 //********************
 //** Debug messages **

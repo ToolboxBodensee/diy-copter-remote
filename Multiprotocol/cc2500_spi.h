@@ -1,3 +1,4 @@
+
 /*
  This project is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -12,9 +13,29 @@
  You should have received a copy of the GNU General Public License
  along with Multiprotocol.  If not, see <http://www.gnu.org/licenses/>.
  */
+//-------------------------------
+//-------------------------------
+//CC2500 SPI routines
+//-------------------------------
+//-------------------------------
+#ifndef _CC2500_SPI_
+#define _CC2500_SPI_
+#include <stdint.h>
+#include "Multiprotocol.h"
 
-#ifndef _IFACE_CC2500_H_
-#define _IFACE_CC2500_H_
+void CC2500_WriteReg(uint8_t address, uint8_t data);
+
+void CC2500_ReadRegisterMulti(uint8_t address, uint8_t data[], uint8_t length);
+uint8_t CC2500_ReadReg(uint8_t address);
+void CC2500_ReadData(uint8_t *dpbuffer, uint8_t len);
+void CC2500_Strobe(uint8_t state);
+void CC2500_WriteRegisterMulti(uint8_t address, const uint8_t data[], uint8_t length);
+void CC2500_WriteData(uint8_t *dpbuffer, uint8_t len);
+void CC2500_SetTxRxMode(uint8_t mode);
+uint8_t CC2500_Reset();
+void CC2500_SetPower();
+
+#include <stdint.h>
 
 enum {
     CC2500_00_IOCFG2           = 0x00,        // GDO2 output pin configuration
@@ -138,13 +159,5 @@ enum {
 //----------------------------------------------------------------------------------
 #define CC2500_LQI_CRC_OK_BM                   0x80
 #define CC2500_LQI_EST_BM                      0x7F
-
-//void CC2500_WriteReg(u8 addr, u8 data);
-//u8 CC2500_ReadReg(u8 addr);
-//void CC2500_Reset();
-//void CC2500_Strobe(u8 cmd);
-//void CC2500_WriteData(u8 *packet, u8 length);
-//void CC2500_ReadData(u8 *dpbuffer, int len);
-//void CC2500_SetTxRxMode(enum TXRX_State);
 
 #endif

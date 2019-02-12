@@ -18,10 +18,11 @@
 //CC2500 SPI routines
 //-------------------------------
 //-------------------------------
-#ifdef CC2500_INSTALLED
-#include "iface_cc2500.h"
+#include <stdint.h>
+#include "pins.h"
+#include "cc2500_spi.h"
+#include "spi.h"
 
-//----------------------------
 void CC2500_WriteReg(uint8_t address, uint8_t data)
 {
     CC25_CSN_off;
@@ -31,8 +32,7 @@ void CC2500_WriteReg(uint8_t address, uint8_t data)
     CC25_CSN_on;
 }
 
-//----------------------
-static void CC2500_ReadRegisterMulti(uint8_t address, uint8_t data[], uint8_t length)
+void CC2500_ReadRegisterMulti(uint8_t address, uint8_t data[], uint8_t length)
 {
     CC25_CSN_off;
     SPI_Write(CC2500_READ_BURST | address);
@@ -41,8 +41,7 @@ static void CC2500_ReadRegisterMulti(uint8_t address, uint8_t data[], uint8_t le
     CC25_CSN_on;
 }
 
-//--------------------------------------------
-static uint8_t CC2500_ReadReg(uint8_t address)
+uint8_t CC2500_ReadReg(uint8_t address)
 {
     uint8_t result;
     CC25_CSN_off;
@@ -52,13 +51,11 @@ static uint8_t CC2500_ReadReg(uint8_t address)
     return(result);
 }
 
-//------------------------
 void CC2500_ReadData(uint8_t *dpbuffer, uint8_t len)
 {
     CC2500_ReadRegisterMulti(CC2500_3F_RXFIFO, dpbuffer, len);
 }
 
-//*********************************************
 void CC2500_Strobe(uint8_t state)
 {
     CC25_CSN_off;
@@ -66,7 +63,7 @@ void CC2500_Strobe(uint8_t state)
     CC25_CSN_on;
 }
 
-static void CC2500_WriteRegisterMulti(uint8_t address, const uint8_t data[], uint8_t length)
+void CC2500_WriteRegisterMulti(uint8_t address, const uint8_t data[], uint8_t length)
 {
     CC25_CSN_off;
     SPI_Write(CC2500_WRITE_BURST | address);
@@ -84,38 +81,20 @@ void CC2500_WriteData(uint8_t *dpbuffer, uint8_t len)
 
 void CC2500_SetTxRxMode(uint8_t mode)
 {
-    if(mode == TX_EN)
-    {//from deviation firmware
+    if(mode == TX_EN) {
+        //from deviation firmware
         CC2500_WriteReg(CC2500_00_IOCFG2, 0x2F);
         CC2500_WriteReg(CC2500_02_IOCFG0, 0x2F | 0x40);
-    }
-    else
-        if (mode == RX_EN)
-        {
+    } else {
+        if (mode == RX_EN) {
             CC2500_WriteReg(CC2500_02_IOCFG0, 0x2F);
             CC2500_WriteReg(CC2500_00_IOCFG2, 0x2F | 0x40);
-        }
-        else
-        {
+        } else {
             CC2500_WriteReg(CC2500_02_IOCFG0, 0x2F);
             CC2500_WriteReg(CC2500_00_IOCFG2, 0x2F);
         }
+    }
 }
-
-//------------------------
-/*static void cc2500_resetChip(void)
-{
-    // Toggle chip select signal
-    CC25_CSN_on;
-    delayMicroseconds(30);
-    CC25_CSN_off;
-    delayMicroseconds(30);
-    CC25_CSN_on;
-    delayMicroseconds(45);
-    CC2500_Strobe(CC2500_SRES);
-    _delay_ms(100);
-}
-*/
 uint8_t CC2500_Reset()
 {
     CC2500_Strobe(CC2500_SRES);
@@ -123,24 +102,6 @@ uint8_t CC2500_Reset()
     CC2500_SetTxRxMode(TXRX_OFF);
     return CC2500_ReadReg(CC2500_0E_FREQ1) == 0xC4;//check if reset
 }
-/*
-static void CC2500_SetPower_Value(uint8_t power)
-{
-    const unsigned char patable[8]= {
-        0xC5,  // -12dbm
-        0x97, // -10dbm
-        0x6E, // -8dbm
-        0x7F, // -6dbm
-        0xA9, // -4dbm
-        0xBB, // -2dbm
-        0xFE, // 0dbm
-        0xFF // 1.5dbm
-    };
-    if (power > 7)
-        power = 7;
-    CC2500_WriteReg(CC2500_3E_PATABLE,  patable[power]);
-}
-*/
 void CC2500_SetPower()
 {
     uint8_t power=CC2500_BIND_POWER;
@@ -158,4 +119,3 @@ void CC2500_SetPower()
         prev_power=power;
     }
 }
-#endif

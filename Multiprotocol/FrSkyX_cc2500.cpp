@@ -15,24 +15,27 @@
     along with Multiprotocol.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if defined(FRSKYX_CC2500_INO)
 
-#include "iface_cc2500.h"
+
+#include "Arduino.h"
+#include "Multiprotocol.h"
+#include "FrSkyX_cc2500.h"
+#include <stdint.h>
+#include "common.h"
+#include "cc2500_spi.h"
 
 uint8_t FrX_chanskip;
 uint8_t FrX_send_seq ;
 uint8_t FrX_receive_seq ;
 
-#define FRX_FAILSAFE_TIMEOUT 1032
-
-static void __attribute__((unused)) frskyX_set_start(uint8_t ch )
+void frskyX_set_start(uint8_t ch)
 {
     CC2500_Strobe(CC2500_SIDLE);
     CC2500_WriteReg(CC2500_25_FSCAL1, calData[ch]);
     CC2500_WriteReg(CC2500_0A_CHANNR, hopping_frequency[ch]);
 }
 
-static void __attribute__((unused)) frskyX_init()
+void frskyX_init(void)
 {
     FRSKY_init_cc2500((sub_protocol&2)?FRSKYXEU_cc2500_conf:FRSKYX_cc2500_conf); // LBT or FCC
     //
@@ -47,7 +50,7 @@ static void __attribute__((unused)) frskyX_init()
     //#######END INIT########
 }
 
-static void __attribute__((unused)) frskyX_initialize_data(uint8_t adr)
+void frskyX_initialize_data(uint8_t adr)
 {
     CC2500_WriteReg(CC2500_0C_FSCTRL0,option);  // Frequency offset hack
     CC2500_WriteReg(CC2500_18_MCSM0,    0x8);
@@ -56,17 +59,19 @@ static void __attribute__((unused)) frskyX_initialize_data(uint8_t adr)
 }
 
 //**CRC**
-const uint16_t PROGMEM frskyX_CRC_Short[]={
+const uint16_t frskyX_CRC_Short[]={
     0x0000, 0x1189, 0x2312, 0x329B, 0x4624, 0x57AD, 0x6536, 0x74BF,
     0x8C48, 0x9DC1, 0xAF5A, 0xBED3, 0xCA6C, 0xDBE5, 0xE97E, 0xF8F7 };
-static uint16_t __attribute__((unused)) frskyX_CRCTable(uint8_t val)
+
+uint16_t frskyX_CRCTable(uint8_t val)
 {
     uint16_t word ;
     word = pgm_read_word(&frskyX_CRC_Short[val&0x0F]) ;
     val /= 16 ;
     return word ^ (0x1081 * val) ;
 }
-static uint16_t __attribute__((unused)) frskyX_crc_x(uint8_t *data, uint8_t len)
+
+uint16_t frskyX_crc_x(uint8_t *data, uint8_t len)
 {
     uint16_t crc = 0;
     for(uint8_t i=0; i < len; i++)
@@ -74,7 +79,7 @@ static uint16_t __attribute__((unused)) frskyX_crc_x(uint8_t *data, uint8_t len)
     return crc;
 }
 
-static void __attribute__((unused)) frskyX_build_bind_packet()
+void frskyX_build_bind_packet(void)
 {
  // debugln("%s:%d build bind", __func__, __LINE__);
     packet[0] = (sub_protocol & 2 ) ? 0x20 : 0x1D ; // LBT or FCC
@@ -104,14 +109,14 @@ static void __attribute__((unused)) frskyX_build_bind_packet()
 
 // 0-2047, 0 = 817, 1024 = 1500, 2047 = 2182
 //64=860,1024=1500,1984=2140//Taranis 125%
-static uint16_t  __attribute__((unused)) frskyX_scaleForPXX( uint8_t i )
+uint16_t frskyX_scaleForPXX(uint8_t i)
 {   //mapped 860,2140(125%) range to 64,1984(PXX values);
     uint16_t chan_val=convert_channel_frsky(i)-1226;
     if(i>7) chan_val|=2048;   // upper channels offset
     return chan_val;
 }
-#ifdef FAILSAFE_ENABLE
-static uint16_t  __attribute__((unused)) frskyX_scaleForPXX_FS( uint8_t i )
+
+uint16_t frskyX_scaleForPXX_FS(uint8_t i)
 {   //mapped 1,2046(125%) range to 64,1984(PXX values);
     uint16_t chan_val=((Failsafe_data[i]*15)>>4)+64;
     if(Failsafe_data[i]==FAILSAFE_CHANNEL_NOPULSES)
@@ -121,10 +126,8 @@ static uint16_t  __attribute__((unused)) frskyX_scaleForPXX_FS( uint8_t i )
     if(i>7) chan_val|=2048;   // upper channels offset
     return chan_val;
 }
-#endif
 
-#define FRX_FAILSAFE_TIME 1032
-static void __attribute__((unused)) frskyX_data_frame()
+void frskyX_data_frame(void)
 {
     //0x1D 0xB3 0xFD 0x02 0x56 0x07 0x15 0x00 0x00 0x00 0x04 0x40 0x00 0x04 0x40 0x00 0x04 0x40 0x00 0x04 0x40 0x08 0x00 0x00 0x00 0x00 0x00 0x00 0x96 0x12
     //
@@ -232,7 +235,7 @@ static void __attribute__((unused)) frskyX_data_frame()
     packet[limit]=lcrc;//low byte
 }
 
-uint16_t ReadFrSkyX()
+uint16_t ReadFrSkyX(void)
 {
     switch(state)
     {
@@ -323,7 +326,7 @@ uint16_t ReadFrSkyX()
     return 1;
 }
 
-uint16_t initFrSkyX()
+uint16_t initFrSkyX(void)
 {
     set_rx_tx_addr(MProtocol_id_master);
     Frsky_init_hop();
@@ -358,4 +361,3 @@ uint16_t initFrSkyX()
     FrX_receive_seq = 0 ;
     return 10000;
 }
-#endif

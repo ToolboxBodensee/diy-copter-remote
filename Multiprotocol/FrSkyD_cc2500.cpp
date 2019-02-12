@@ -13,10 +13,11 @@
  along with Multiprotocol.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(FRSKYD_CC2500_INO)
-#include "iface_cc2500.h"
+#include "common.h"
+#include "cc2500_spi.h"
+#include "Multiprotocol.h"
 
-static void __attribute__((unused)) frsky2way_init(uint8_t bind)
+void frsky2way_init(uint8_t bind)
 {
   //debugln("frsky2way_init");
     FRSKY_init_cc2500(FRSKYD_cc2500_conf);
@@ -31,7 +32,7 @@ static void __attribute__((unused)) frsky2way_init(uint8_t bind)
     //#######END INIT########
 }
 
-static void __attribute__((unused)) frsky2way_build_bind_packet()
+void frsky2way_build_bind_packet()
 {
   //debugln("build bind");
     //11 03 01 d7 2d 00 00 1e 3c 5b 78 00 00 00 00 00 00 01
@@ -57,7 +58,7 @@ static void __attribute__((unused)) frsky2way_build_bind_packet()
     packet[17] = 0x01;
 }
 
-static void __attribute__((unused)) frsky2way_data_frame()
+void frsky2way_data_frame()
 {
   //pachet[4] is telemetry user frame counter(hub)
     //11 d7 2d 22 00 01 c9 c9 ca ca 88 88 ca ca c9 ca 88 88
@@ -212,4 +213,3 @@ uint16_t ReadFrSky_2way()
     }
     return state == FRSKY_DATA4 ? 7500 : 9000;
 }
-#endif
