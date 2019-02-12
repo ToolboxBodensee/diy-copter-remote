@@ -16,13 +16,22 @@ class Input {
             bool menu;
 
         };
-        int curr_input;
-    public:
         struct data input[2];
         struct data* curr;
         struct data* old;
 
+        struct {
+          uint16_t max;
+          uint16_t min;
+          uint8_t inverted;
+        } throttle, yaw, roll, pitch, aux[5];
+
+        bool save_calibration(void);
+    public:
+
         Input(void);
+        void init(void);
+        void do_calibration(void);
         void update(void);
 
         struct data* get_curr_input(void);

@@ -152,19 +152,7 @@ void setup()
         // outputs
         SDI_output;
         SCLK_output;
-        #ifdef A7105_CSN_pin
-            A7105_CSN_output;
-        #endif
-        #ifdef CC25_CSN_pin
-            CC25_CSN_output;
-        #endif
-        #ifdef CYRF_CSN_pin
-            CYRF_RST_output;
-            CYRF_CSN_output;
-        #endif
-        #ifdef NRF_CSN_pin
-            NRF_CSN_output;
-        #endif
+        CC25_CSN_output;
 
         // Timer1 config
     #ifdef TCCR1A
@@ -173,20 +161,7 @@ void setup()
     #endif
         // Random
         //random_init();
-
-    // Set Chip selects
-    #ifdef A7105_CSN_pin
-        A7105_CSN_on;
-    #endif
-    #ifdef CC25_CSN_pin
         CC25_CSN_on;
-    #endif
-    #ifdef CYRF_CSN_pin
-        CYRF_CSN_on;
-    #endif
-    #ifdef NRF_CSN_pin
-        NRF_CSN_on;
-    #endif
     //  Set SPI lines
     #ifdef  STM32_BOARD
         initSPI2();
@@ -309,8 +284,13 @@ void setup()
     else
 #endif //ENABLE_PPM
   debugln("Init complete");
+  input.init();
   input.update();
   init_state();
+
+  
+  debugln("do calibration start moving sticks please");
+  input.do_calibration();
 }
 
 // Main
@@ -334,7 +314,7 @@ void loop()
 
         if (next_callback > 4000) {
             input.update();
-            update_state();
+            //update_state();
         }
 
         uint32_t wait_until = start + next_callback;
