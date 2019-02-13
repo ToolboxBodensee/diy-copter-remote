@@ -288,7 +288,7 @@ void setup()
   input.update();
   init_state();
 
-  
+
   debugln("do calibration start moving sticks please");
   input.do_calibration();
 }
@@ -330,8 +330,7 @@ void loop()
     }
 }
 
-uint8_t Update_All()
-{
+uint8_t Update_All() {
     #ifdef ENABLE_SERIAL
         if(mode_select==MODE_SERIAL && IS_RX_FLAG_on)       // Serial mode and something has been received
         {
@@ -398,8 +397,7 @@ uint8_t Update_All()
 }
 
 // Update channels direction and Channel_AUX flags based on servo AUX positions
-static void update_channels_aux(void)
-{
+static void update_channels_aux(void) {
     //Reverse channels direction
     #ifdef REVERSE_AILERON
         reverse_channel(AILREON);
@@ -422,8 +420,7 @@ static void update_channels_aux(void)
 }
 
 #ifdef ENABLE_PPM
-uint8_t bank_switch(void)
-{
+uint8_t bank_switch(void) {
     uint8_t bank= curr_bank;
     if(bank>=NBR_BANKS)
     { // Wrong number of bank
@@ -531,11 +528,9 @@ inline void tx_resume()
 }
 
 // Protocol start
-static void protocol_init()
-{
+static void protocol_init() {
     static uint16_t next_callback;
-    if(IS_WAIT_BIND_off)
-    {
+    if(IS_WAIT_BIND_off) {
         remote_callback = 0;            // No protocol
         next_callback=0;                // Default is immediate call back
         modules_reset();                // Reset all modules
@@ -579,26 +574,8 @@ static void protocol_init()
     WAIT_BIND_off;
     CHANGE_PROTOCOL_FLAG_off;
 
-#if 0
-    if(next_callback>32000)
-    { // next_callback should not be more than 32767 so we will wait here...
-        uint16_t temp=(next_callback>>10)-2;
-        delayMilliseconds(temp);
-        next_callback-=temp<<10;                // between 2-3ms left at this stage
-    }
-    cli();                                      // disable global int
-    OCR1A = TCNT1 + next_callback*2;            // set compare A for callback
-    #ifndef STM32_BOARD
-        TIFR1 = OCF1A_bm ;                      // clear compare A flag
-    #else
-        TIMER2_BASE->SR = 0x1E5F & ~TIMER_SR_CC1IF; // Clear Timer2/Comp1 interrupt flag
-    #endif
-    sei();                                      // enable global int
-    BIND_BUTTON_FLAG_off;                       // do not bind/reset id anymore even if protocol change
-#else
-  delayMicroseconds(next_callback);
-#endif
-  debugln("%s BIND_BUTTON_FLAG_off",__func__);
+    delayMicroseconds(next_callback);
+    debugln("%s BIND_BUTTON_FLAG_off",__func__);
 }
 
 void update_serial_data()

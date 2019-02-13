@@ -39,13 +39,26 @@ class Input {
         void update_inputs(void);
         void mark_processed(void);
 
+        bool is_centered(void);
+        bool is_centered_left(void);
+        bool is_centered_right(void);
         // menu inputs
-        bool menu_triggered(void);
+        bool is_menu_triggered(void);
 
-        bool left_triggered(void);
-        bool right_triggered(void);
-        bool down_triggered(void);
-        bool up_triggered(void);
+        bool is_menu_left(void);
+        bool is_menu_right(void);
+        bool is_menu_down(void);
+        bool is_menu_up(void);
+
+        bool is_throttle_up(void);
+        bool is_throttle_down(void);
+        bool is_yaw_up(void);
+        bool is_yaw_down(void);
+
+        bool is_roll_up(void);
+        bool is_roll_down(void);
+        bool is_pitch_up(void);
+        bool is_pitch_down(void);
 };
 
 extern uint16_t Channel_data[NUM_CHN];
