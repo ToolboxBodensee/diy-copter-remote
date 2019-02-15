@@ -9,24 +9,24 @@ use <lib/Arduino_nano.scad>;
 use <lib/threads.scad>;
 $fn=64;
 
-show_top            =1;
-show_bottom         =1;
-show_strapholder    =1;
-show_joysticks      =1;
+show_top            =0;
+show_bottom         =0;
+show_strapholder    =0;
+show_joysticks      =0;
 show_grip           =1;
-show_electronics    =1;
 
 enable_text_engrave =0;
 
-show_switch         =1;
-show_lcd            =1;
-show_sticks         =1;
-show_stm32          =1;
-show_antenna        =1;
-show_cc2500         =1;
-show_batery_charger =1;
-show_batery         =1;
-show_joysticks_pcb  =1;
+show_switch         =0;
+show_lcd            =0;
+show_sticks         =0;
+show_stm32          =0;
+show_antenna        =0;
+show_cc2500         =0;
+show_batery_charger =0;
+show_batery         =0;
+show_joysticks_pcb  =0;
+show_usb_connector  =0;
 
 show_stands=0;
 
@@ -79,6 +79,10 @@ rot_batery_charger=[0,0,90];
 pos_batery=[-40,-10.25,-16];
 rot_batery=[0,0,90];
 pos_strap_holder=[0,10,3];
+
+pos_usb_connector=[30,-65,-20];
+rot_usb_connector=[0,0,90];
+
 strap_screw_dist=13.5;
 
 remote_top_plate_1=[140,110,0];
@@ -160,6 +164,11 @@ module remote() {
         }
     }
 
+    if(show_usb_connector) {
+        translate(pos_usb_connector)
+        rotate(rot_usb_connector)
+        usb_connector_pcb();
+    }
 
     // stands
     if(show_stands)
@@ -185,6 +194,7 @@ module remote() {
 
     if(show_strapholder)
         strapholder();
+
 }
 module strapholder() {
     eps=0.1;
@@ -465,6 +475,8 @@ module top_case() {
             }
         }
 
+
+
         // stick cutouts
         color("orange")
         for(i=[1,-1]) {
@@ -650,6 +662,20 @@ module bottom_case() {
                         aligned_cube([8,7,3], [1,1,1]);
                 }
             }
+
+            // usb connector cutout
+            color("red") {
+                w=1.5;
+                translate(pos_usb_connector)
+                rotate(rot_usb_connector)
+                rotate([0,0,180]) {
+                    translate([4+w, 0,-1]) {
+                        aligned_rounded_cube([8,12,8], 3, [0,1,1]);
+                        translate([-w-eps, 0,4]) // undo moveing
+                            aligned_cube([8,7,3.75], [1,1,1]);
+                    }
+                }
+            }
         }
 
         //bot_screw holes
@@ -786,12 +812,12 @@ module stm32_bluepill() {
     }
 }
 
-module usb_micro() {
+module usb_micro(aligned=[2,1,0]) {
 
     color("Silver")
     difference() {
         size= [7.45, 6, 2.5];
-        aligned_cube(size,[2,1,0]);
+        aligned_cube(size,aligned);
 
     }
 }
@@ -1079,6 +1105,73 @@ module top_bottom_case_srews(l=26+2.5,head=50, h=2.1) {
             //cylinder(d=screw_head_d,  h=h_screw2);
             cylinder($fn=6, r=w / 2 / cos(180 / 6) + 0.05, h=h_female_screw);
     }
+}
+module usb_connector_pcb() {
+    eps=0.01;
+    usb_pcb_size=[15.6,13.3,1.6];
+
+    difference() {
+        union() {
+            color("lightblue") {
+                aligned_cube(usb_pcb_size, [0,1,0]);
+            }
+
+
+            //screw connectors plates
+            color("silver") {
+                for(i=[1,-1]) {
+                    translate([9.3, i*4.5, -eps])
+                        cylinder(d=3.5,h=usb_pcb_size[2]+eps*2);
+                }
+            }
+
+            // pin connectors plates
+            {
+                names= [ "GND", "ID", "D+", "D-", "5V"];
+                for(i=[0,1,2,3,4]) {
+                    translate([9.3+4.81, (i-2)*2.54, -eps]) {
+                        color("silver")
+                        cylinder(d=1.5,h=usb_pcb_size[2]+eps*2);
+
+                        color("black")
+                        translate([-1.5,0,usb_pcb_size[2]])
+                        linear_extrude(height = 2*eps)
+                        rotate([0,0,90])
+                        text(
+                                halign="center",
+                                valign="center",
+                                size=0.75,
+                                font=font,
+                                names[i]
+                        );
+                    }
+                }
+            }
+            // usb micro
+            translate([0,0,usb_pcb_size[2]])
+                usb_micro([0,1,0]);
+
+        }
+
+        //screw holes
+        color("silver") {
+            for(i=[1,-1]) {
+                translate([9.3, i*4.5, -2*eps])
+                    cylinder(d=3,h=usb_pcb_size[2]+eps*4);
+            }
+        }
+
+        // pin connectors
+        color("silver") {
+            for(i=[-2,-1,0,1,2]) {
+                translate([9.3+4.81, i*2.54, -2*eps])
+                    cylinder(d=1,h=usb_pcb_size[2]+eps*4);
+            }
+        }
+    }
+
+
+
 }
 remote();
 ///left_right_grip_srews();
