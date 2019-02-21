@@ -7,7 +7,7 @@ use <lib/cylinder.scad>
 // draw itself
 stick();
 
-module stick(h=20)
+module stick(h=10,is_ps2_shaft=0)
 {
     $fn=32;
     translate([0,0,15-3]) {
@@ -18,12 +18,13 @@ module stick(h=20)
     }
     // stick holder with cutout
     translate([0,0,0]) {
-        stick_mount();
+        stick_mount(is_ps2_shaft);
     }
 
     // dust protector
-    translate([0,0,-3]) {
-        protector_cone(thickness=1.25);
+    translate([0,0,-3+2.9]) {
+        resize([30,30,22])
+        protector_cone(thickness=0.4*2.5);
     }
 }
 
@@ -67,13 +68,17 @@ module gabber_part() {
 }
 
 module stick_mount(is_ps2_shaft=0) {
-    ps2_dia=4*1.269;
-    ps2_hight=5;
-    ps2_width=3*1.276;
+    ps2_dia=4+0.4;
+    ps2_width=3+0.4;
+    
+    
+    mount_h=5;
     eps = 0.01;
 
     difference() {
         color([1,0,1]) {
+            translate([0,0,5])
+            cylinder_flange_sphere($fn=32,r2=5, r1=3, h=5);
             if ( is_ps2_shaft ) {
                 cylinder(d=6.75,h=10);
             } else {
@@ -84,9 +89,9 @@ module stick_mount(is_ps2_shaft=0) {
         if ( is_ps2_shaft ) {
             intersection() {
                 cube(center=true,[ps2_width,100,100]);
-                cylinder(d=ps2_dia,h=ps2_hight);
+                cylinder(d=ps2_dia,h=mount_h);
             }
-            translate([0,0,ps2_hight])
+            translate([0,0,mount_h])
                 cylinder(d1=ps2_dia,d2=1.5,h=1.5);
         } else {
             aligned_cube([1.9,1.15,6]);
@@ -94,21 +99,22 @@ module stick_mount(is_ps2_shaft=0) {
     }
 }
 module protector_cone(thickness) {
+    d=30;
     //dust protector
     difference() {
         union() {
-            sphere(d=30);
+            sphere(d=d+2*thickness);
             translate([0,0,12.1])
             //cylinder(d2=3,d1=17.5,h=7);
             cylinder_flange_sphere($fn=32,r2=4/2, r1=17.5/2, h=20);
         }
 
         // cut lower half
-        translate([-15,-15,-30])
-            cube([30,30,30]);
+        translate([-d,-d,-30])
+            cube([2*d,2*d,30]);
 
         // cut innerpart so its a shell
-        sphere(d=30-2*thickness);
+        sphere(d=d);
     }
 }
 

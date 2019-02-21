@@ -10,23 +10,23 @@ use <lib/threads.scad>;
 $fn=64;
 
 show_top            =0;
-show_bottom         =0;
+show_bottom         =1;
 show_strapholder    =0;
-show_joysticks      =0;
-show_grip           =1;
+show_joysticks      =1;
+show_grip           =0;
 
 enable_text_engrave =0;
 
-show_switch         =0;
+show_switch         =1;
 show_lcd            =0;
 show_sticks         =0;
-show_stm32          =0;
+show_stm32          =1;
 show_antenna        =0;
 show_cc2500         =0;
 show_batery_charger =0;
 show_batery         =0;
 show_joysticks_pcb  =0;
-show_usb_connector  =0;
+show_usb_connector  =1;
 
 show_stands=0;
 
@@ -64,14 +64,16 @@ grip_h=14;
 
 name="";
 
-text_pos=[[-6.75,-17,0], [6.75,-17,0], [-43,55,0], [-20,55,0], [0,39,0],    [20,55,0], [43,55,0]   ];
-top_text=["on",          "arm",        "mode",     "beeper",   "failsave",  "prearm",  "led"    ];
-bot_text=["off",         "",           "",         "",         "",          "",        ""          ];
+
+sw_is_double= [ true,         false,        false,      false,      false,       false,     false];
+sw_pos=  [[-6.75,-17,0], [6.75,-17,0], [-43,55,0], [-20,55,0], [0,39,0],    [20,55,0], [43,55,0]   ];
+top_text=  ["on",          "arm",        "mode",     "beeper",   "failsave",  "prearm",  "led"    ];
+bot_text=  ["off",         "",           "",         "",         "",          "",        ""          ];
 
 bottom_h=25;
 pos_sticks=[40,26,0];
 pos_cc2500=[0,12,-7];
-pos_stm32=[40.5,-13.5,-4.5];
+pos_stm32=[40.0,-13.5,-4.5];
 pos_antenna=[0,130/2+8.20,-15];
 pos_lcd=[0,-43,-8.75];
 pos_batery_charger=[-50,-40,-7];
@@ -93,7 +95,7 @@ bottom_wall=3;
 ps2_pcb_size=[26.15, 34.15, 1.6];
 charger_pcb_size_small=[14.75, 26, 1.6];
 charger_pcb_size=[18, 26.6, 1.6];
-stm32_pcb_size=[52.3, 22.6, 1.6];
+stm32_pcb_size=[52.7, 22.6, 1.6];
 cc2500_pcb_size=[34.3, 21.4, 0.9];
 batery_size=[24, 50, 15];
 
@@ -139,11 +141,11 @@ module remote() {
         LCD_1602_I2C(3, "RSSI 99     A99 ", " ARMED      A99 ");
     }
 
-    if(show_switch){
-            for(i=[0:1:len(text_pos)-1]) {
-                translate(text_pos[i])
-                translate([0,0,-5])
-                switch(thick);
+    if(show_switch) {
+            for(i=[0:1:len(sw_pos)-1]) {
+                translate(sw_pos[i])
+                translate([0,0,-3.5])
+                switch(sw_is_double[i]);
             }
     }
     if(show_batery_charger) {
@@ -299,30 +301,38 @@ module top_case() {
             translate([-40.6,-20.25,0])
             {
                 d_top=8.75;
-                d_bot=7.75;
+                d_bot=7.40;
                 // screwsholders
                 h=10;
                 translate([0,1,thick-h]){
                     translate([2.5,4,-1]) rotate([0,0,0])
                     difference() {cylinder(d=d_bot,h=h); translate([0,0,-eps]) cylinder(d=screw_d, h=4);};
                     translate([2.5,35,-1]) rotate([0,0,0])
-                    difference() {cylinder(d=d_top,h=h); translate([0,0,-eps]) cylinder(d=screw_d, h=4);};
+                    difference() {cylinder(d=d_bot,h=h); translate([0,0,-eps]) cylinder(d=screw_d, h=4);};
                     translate([78.5,4,-1]) rotate([0,0,0])
                     difference() {cylinder(d=d_bot,h=h); translate([0,0,-eps]) cylinder(d=screw_d, h=4);};
                     translate([78.5,35,-1]) rotate([0,0,0])
-                    difference() {cylinder(d=d_top,h=h); translate([0,0,-eps]) cylinder(d=screw_d, h=4);};
+                    difference() {cylinder(d=d_bot,h=h); translate([0,0,-eps]) cylinder(d=screw_d, h=4);};
                 }
             }
 
             // button holders
             {
-                for(i=[0:1:len(text_pos)-1]) {
+                for(i=[0:1:len(sw_pos)-1]) {
                     translate([0,0,thick-10])
-                    translate(text_pos[i])
-                    difference() {
-                        aligned_cube([15,10,8]);
-                        translate([0,0,-7.25])
-                            aligned_cube([8.5,13,10]);
+                    translate(sw_pos[i])
+                    if(sw_is_double[i]) {
+                        difference() {
+                            aligned_cube([17.5,10,8]);
+                            translate([0,0,-7.25])
+                                aligned_cube([13.5,13,10]);
+                        }
+                    } else {
+                        difference() {
+                            aligned_cube([13.5,10,8]);
+                            translate([0,0,-7.25])
+                                aligned_cube([8.5,13,10]);
+                        }
                     }
                 }
             }
@@ -507,13 +517,15 @@ module top_case() {
                 text_engave(thick, font_size=font_size_name, text_=name);
 
             // switches
-            for(i=[0:1:len(text_pos)-1]) {
-                translate(text_pos[i]) {
+            for(i=[0:1:len(sw_pos)-1]) {
+                translate(sw_pos[i]) {
                     switch_with_text(thick=thick+2*eps,
                                 top_text=top_text[i],
-                                bottom_text=bot_text[i]);
+                                bottom_text=bot_text[i],
+                                is_double=sw_is_double[i]
+                                );
+                }
             }
-        }
         }
 
     }
@@ -534,7 +546,7 @@ module switch_with_text(thick=4,top_text="on",bottom_text="off")
     }
 
     if(enable_text_engrave) {
-    translate([0,dist_text,0])
+        translate([0,dist_text,0])
             text_engave(thick, text_=top_text);
         translate([0,1-dist_text-2.5,0])
             text_engave(thick,  text_=bottom_text);
@@ -619,6 +631,22 @@ module bottom_case() {
                     }
                 }
             }
+            // usb connector wall
+            color("red") {
+                translate(pos_usb_connector)
+                rotate(rot_usb_connector) {
+                    for(i=[1,-1]) {
+                        // left right
+                        translate([8, 9*i,-1]) {
+                            aligned_cube([10,4,8], [0,1,1]);
+                        }
+                        //back
+                        translate([16, 7*i,-1]) {
+                            aligned_cube([4,8,8], [0,1,1]);
+                        }
+                    }
+                }
+            }
         }
         // ps2 holder
         for(i=[1,-1]) {
@@ -689,7 +717,7 @@ module bottom_case() {
 
 
 }
-module switch() {
+module switch(is_double=false) {
     // screw
     color("silver")
     cylinder(d=6.4,h=8.75);
@@ -706,17 +734,32 @@ module switch() {
 
     // body
     color([0.3,0.3,0.6,1])
-        aligned_cube([8.05,13,10],[1,1,2]);
+        if (is_double)
+            aligned_cube([12.6,13.1,10],[1,1,2]);
+        else
+            aligned_cube([8.05,13.1,10],[1,1,2]);
 
     // pins
     color("silver")
-    for(i=[1,0,-1]) {
-        translate([0, i*4.5,-10])
-        difference() {
-            aligned_cube([2,0.7, 4.2], [1,1,2]);
-            translate([0,0,-3])
-            rotate([90,0,0])
-                cylinder(d=1, h=2, center=true);
+    for(y=[1,0,-1]) {
+        if (is_double) {
+            for(x=[1,-1]) {
+                translate([x*2.5, y*4.5,-10])
+                difference() {
+                    aligned_cube([2,0.7, 4.2], [1,1,2]);
+                    translate([0,0,-3])
+                    rotate([90,0,0])
+                        cylinder(d=1, h=2, center=true);
+                }
+            }
+        } else {
+            translate([0, y*4.5,-10])
+            difference() {
+                aligned_cube([2,0.7, 4.2], [1,1,2]);
+                translate([0,0,-3])
+                rotate([90,0,0])
+                    cylinder(d=1, h=2, center=true);
+            }
         }
     }
 
