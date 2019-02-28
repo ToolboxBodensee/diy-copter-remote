@@ -20,10 +20,7 @@
  You should have received a copy of the GNU General Public License
  along with Multiprotocol.  If not, see <http://www.gnu.org/licenses/>.
 */
-#if 0
-#include <avr/pgmspace.h>
-#include <avr/eeprom.h>
-#endif
+
 
 //#define DEBUG_PIN     // Use pin TX for AVR and SPI_CS for STM32 => DEBUG_PIN_on, DEBUG_PIN_off, DEBUG_PIN_toggle
 #define DEBUG_SERIAL    // Only for STM32_BOARD compiled with Upload method "Serial"->usart1, "STM32duino bootloader"->USB serial
