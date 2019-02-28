@@ -12,21 +12,21 @@ $fn=64;
 show_top            =0;
 show_bottom         =1;
 show_strapholder    =0;
-show_joysticks      =1;
+show_joysticks      =0;
 show_grip           =0;
 
 enable_text_engrave =0;
 
-show_switch         =1;
+show_switch         =0;
 show_lcd            =0;
 show_sticks         =0;
-show_stm32          =1;
+show_stm32          =0;
 show_antenna        =0;
 show_cc2500         =0;
 show_batery_charger =0;
 show_batery         =0;
 show_joysticks_pcb  =0;
-show_usb_connector  =1;
+show_usb_connector  =0;
 
 show_stands=0;
 
@@ -641,7 +641,7 @@ module bottom_case() {
                             aligned_cube([10,4,8], [0,1,1]);
                         }
                         //back
-                        translate([16, 7*i,-1]) {
+                        translate([16.5, 7*i,-1]) {
                             aligned_cube([4,8,8], [0,1,1]);
                         }
                     }
@@ -697,7 +697,7 @@ module bottom_case() {
                 translate(pos_usb_connector)
                 rotate(rot_usb_connector)
                 rotate([0,0,180]) {
-                    translate([4+w, 0,-1]) {
+                    translate([4+w, 0,-0.75]) {
                         aligned_rounded_cube([8,12,8], 3, [0,1,1]);
                         translate([-w-eps, 0,4]) // undo moveing
                             aligned_cube([8,7,3.75], [1,1,1]);
