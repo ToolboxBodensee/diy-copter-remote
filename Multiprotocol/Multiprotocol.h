@@ -25,7 +25,6 @@
 
 void set_rx_tx_addr(uint32_t id);
 #define MAX_PKT 29
-extern volatile uint16_t PPM_data[NUM_CHN];
 extern uint8_t  hopping_frequency_no;
 extern uint8_t sub_protocol;
 extern uint8_t calData[48];
@@ -34,11 +33,8 @@ extern uint8_t protocol_flags;
 extern uint8_t protocol_flags2;
 extern uint8_t pkt[MAX_PKT];//telemetry receiving packets
 extern uint8_t prev_option;
-extern uint8_t prev_power; // unused power value
-extern uint16_t counter;
 extern uint8_t  hopping_frequency[50];
 extern uint8_t  crc8;
-extern uint16_t Channel_data[NUM_CHN];
 extern uint8_t  packet_count;
 extern uint8_t  RX_num;
 extern uint8_t  binding_idx;
@@ -67,14 +63,13 @@ enum MultiPacketTypes
 };
 
 // Macros
+#ifndef _BV
 #define _BV(i)  (1<<i)
+#endif
 
 //***************
 //***  Flags  ***
 //***************
-#define RX_FLAG_on          protocol_flags |= _BV(0)
-#define RX_FLAG_off         protocol_flags &= ~_BV(0)
-#define IS_RX_FLAG_on       ( ( protocol_flags & _BV(0) ) !=0 )
 //
 #define CHANGE_PROTOCOL_FLAG_on     protocol_flags |= _BV(1)
 #define CHANGE_PROTOCOL_FLAG_off    protocol_flags &= ~_BV(1)
@@ -95,35 +90,15 @@ enum MultiPacketTypes
 #define BIND_BUTTON_FLAG_on     protocol_flags |= _BV(5)
 #define BIND_BUTTON_FLAG_off    protocol_flags &= ~_BV(5)
 #define IS_BIND_BUTTON_FLAG_on  ( ( protocol_flags & _BV(5) ) !=0 )
-//PPM RX OK
-#define PPM_FLAG_off        protocol_flags &= ~_BV(6)
-#define PPM_FLAG_on         protocol_flags |= _BV(6)
-#define IS_PPM_FLAG_on      ( ( protocol_flags & _BV(6) ) !=0 )
 //Bind flag
 #define BIND_IN_PROGRESS    protocol_flags &= ~_BV(7)
 #define BIND_DONE           protocol_flags |= _BV(7)
 #define IS_BIND_DONE        ( ( protocol_flags & _BV(7) ) !=0 )
 #define IS_BIND_IN_PROGRESS ( ( protocol_flags & _BV(7) ) ==0 )
 //
-#define FAILSAFE_VALUES_off protocol_flags2 &= ~_BV(0)
-#define FAILSAFE_VALUES_on      protocol_flags2 |= _BV(0)
-#define IS_FAILSAFE_VALUES_on   ( ( protocol_flags2 & _BV(0) ) !=0 )
-//
-#define RX_DONOTUPDATE_off  protocol_flags2 &= ~_BV(1)
-#define RX_DONOTUPDATE_on   protocol_flags2 |= _BV(1)
-#define IS_RX_DONOTUPDATE_on    ( ( protocol_flags2 & _BV(1) ) !=0 )
-//
 #define RX_MISSED_BUFF_off  protocol_flags2 &= ~_BV(2)
 #define RX_MISSED_BUFF_on   protocol_flags2 |= _BV(2)
 #define IS_RX_MISSED_BUFF_on    ( ( protocol_flags2 & _BV(2) ) !=0 )
-//TX Pause
-#define TX_MAIN_PAUSE_off   protocol_flags2 &= ~_BV(3)
-#define TX_MAIN_PAUSE_on        protocol_flags2 |= _BV(3)
-#define IS_TX_MAIN_PAUSE_on ( ( protocol_flags2 & _BV(3) ) !=0 )
-#define TX_RX_PAUSE_off     protocol_flags2 &= ~_BV(4)
-#define TX_RX_PAUSE_on      protocol_flags2 |= _BV(4)
-#define IS_TX_RX_PAUSE_on   ( ( protocol_flags2 & _BV(4) ) !=0 )
-#define IS_TX_PAUSE_on      ( ( protocol_flags2 & (_BV(4)|_BV(3)) ) !=0 )
 //Bind from channel
 #define BIND_CH_PREV_off    protocol_flags2 &= ~_BV(6)
 #define BIND_CH_PREV_on     protocol_flags2 |= _BV(6)
@@ -135,456 +110,7 @@ enum MultiPacketTypes
 #define IS_WAIT_BIND_on     ( ( protocol_flags2 & _BV(7) ) !=0 )
 #define IS_WAIT_BIND_off    ( ( protocol_flags2 & _BV(7) ) ==0 )
 
-// Failsafe
-#define FAILSAFE_CHANNEL_HOLD       2047
-#define FAILSAFE_CHANNEL_NOPULSES   0
 
 #include "debug.h"
-//********************
-//*** Blink timing ***
-//********************
-#define BLINK_BIND_TIME             100
-#define BLINK_SERIAL_TIME           500
-#define BLINK_PPM_TIME              1000
-#define BLINK_BAD_PROTO_TIME_HIGH   50
-#define BLINK_BAD_PROTO_TIME_LOW    1000
-#define BLINK_WAIT_BIND_TIME_HIGH   1000
-#define BLINK_WAIT_BIND_TIME_LOW    100
-#define BLINK_BANK_TIME_HIGH        50
-#define BLINK_BANK_TIME_LOW         500
-#define BLINK_BANK_REPEAT           1500
-
-//*******************
-//***  AUX flags  ***
-//*******************
-#define GET_FLAG(ch, mask) ( ch ? mask : 0)
-#define CH5_SW  (Channel_AUX & _BV(0))
-#define CH6_SW  (Channel_AUX & _BV(1))
-#define CH7_SW  (Channel_AUX & _BV(2))
-#define CH8_SW  (Channel_AUX & _BV(3))
-#define CH9_SW  (Channel_AUX & _BV(4))
-#define CH10_SW (Channel_AUX & _BV(5))
-#define CH11_SW (Channel_AUX & _BV(6))
-#define CH12_SW (Channel_AUX & _BV(7))
-#define CH13_SW (Channel_data[CH13]>CHANNEL_SWITCH)
-#define CH14_SW (Channel_data[CH14]>CHANNEL_SWITCH)
-#define CH15_SW (Channel_data[CH15]>CHANNEL_SWITCH)
-#define CH16_SW (Channel_data[CH16]>CHANNEL_SWITCH)
-
-//************************
-//***  Power settings  ***
-//************************
-enum {
-    TXPOWER_100uW,
-    TXPOWER_300uW,
-    TXPOWER_1mW,
-    TXPOWER_3mW,
-    TXPOWER_10mW,
-    TXPOWER_30mW,
-    TXPOWER_100mW,
-    TXPOWER_150mW
-};
-
-// A7105 power
-//  Power amp is ~+16dBm so:
-enum A7105_POWER
-{
-    A7105_POWER_0 = 0x00<<3 | 0x00, // TXPOWER_100uW  = -23dBm == PAC=0 TBG=0
-    A7105_POWER_1 = 0x00<<3 | 0x01, // TXPOWER_300uW  = -20dBm == PAC=0 TBG=1
-    A7105_POWER_2 = 0x00<<3 | 0x02, // TXPOWER_1mW    = -16dBm == PAC=0 TBG=2
-    A7105_POWER_3 = 0x00<<3 | 0x04, // TXPOWER_3mW    = -11dBm == PAC=0 TBG=4
-    A7105_POWER_4 = 0x01<<3 | 0x05, // TXPOWER_10mW   =  -6dBm == PAC=1 TBG=5
-    A7105_POWER_5 = 0x02<<3 | 0x07, // TXPOWER_30mW   =   0dBm == PAC=2 TBG=7
-    A7105_POWER_6 = 0x03<<3 | 0x07, // TXPOWER_100mW  =   1dBm == PAC=3 TBG=7
-    A7105_POWER_7 = 0x03<<3 | 0x07  // TXPOWER_150mW  =   1dBm == PAC=3 TBG=7
-};
-#define A7105_HIGH_POWER    A7105_POWER_7
-#define A7105_LOW_POWER     A7105_POWER_3
-#define A7105_RANGE_POWER   A7105_POWER_0
-#define A7105_BIND_POWER    A7105_POWER_0
-
-// NRF Power
-// Power setting is 0..3 for nRF24L01
-// Claimed power amp for nRF24L01 from eBay is 20dBm.
-enum NRF_POWER
-{                       //      Raw            w 20dBm PA
-    NRF_POWER_0 = 0x00, // 0 : -18dBm  (16uW)   2dBm (1.6mW)
-    NRF_POWER_1 = 0x01, // 1 : -12dBm  (60uW)   8dBm   (6mW)
-    NRF_POWER_2 = 0x02, // 2 :  -6dBm (250uW)  14dBm  (25mW)
-    NRF_POWER_3 = 0x03  // 3 :   0dBm   (1mW)  20dBm (100mW)
-};
-#define NRF_HIGH_POWER      NRF_POWER_3
-#define NRF_LOW_POWER       NRF_POWER_1
-#define NRF_RANGE_POWER     NRF_POWER_0
-#define NRF_BIND_POWER      NRF_POWER_0
-
-// CC2500 power output from the chip itself
-// The numbers do not take into account any outside amplifier
-enum CC2500_POWER
-{
-    CC2500_POWER_0  = 0x00, // -55dbm or less
-    CC2500_POWER_1  = 0x50, // -30dbm
-    CC2500_POWER_2  = 0x44, // -28dbm
-    CC2500_POWER_3  = 0xC0, // -26dbm
-    CC2500_POWER_4  = 0x84, // -24dbm
-    CC2500_POWER_5  = 0x81, // -22dbm
-    CC2500_POWER_6  = 0x46, // -20dbm
-    CC2500_POWER_7  = 0x93, // -18dbm
-    CC2500_POWER_8  = 0x55, // -16dbm
-    CC2500_POWER_9  = 0x8D, // -14dbm
-    CC2500_POWER_10 = 0xC6, // -12dbm
-    CC2500_POWER_11 = 0x97, // -10dbm
-    CC2500_POWER_12 = 0x6E, //  -8dbm
-    CC2500_POWER_13 = 0x7F, //  -6dbm
-    CC2500_POWER_14 = 0xA9, //  -4dbm
-    CC2500_POWER_15 = 0xBB, //  -2dbm
-    CC2500_POWER_16 = 0xFE, //   0dbm
-    CC2500_POWER_17 = 0xFF  //  +1dbm
-};
-#define CC2500_HIGH_POWER     CC2500_POWER_1
-#define CC2500_LOW_POWER      CC2500_POWER_1
-#define CC2500_RANGE_POWER  CC2500_POWER_1
-#define CC2500_BIND_POWER     CC2500_POWER_1
-
-// CYRF power
-enum CYRF_POWER
-{
-    CYRF_POWER_0 = 0x00,    // -35dbm
-    CYRF_POWER_1 = 0x01,    // -30dbm
-    CYRF_POWER_2 = 0x02,    // -24dbm
-    CYRF_POWER_3 = 0x03,    // -18dbm
-    CYRF_POWER_4 = 0x04,    // -13dbm
-    CYRF_POWER_5 = 0x05,    //  -5dbm
-    CYRF_POWER_6 = 0x06,    //   0dbm
-    CYRF_POWER_7 = 0x07     //  +4dbm
-};
-#define CYRF_HIGH_POWER     CYRF_POWER_7
-#define CYRF_LOW_POWER      CYRF_POWER_3
-#define CYRF_RANGE_POWER    CYRF_POWER_1    // 1/30 of the full power distance
-#define CYRF_BIND_POWER     CYRF_POWER_0
-
-enum TXRX_State {
-    TXRX_OFF,
-    TX_EN,
-    RX_EN
-};
-
-// Packet ack status values
-enum {
-    PKT_PENDING = 0,
-    PKT_ACKED,
-    PKT_TIMEOUT
-};
-
-// baudrate defines for serial
-#define SPEED_100K  0
-#define SPEED_9600  1
-#define SPEED_57600 2
-#define SPEED_125K  3
-
-/** EEPROM Layout */
-#define EEPROM_ID_OFFSET        10      // Module ID (4 bytes)
-#define EEPROM_BANK_OFFSET      15      // Current bank number (1 byte)
-#define EEPROM_ID_VALID_OFFSET  20      // 1 byte flag that ID is valid
-#define MODELMODE_EEPROM_OFFSET 30      // Autobind mode, 1 byte per model, end is 30+16=46
-#define AFHDS2A_EEPROM_OFFSET   50      // RX ID, 4 byte per model id, end is 50+64=114
-#define BUGS_EEPROM_OFFSET      114     // RX ID, 4 byte per model id, end is 114+64=178
-//#define CONFIG_EEPROM_OFFSET  178     // Current configuration of the multimodule
-
-//****************************************
-//*** MULTI protocol serial definition ***
-//****************************************
-/*
-**************************
-16 channels serial protocol
-**************************
-Serial: 100000 Baud 8e2      _ xxxx xxxx p --
-  Total of 26 bytes
-  Stream[0]   = 0x55    sub_protocol values are 0..31   Stream contains channels
-  Stream[0]   = 0x54    sub_protocol values are 32..63  Stream contains channels
-  Stream[0]   = 0x57    sub_protocol values are 0..31   Stream contains failsafe
-  Stream[0]   = 0x56    sub_protocol values are 32..63  Stream contains failsafe
-   header
-  Stream[1]   = sub_protocol|BindBit|RangeCheckBit|AutoBindBit;
-   sub_protocol is 0..31 (bits 0..4), value should be added with 32 if Stream[0] = 0x54
-   =>   Reserved    0
-                    Flysky      1
-                    Hubsan      2
-                    FrskyD      3
-                    Hisky       4
-                    V2x2        5
-                    DSM         6
-                    Devo        7
-                    YD717       8
-                    KN          9
-                    SymaX       10
-                    SLT         11
-                    CX10        12
-                    CG023       13
-                    Bayang      14
-                    FrskyX      15
-                    ESky        16
-                    MT99XX      17
-                    MJXQ        18
-                    SHENQI      19
-                    FY326       20
-                    SFHSS       21
-                    J6PRO       22
-                    FQ777       23
-                    ASSAN       24
-                    FrskyV      25
-                    HONTAI      26
-                    OpenLRS     27
-                    AFHDS2A     28
-                    Q2X2        29
-                    WK2x01      30
-                    Q303        31
-                    GW008       32
-                    DM002       33
-                    CABELL      34
-                    ESKY150     35
-                    H8_3D       36
-                    CORONA      37
-                    CFlie       38
-                    Hitec       39
-                    WFLY        40
-                    BUGS        41
-   BindBit=>        0x80    1=Bind/0=No
-   AutoBindBit=>    0x40    1=Yes /0=No
-   RangeCheck=>     0x20    1=Yes /0=No
-  Stream[2]   = RxNum | Power | Type;
-   RxNum value is 0..15 (bits 0..3)
-   Type is 0..7 <<4     (bit 4..6)
-        sub_protocol==Flysky
-            Flysky      0
-            V9x9        1
-            V6x6        2
-            V912        3
-            CX20        4
-        sub_protocol==Hubsan
-            H107        0
-            H301        1
-            H501        2
-        sub_protocol==Hisky
-            Hisky       0
-            HK310       1
-        sub_protocol==DSM
-            DSM2_22     0
-            DSM2_11     1
-            DSMX_22     2
-            DSMX_11     3
-            DSM_AUTO    4
-        sub_protocol==YD717
-            YD717       0
-            SKYWLKR     1
-            SYMAX4      2
-            XINXUN      3
-            NIHUI       4
-        sub_protocol==KN
-            WLTOYS      0
-            FEILUN      1
-        sub_protocol==SYMAX
-            SYMAX       0
-            SYMAX5C     1
-        sub_protocol==CX10
-            CX10_GREEN  0
-            CX10_BLUE   1   // also compatible with CX10-A, CX12
-            DM007       2
-            ---         3
-            JC3015_1    4
-            JC3015_2    5
-            MK33041     6
-        sub_protocol==Q2X2
-            Q222        0
-            Q242        1
-            Q282        2
-        sub_protocol==CG023
-            CG023       0
-            YD829       1
-        sub_protocol==BAYANG
-            BAYANG      0
-            H8S3D       1
-            X16_AH      2
-            IRDRONE     3
-        sub_protocol==MT99XX
-            MT99        0
-            H7          1
-            YZ          2
-            LS          3
-            FY805       4
-        sub_protocol==MJXQ
-            WLH08       0
-            X600        1
-            X800        2
-            H26D        3
-            E010        4
-            H26WH       5
-        sub_protocol==FRSKYX
-            CH_16       0
-            CH_8        1
-            EU_16       2
-            EU_8        3
-        sub_protocol==HONTAI
-            HONTAI  0
-            JJRCX1  1
-            X5C1        2
-            FQ777_951 3
-        sub_protocol==AFHDS2A
-            PWM_IBUS    0
-            PPM_IBUS    1
-            PWM_SBUS    2
-            PPM_SBUS    3
-        sub_protocol==V2X2
-            V2X2        0
-            JXD506      1
-        sub_protocol==FY326
-            FY326       0
-            FY319       1
-        sub_protocol==WK2x01
-            WK2801      0
-            WK2401      1
-            W6_5_1      2
-            W6_6_1      3
-            W6_HEL      4
-            W6_HEL_I    5
-        sub_protocol==Q303
-            Q303        0
-            CX35        1
-            CX10D       2
-            CX10WD      3
-        sub_protocol==CABELL
-            CABELL_V3               0
-            CABELL_V3_TELEMETRY     1
-            CABELL_SET_FAIL_SAFE    6
-            CABELL_UNBIND           7
-        sub_protocol==H8_3D
-            H8_3D       0
-            H20H        1
-            H20MINI     2
-            H30MINI     3
-        sub_protocol==CORONA
-            COR_V1      0
-            COR_V2      1
-            FD_V3       2
-        sub_protocol==HITEC
-            OPT_FW      0
-            OPT_HUB     1
-            MINIMA      2
-        sub_protocol==SLT
-            SLT_V1      0
-            SLT_V2      1
-            Q100        2
-            Q200        3
-            MR100       4
-
-   Power value => 0x80  0=High/1=Low
-  Stream[3]   = option_protocol;
-   option_protocol value is -128..127
-  Stream[4] to [25] = Channels or failsafe depending on Steam[0]
-   16 Channels on 11 bits (0..2047)
-    0       -125%
-    204     -100%
-    1024       0%
-    1843    +100%
-    2047    +125%
-   Values are concatenated to fit in 22 bytes like in SBUS protocol.
-   Failsafe values have exactly the same range/values than normal channels except the extremes where
-      0=hold, 2047=no pulse. If failsafe is not set or RX then failsafe packets should not be sent.
-*/
-/*
-  Multimodule Status
-  Based on #define MULTI_STATUS
-
-  Serial: 100000 Baud 8e2 (same as input)
-
-  Format: header (2 bytes) + data (variable)
-   [0] = 'M' (0x4d)
-   [1] Length (excluding the 2 header bytes)
-   [2-xx] data
-
-  Type = 0x01 Multimodule Status:
-   [2] Flags
-   0x01 = Input signal detected
-   0x02 = Serial mode enabled
-   0x04 = Protocol is valid
-   0x08 = Module is in binding mode
-   0x10 = Module waits a bind event to load the protocol
-   0x20 = Failsafe supported by currently running protocol
-   [3] major
-   [4] minor
-   [5] revision
-   [6] patchlevel,
-   version of multi code, should be displayed as major.minor.revision.patchlevel
-*/
-/*
-  Multiprotocol telemetry/command definition for OpenTX
-  Based on #define MULTI_TELEMETRY enables OpenTX to get the multimodule status and select the correct telemetry type automatically.
-
-  Serial: 100000 Baud 8e2 (same as input)
-
-  TLV Protocol (type, length, value), allows a TX to ignore unknown messages
-
-  Format: header (4 byte) + data (variable)
-   [0] = 'M' (0x4d)
-   [1] = 'P' (0x50)
-
-   The first byte is deliberatly chosen to be different from other telemetry protocols
-   (e.g. 0xAA for DSM/Multi, 0xAA for FlySky and 0x7e for Frsky) to allow a TX to detect
-   the telemetry format of older versions
-
-   [2] Type (see below)
-   [3] Length (excluding the 4 header bytes)
-
-   [4-xx] data#define EEPROM_BANK_OFFSET    15    // Current bank number (1 byte)
-
-
-  Commands from TX to multi cannot be longer than 22 bytes (RXLen -4byte header)
-
-  Type = 0x01 Multimodule Status:
-   [4] Flags
-   0x01 = Input signal detected
-   0x02 = Serial mode enabled
-   0x04 = protocol is valid
-   0x08 = module is in binding mode
-   0x10 = module waits a bind event to load the protocol
-   [5] major
-   [6] minor
-   [7] revision
-   [8] patchlevel,
-   version of multi code, should be displayed as major.minor.revision.patchlevel
-
-   more information can be added by specifing a longer length of the type, the TX will just ignore these bytes
-
-
-  Type 0x02 Frksy S.port telemetry
-  Type 0x03 Frsky Hub telemetry
-
-    *No* usual frsky byte stuffing and without start/stop byte (0x7e)
-
-
-  Type 0x04 Spektrum telemetry data
-   data[0] TX RSSI
-   data[1-15] telemetry data
-
-  Type 0x05 DSM bind data
-    data[0-16] DSM bind data
-
-    technically DSM bind data is only 10 bytes but multi sends 16
-    like with telemtery, check length field)
-
-  Type 0x06 Flysky AFHDS2 telemetry data
-   length: 29
-   data[0] = RSSI value
-   data[1-28] telemetry data
-
-  Type 0x0A Hitec telemetry data
-   length: 8
-   data[0] = TX RSSI value
-   data[1] = TX LQI value
-   data[2] = frame number
-   data[3-7] telemetry data
-   Full description at the bottom of Hitec_cc2500.ino
-
-*/
 
 #endif

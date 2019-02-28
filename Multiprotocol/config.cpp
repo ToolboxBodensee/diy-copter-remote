@@ -14,7 +14,7 @@
  */
 #include "config.h"
 uint8_t curr_bank = 0;
-const PPM_Parameters PPM_prot[14*NBR_BANKS]=    {
+const PPM_Parameters PPM_prot[14]=    {
 //******************************       BANK 1       ******************************
 //  Switch  Protocol            Sub protocol    RX_Num  Power       Auto Bind       Option
 /*  1 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 0   },
@@ -31,38 +31,7 @@ const PPM_Parameters PPM_prot[14*NBR_BANKS]=    {
 /*  12  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 220  }, // option=fine freq tuning
 /*  13  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 240   },
 /*  14  */  {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 255   },
-//******************************       BANK 2       ******************************
-//  Switch  Protocol        Sub protocol    RX_Num  Power       Auto Bind       Option
-/*  1 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -120    },
-/*  2 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -100   },
-/*  3 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -80   },
-/*  4 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -60   },
-/*  5 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -40   },
-/*  6 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  , -20   },
-/*  7 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,   0   },
-/*  8 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  10   },
-/*  9 */    {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  20   },
-/*  10  */  {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  40   },
-/*  11  */  {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  60   },
-/*  12  */  {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  80   }, // option=fine freq tuning
-/*  13  */  {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  100   },
-/*  14  */  {PROTO_FRSKYX,  EU_16       , 0 , P_LOW , AUTOBIND  ,  120   },
-//******************************       BANK 3       ******************************
-//  Switch  Protocol        Sub protocol    RX_Num  Power       Auto Bind       Option
-/*  1 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -120    },
-/*  2 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -100   },
-/*  3 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -80   },
-/*  4 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -60   },
-/*  5 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -40   },
-/*  6 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  , -20   },
-/*  7 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,   0   },
-/*  8 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  10   },
-/*  9 */    {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  20   },
-/*  10  */  {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  40   },
-/*  11  */  {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  60   },
-/*  12  */  {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  80   }, // option=fine freq tuning
-/*  13  */  {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  100   },
-/*  14  */  {PROTO_FRSKYX,  CH_16       , 0 , P_LOW , AUTOBIND  ,  120   },
+
 };
 /* Available protocols and associated sub protocols to pick and choose from
     PROTO_FLYSKY

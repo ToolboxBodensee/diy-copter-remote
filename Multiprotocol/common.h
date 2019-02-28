@@ -18,8 +18,6 @@
 #include "config.h"
 #include "tx_def.h"
 
-void InitFailsafe(void);
-void InitPPM(void);
 void InitChannel(void);
 void reverse_channel(uint8_t num);
 uint16_t convert_channel_ppm(uint8_t num);
@@ -53,25 +51,13 @@ void Frsky_init_hop(void);
 #if defined(FRSKYV_CC2500_INO) || defined(FRSKYD_CC2500_INO) || defined(FRSKYX_CC2500_INO)
 
     extern uint8_t FRSKY_common_startreg_cc2500_conf[];
-    #if defined(FRSKYV_CC2500_INO)
-    extern uint8_t FRSKYV_cc2500_conf[];
-    #endif
 
-    #if defined(FRSKYD_CC2500_INO)
     extern uint8_t FRSKYD_cc2500_conf[];
-    #endif
 
-    #if defined(FRSKYX_CC2500_INO)
-    extern uint8_t FRSKYX_cc2500_conf[];
-    extern uint8_t FRSKYXEU_cc2500_conf[];
-    #endif
 
     extern uint8_t FRSKY_common_end_cc2500_conf[][2];
     void FRSKY_init_cc2500(const uint8_t *ptr);
 
-    #ifdef FAILSAFE_ENABLE
-    extern uint16_t Failsafe_data[NUM_CHN];
-    #endif
 #endif
 
 #endif

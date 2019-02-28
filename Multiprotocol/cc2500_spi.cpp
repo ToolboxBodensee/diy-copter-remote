@@ -23,6 +23,7 @@
 #include "cc2500_spi.h"
 #include "spi.h"
 
+uint8_t prev_power=0xFD; // unused power value
 void CC2500_WriteReg(uint8_t address, uint8_t data)
 {
     CC25_CSN_off;
@@ -85,14 +86,12 @@ void CC2500_SetTxRxMode(uint8_t mode)
         //from deviation firmware
         CC2500_WriteReg(CC2500_00_IOCFG2, 0x2F);
         CC2500_WriteReg(CC2500_02_IOCFG0, 0x2F | 0x40);
-    } else {
-        if (mode == RX_EN) {
+    } else if (mode == RX_EN) {
             CC2500_WriteReg(CC2500_02_IOCFG0, 0x2F);
             CC2500_WriteReg(CC2500_00_IOCFG2, 0x2F | 0x40);
-        } else {
+    } else {
             CC2500_WriteReg(CC2500_02_IOCFG0, 0x2F);
             CC2500_WriteReg(CC2500_00_IOCFG2, 0x2F);
-        }
     }
 }
 uint8_t CC2500_Reset()
@@ -100,21 +99,22 @@ uint8_t CC2500_Reset()
     CC2500_Strobe(CC2500_SRES);
     delay(1);
     CC2500_SetTxRxMode(TXRX_OFF);
+    prev_power=0xFD;        // unused power value
     return CC2500_ReadReg(CC2500_0E_FREQ1) == 0xC4;//check if reset
 }
 void CC2500_SetPower()
 {
     uint8_t power=CC2500_BIND_POWER;
-    if(IS_BIND_DONE)
+    if(IS_BIND_DONE) {
         #ifdef CC2500_ENABLE_LOW_POWER
             power=IS_POWER_FLAG_on?CC2500_HIGH_POWER:CC2500_LOW_POWER;
         #else
             power=CC2500_HIGH_POWER;
         #endif
+    }
     if(IS_RANGE_FLAG_on)
         power=CC2500_RANGE_POWER;
-    if(prev_power != power)
-    {
+    if(prev_power != power) {
         CC2500_WriteReg(CC2500_3E_PATABLE, power);
         prev_power=power;
     }

@@ -17,6 +17,7 @@
 #include "cc2500_spi.h"
 #include "Multiprotocol.h"
 
+uint16_t counter;
 void frsky2way_init(uint8_t bind)
 {
   //debugln("frsky2way_init");
@@ -105,12 +106,10 @@ uint16_t initFrSky_2way()
     {
         frsky2way_init(1);
         state = FRSKY_BIND;
-    debugln("initFrSky_2way bind");
-    }
-    else
-    {
+        debugln("initFrSky_2way bind");
+    } else {
         state = FRSKY_BIND_DONE;
-    debugln("initFrSky_2way bind done");
+        debugln("initFrSky_2way bind done");
     }
     return 10000;
 }
@@ -119,8 +118,7 @@ uint16_t ReadFrSky_2way()
 {
    //debugln("%s",__func__);
 
-    if (state < FRSKY_BIND_DONE)
-    {
+    if (state < FRSKY_BIND_DONE) {
         frsky2way_build_bind_packet();
         CC2500_Strobe(CC2500_SIDLE);
         CC2500_WriteReg(CC2500_0A_CHANNR, 0x00);
@@ -129,50 +127,43 @@ uint16_t ReadFrSky_2way()
         CC2500_WriteData(packet, packet[0]+1);
         if(IS_BIND_DONE) {
             state = FRSKY_BIND;
-      debugln("%s bind done",__func__);
-        } else
-            state++;
-
-    if(state == FRSKY_BIND_DONE) {
-      debugln("%s bind done fr",__func__);
-    }
+            debugln("%s bind done",__func__);
+        } else {
+            // menu tells us to stop so do not inc state
+            //state++;
+        }
+  
+        if(state == FRSKY_BIND_DONE) {
+            debugln("%s bind done fr",__func__);
+        }
         return 9000;
     }
-    if (state == FRSKY_BIND_DONE)
-    {
+    if (state == FRSKY_BIND_DONE) {
       //debugln("%s bind done",__func__);
 
         state = FRSKY_DATA2;
         frsky2way_init(0);
         counter = 0;
         BIND_DONE;
-    }
-    else
-        if (state == FRSKY_DATA5)
-        {
+    } else if (state == FRSKY_DATA5) {
             CC2500_Strobe(CC2500_SRX);//0x34 RX enable
             state = FRSKY_DATA1;
             return 9200;
         }
     counter = (counter + 1) % 188;
-    if (state == FRSKY_DATA4)
-    {   //telemetry receive
+    if (state == FRSKY_DATA4) {   //telemetry receive
         CC2500_SetTxRxMode(RX_EN);
         CC2500_Strobe(CC2500_SIDLE);
         CC2500_WriteReg(CC2500_0A_CHANNR, hopping_frequency[counter % 47]);
         CC2500_WriteReg(CC2500_23_FSCAL3, 0x89);
         state++;
         return 1300;
-    }
-    else
-    {
-        if (state == FRSKY_DATA1)
-        {
+    } else {
+        if (state == FRSKY_DATA1) {
             len = CC2500_ReadReg(CC2500_3B_RXBYTES | CC2500_READ_BURST) & 0x7F;
 
       //debugln("%d len",len);
-            if (len && len<=(0x11+3))// 20bytes
-            {
+            if (len && len<=(0x11+3)) { // 20bytes
                 CC2500_ReadData(pkt, len);              //received telemetry packets
                 #if defined(TELEMETRY)
                     if(pkt[len-1] & 0x80)
@@ -181,13 +172,10 @@ uint16_t ReadFrSky_2way()
                         frsky_check_telemetry(pkt,len); //check if valid telemetry packets and buffer them.
                     }
                 #endif
-            }
-            else
-            {
+            } else {
                 packet_count++;
                 // restart sequence on missed packet - might need count or timeout instead of one missed
-                if(packet_count>100)
-                {//~1sec
+                if(packet_count > 100) {//~1sec
                     packet_count=0;
                     #if defined TELEMETRY
                         telemetry_link=0;//no link frames
@@ -200,8 +188,7 @@ uint16_t ReadFrSky_2way()
         }
         CC2500_Strobe(CC2500_SIDLE);
         CC2500_WriteReg(CC2500_0A_CHANNR, hopping_frequency[counter % 47]);
-        if ( prev_option != option )
-        {
+        if ( prev_option != option ) {
             CC2500_WriteReg(CC2500_0C_FSCTRL0,option);  // Frequency offset hack
             prev_option = option ;
         }

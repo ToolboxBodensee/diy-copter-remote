@@ -10,10 +10,11 @@ LiquidCrystal_I2C lcd(0x27,16,2);
 State *curr_state = NULL;
 State *new_state = NULL;
 
-State *s_init = new LCD_state_init();
-State *s_bind = new LCD_state_bind();
-State *s_fly  = new LCD_state_fly();
-State *s_menu = new LCD_state_menu();
+State *s_init = NULL;
+State *s_bind = NULL;
+State *s_fly  = NULL;
+State *s_joy  = NULL;
+State *s_menu = NULL;
 
 
 enum lcd_special_chars {
@@ -58,11 +59,17 @@ void install_special_caracters(void)
 }
 
 void init_state(void) {
+    #if 0
     Wire.setSDA(PB9);
     Wire.setSCL(PB8);
+    #endif
     Wire.begin();
     lcd.init();
 
+    s_init = new LCD_state_init();
+    s_bind = new LCD_state_bind();
+    s_fly  = new LCD_state_fly();
+    s_menu = new LCD_state_menu();
     lcd.backlight();
     curr_state = NULL;
     new_state = s_init;
@@ -89,14 +96,12 @@ void update_state(void) {
 //LCD_state_init
 
 LCD_state_init::LCD_state_init(void) {
-    snprintf(this->line[0],sizeof(this->line[0]),"    wellcome    ");
-    snprintf(this->line[1],sizeof(this->line[1]),"    phschoen    ");
 }
 void LCD_state_init::enter(void) {
     lcd.setCursor(0,0);
-    lcd.print(this->line[0]);
+    lcd.print("    wellcome    ");
     lcd.setCursor(0,1);
-    lcd.print(this->line[1]);
+    lcd.print("    phschoen    ");
     this->time_enter = millis();
 }
 void LCD_state_init::update(void)
@@ -113,28 +118,29 @@ void LCD_state_init::leave(void)
 }
 //LCD_state_bind
 LCD_state_bind::LCD_state_bind(void) {
-    snprintf(this->line[0],sizeof(this->line[0]),"bind mode       ");
-    snprintf(this->line[1],sizeof(this->line[1]),"                ");
     this->bind_time = 20;
 }
 void LCD_state_bind::enter(void) {
     lcd.setCursor(0,0);
-    lcd.print(this->line[0]);
+    lcd.print("bind mode       ");
     lcd.setCursor(0,1);
-    lcd.print(this->line[1]);
+    lcd.print("                ");
     this->time_enter = millis();
 }
 
 void LCD_state_bind::update(void)
 {
   debugln("blubber\n");
+  char line[17];
   unsigned long time_in_ms = millis() - this->time_enter;
   unsigned long time_in_s = time_in_ms/1000; // to sec
   unsigned long remain_s = this->bind_time - time_in_s;
 
-  snprintf(this->line[0],sizeof(this->line[1]),"remaining sec %02d",remain_s);
+  snprintf(line,sizeof(line),"remaining sec %02d",remain_s);
   lcd.setCursor(0,1);
-  lcd.print(this->line[0]);
+  lcd.print(line);
+
+  // cange to menu when done
   if (time_in_s >= this->bind_time)
       new_state = s_menu;
 }
@@ -146,15 +152,12 @@ void LCD_state_bind::leave(void)
 
 // LCD_state_menu
 LCD_state_menu::LCD_state_menu(void) {
-    snprintf(this->line[0],sizeof(this->line[0]),"Menubind mode       ");
-    snprintf(this->line[1],sizeof(this->line[1]),"                ");
-    this->curr_selected = 0;
 }
 void LCD_state_menu::enter(void) {
     lcd.setCursor(0,0);
-    lcd.print(this->line[0]);
+    lcd.print("menu mode       ");
     lcd.setCursor(0,1);
-    lcd.print(this->line[1]);
+    lcd.print("                ");
     this->time_enter = millis();
 }
 
@@ -169,15 +172,13 @@ void LCD_state_menu::leave(void)
 
 // LCD_state_fly
 LCD_state_fly::LCD_state_fly(void) {
-    snprintf(this->line[0],sizeof(this->line[0]),"fly mode       ");
-    snprintf(this->line[1],sizeof(this->line[1]),"                ");
 }
 
 void LCD_state_fly::enter(void) {
     lcd.setCursor(0,0);
-    lcd.print(this->line[0]);
+    lcd.print("fly mode        ");
     lcd.setCursor(0,1);
-    lcd.print(this->line[1]);
+    lcd.print("                ");
     this->time_enter = millis();
 }
 

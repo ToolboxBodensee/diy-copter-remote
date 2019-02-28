@@ -8,10 +8,37 @@
 #include "state.h"
 Input input;
 
+uint16_t Channel_data[NUM_TX_CHN];
+uint16_t Failsafe_data[NUM_TX_CHN];
+
+const char* ch_name[NUM_TX_CHN] = {
+    "CH_ROLL",
+    "CH_PITCH",
+    "CH_THROTTLE",
+    "CH_YAW",
+
+    "CH_AUX1",
+    "CH_AUX2",
+    "CH_AUX3",
+    "CH_AUX4",
+    "CH_AUX5",
+    "CH_AUX6"
+};
+
 Input::Input(void) {
     this->curr = &(this->input[0]);
     this->old  = &(this->input[1]);
     memset(this->input,0, sizeof(this->input));
+  //InitFailsafe
+  for (uint8_t i = 0; i < NUM_TX_CHN; i++)
+    Failsafe_data[i] = (CHANNEL_MAX_100 - CHANNEL_MIN_100) / 2 + CHANNEL_MIN_100;
+  Failsafe_data[CH_THROTTLE] = CHANNEL_MIN_100;  //1=-125%, 204=-100%
+
+  // init channel
+
+  for (uint8_t i = 0; i < NUM_TX_CHN; i++)
+    Channel_data[i] = 1024;
+  Channel_data[CH_THROTTLE] = 204;
 }
 void Input::mark_processed(void) {
     struct data* temp = this->old;
@@ -28,40 +55,63 @@ struct Input::data* Input::get_old_input(void) {
 }
 
 void Input::init() {
-  analogReadResolution(16);
+  this->pins[CH_THROTTLE] = Throttle_pin;
+  this->ch_config[CH_THROTTLE].is_analog = true;
 
-  pinMode(Throttle_pin,INPUT);
-  pinMode(Yaw_pin,INPUT);
-  pinMode(Roll_pin,INPUT);
-  pinMode(Aux1_pin,INPUT);
-  pinMode(Aux2_pin,INPUT);
-  pinMode(Aux3_pin,INPUT);
-  pinMode(Aux4_pin,INPUT);
-  pinMode(Aux5_pin,INPUT);
-  pinMode(Aux6_pin,INPUT);
+  this->pins[CH_YAW] = Yaw_pin;
+  this->ch_config[CH_YAW].is_analog = true;
+
+  this->pins[CH_PITCH] = Pitch_pin;
+  this->ch_config[CH_PITCH].is_analog = true;
+
+  this->pins[CH_ROLL] = Roll_pin;
+  this->ch_config[CH_ROLL].is_analog = true;
+
+  this->pins[CH_AUX1] = Aux1_pin;
+  this->ch_config[CH_AUX1].is_analog = false;
+
+  this->pins[CH_AUX2] = Aux2_pin;
+  this->ch_config[CH_AUX2].is_analog = false;
+
+  this->pins[CH_AUX3] = Aux3_pin;
+  this->ch_config[CH_AUX3].is_analog = false;
+
+  this->pins[CH_AUX4] = Aux4_pin;
+  this->ch_config[CH_AUX4].is_analog = false;
+
+  this->pins[CH_AUX5] = Aux5_pin;
+  this->ch_config[CH_AUX5].is_analog = false;
+
+  this->pins[CH_AUX6] = Aux6_pin;
+  this->ch_config[CH_AUX6].is_analog = false;
+
+  for (uint8_t i = 0; i < CH_COUNT; ++i) {
+    pinMode(this->pins[i], INPUT);
+  }
   pinMode(Menu_pin,INPUT);
 
-  this->throttle.inverted = true;
-  this->yaw.inverted      = false;
-  this->roll.inverted     = false;
-  this->pitch.inverted    = false;
-  this->aux[0].inverted   = false;
-  this->aux[1].inverted   = false;
-  this->aux[2].inverted   = false;
-  this->aux[3].inverted   = false;
-  this->aux[4].inverted   = false;
-  this->aux[5].inverted   = false;
+  //analogReadResolution(16);
 
+  // move this to eeprom later
+  this->ch_config[CH_THROTTLE].inverted = false;
+  this->ch_config[CH_YAW].inverted      = false;
+  this->ch_config[CH_ROLL].inverted     = false;
+  this->ch_config[CH_PITCH].inverted    = false;
+  this->ch_config[CH_AUX1].inverted     = false;
+  this->ch_config[CH_AUX2].inverted     = false;
+  this->ch_config[CH_AUX3].inverted     = false;
+  this->ch_config[CH_AUX4].inverted     = false;
+  this->ch_config[CH_AUX5].inverted     = false;
 
-  this->throttle.min  = 500;
-  this->yaw.min       = 500;
-  this->roll.min      = 500;
-  this->pitch.min     = 500;
+  this->ch_config[CH_THROTTLE].min  = 0;
+  this->ch_config[CH_YAW].min       = 0;
+  this->ch_config[CH_ROLL].min      = 0;
+  this->ch_config[CH_PITCH].min     = 0;
 
-  this->throttle.max  = 500;
-  this->yaw.max       = 500;
-  this->roll.max      = 500;
-  this->pitch.max     = 500;
+  this->ch_config[CH_THROTTLE].max  = 4096;
+  this->ch_config[CH_YAW].max       = 4096;
+  this->ch_config[CH_ROLL].max      = 4096;
+  this->ch_config[CH_PITCH].max     = 4096;
 }
 void Input::do_calibration(void) {
   int8_t turns = 50;
@@ -71,24 +121,19 @@ void Input::do_calibration(void) {
   i = turns;
   while(i > 0) {
     this->update();
-    if (true == this->save_calibration()) {
+    if (true == this->calibration_update()) {
       i = turns;
       debugln("new values t %d-%d r %d-%d p %d-%d y %d-%d",
-              this->throttle.min,this->throttle.max,
-              this->roll.min,    this->roll.max,
-              this->pitch.min,   this->pitch.max,
-              this->yaw.min,     this->yaw.max);
+              this->ch_config[CH_THROTTLE].min, this->ch_config[CH_THROTTLE].max,
+              this->ch_config[CH_ROLL].min,    this->ch_config[CH_ROLL].max,
+              this->ch_config[CH_PITCH].min,   this->ch_config[CH_PITCH].max,
+              this->ch_config[CH_YAW].min,     this->ch_config[CH_YAW].max);
     }else {
       i -= 1;
     }
 
     delay(100);
   }
-  debugln("end values t %d-%d r %d-%d p %d-%d y %d-%d",
-          this->throttle.min,this->throttle.max,
-          this->roll.min,    this->roll.max,
-          this->pitch.min,   this->pitch.max,
-          this->yaw.min,     this->yaw.max);
 
   // center
   debugln("now center all sticks");
@@ -104,199 +149,64 @@ void Input::do_calibration(void) {
 
   }
 
-  debugln("now Move throttle to max");
+  for (int ch = 0; ch < 4 ; ++ch) {
+    debugln("now Move %s to max", ch_name[ch]);
   i = turns;
   while(i>0) {
-    delay(100);
+      delay(50);
     this->update();
 
-    if (true == this->is_throttle_up()) {
+      if (true == this->is_high((enum input_channels)ch)) {
+        debug("u");
         i--;
         continue;
     }
-    if (true == this->is_throttle_down()) {
-        this->throttle.inverted = ! this->throttle.inverted;
-        i = turns;
-        continue;
-    }
-  }
-  debugln("throttle invert is %d", this->throttle.inverted);
 
 
-  debugln("now Move yaw to max");
+      if (true == this->is_low((enum input_channels)ch)) {
+        debug("dI");
+        this->ch_config[CH_THROTTLE].inverted = !this->ch_config[CH_THROTTLE].inverted;
   i = turns;
-  while(i>0) {
-    delay(100);
-    this->update();
-
-    if (true == this->is_yaw_up()) {
-        i--;
         continue;
     }
-    if (true == this->is_yaw_down()) {
-        this->yaw.inverted = ! this->yaw.inverted;
-        i = turns;
-        continue;
     }
   }
-  debugln("yaw invert is %d", this->yaw.inverted);
-
-  debugln("now Move pitch to max");
-  i = turns;
-  while(i>0) {
-    delay(100);
-    this->update();
-
-    if (true == this->is_pitch_up()) {
-        i--;
-        continue;
-    }
-    if (true == this->is_pitch_down()) {
-        this->pitch.inverted = ! this->pitch.inverted;
-        i = turns;
-        continue;
-    }
-  }
-  debugln("pitch invert is %d", this->pitch.inverted);
-
-  debugln("now Move roll to max");
-  i = turns;
-  while(i>0) {
-    delay(100);
-    this->update();
-
-    if (true == this->is_roll_up()) {
-        i--;
-        continue;
-    }
-    if (true == this->is_roll_down()) {
-        this->roll.inverted = ! this->roll.inverted;
-        i = turns;
-        continue;
-    }
-  }
-  debugln("roll invert is %d", this->roll.inverted);
 
 }
 bool Input::is_centered(void) {
-    return this->is_centered_left() && this->is_centered_right();
+  return 
+    this->is_centered(CH_ROLL) &&
+    this->is_centered(CH_PITCH) &&
+    this->is_centered(CH_THROTTLE) &&
+    this->is_centered(CH_YAW);
 }
 
-bool Input::is_centered_left(void) {
-    uint16_t range;
-    uint16_t delta;
+bool Input::is_centered(enum Input::input_channels ch) {
+  uint16_t range = this->ch_config[ch].max - this->ch_config[ch].min;
+  uint16_t delta = range / 5;
 
-    range = this->throttle.max - this->throttle.min;
-    delta = range >>4;
-    if ( this->curr->throttle < this->throttle.min + range/2 - delta ||
-         this->curr->throttle > this->throttle.min + range/2 + delta
-    ) {
-        // throttle is not centered
-        return false;
-    }
-
-
-    range = this->yaw.max - this->yaw.min;
-    delta = range >>4;
-    if ( this->curr->yaw < this->yaw.min + range/2 - delta ||
-         this->curr->yaw > this->yaw.min + range/2 + delta
-    ) {
-        // yaw is not centered
-        return false;
-    }
-    return true;
-}
-bool Input::is_centered_right(void) {
-    uint16_t range;
-    uint16_t delta;
-
-    range = this->pitch.max - this->pitch.min;
-    delta = range >>4;
-    if ( this->curr->pitch < this->pitch.min + range/2 - delta ||
-         this->curr->pitch > this->pitch.min + range/2 + delta
+  if ( this->curr->ch_data[ch] < this->ch_config[ch].min + range / 2 - delta ||
+       this->curr->ch_data[ch] > this->ch_config[ch].min + range / 2 + delta
     ) {
         // pitch is not centered
         return false;
     }
-
-    range = this->roll.max - this->roll.min;
-    delta = range >>4;
-    if ( this->curr->roll < this->roll.min + range/2 - delta ||
-         this->curr->roll > this->roll.min + range/2 + delta
-    ) {
-        // roll is not centered
-        return false;
-    }
     return true;
 }
 
-bool Input::is_menu_left(void) {
-    return this->is_roll_down();
-}
-bool Input::is_menu_right(void) {
-    return this->is_roll_up();
-}
-bool Input::is_menu_down(void) {
-    return this->is_pitch_down();
-}
-bool Input::is_menu_up(void) {
-    return this->is_pitch_up();
-}
-bool Input::is_throttle_down(void) {
-    uint16_t delta = (this->throttle.max - this->throttle.min)/3;
-    if ( this->curr->throttle < this->throttle.min + delta) {
+bool Input::is_high(enum Input::input_channels ch) {
+  uint16_t range = this->ch_config[ch].max - this->ch_config[ch].min;
+  uint16_t delta = range / 3;
+  if ( this->curr->ch_data[ch] < this->ch_config[ch].max - delta) {
         return true;
     }
     return false;
 
 }
-bool Input::is_throttle_up(void) {
-    uint16_t delta = (this->throttle.max - this->throttle.min)/3;
-    if ( this->curr->throttle > this->throttle.max - delta) {
-        return true;
-    }
-    return false;
-}
-bool Input::is_yaw_up(void) {
-    uint16_t delta = (this->yaw.max - this->yaw.min)/3;
-    if ( this->curr->yaw > this->yaw.max - delta) {
-        return true;
-    }
-    return false;
-}
-bool Input::is_yaw_down(void) {
-    uint16_t delta = (this->yaw.max - this->yaw.min)/3;
-    if ( this->curr->yaw > this->yaw.min + delta) {
-        return true;
-    }
-    return false;
-}
-
-bool Input::is_roll_down(void) {
-    uint16_t delta = (this->roll.max - this->roll.min)/3;
-    if ( this->curr->roll < this->roll.min + delta) {
-        return true;
-    }
-    return false;
-
-}
-bool Input::is_roll_up(void) {
-    uint16_t delta = (this->roll.max - this->roll.min)/3;
-    if ( this->curr->roll > this->roll.max - delta) {
-        return true;
-    }
-    return false;
-}
-bool Input::is_pitch_up(void) {
-    uint16_t delta = (this->pitch.max - this->pitch.min)/3;
-    if ( this->curr->pitch > this->pitch.max - delta) {
-        return true;
-    }
-    return false;
-}
-bool Input::is_pitch_down(void) {
-    uint16_t delta = (this->pitch.max - this->pitch.min)/3;
-    if ( this->curr->pitch > this->pitch.min + delta) {
+bool Input::is_low(enum Input::input_channels ch) {
+  uint16_t range = this->ch_config[ch].max - this->ch_config[ch].min;
+  uint16_t delta = range / 3;
+  if ( this->curr->ch_data[ch] < this->ch_config[ch].min + delta) {
         return true;
     }
     return false;
@@ -306,56 +216,48 @@ bool Input::is_menu_triggered(void) {
     return this->curr->menu;
 }
 
-bool Input::save_calibration(void) {
+bool Input::calibration_update(void) {
   bool changed = false;
-  if (this->throttle.min > this->curr->throttle){
-    changed = true;
-    this->throttle.min = this->curr->throttle;
-  } else if (this->throttle.max < this->curr->throttle) {
-    changed = true;
-    this->throttle.max = this->curr->throttle;
-  }
 
-  if (this->yaw.min > this->curr->yaw){
+  for (uint8_t ch = 0; ch < CH_COUNT; ch++) {
+    if (this->ch_config[ch].min > this->ch_raw[ch]) {
+      this->ch_config[ch].min = this->ch_raw[ch];
     changed = true;
-    this->yaw.min = this->curr->yaw;
-  } else if (this->yaw.max < this->curr->yaw) {
+    } else if (this->ch_config[ch].max < this->ch_raw[ch]) {
     changed = true;
-    this->yaw.max = this->curr->yaw;
+      this->ch_config[ch].max = this->ch_raw[ch];
   }
 
 
-  if (this->roll.min > this->curr->roll){
-    changed = true;
-    this->roll.min = this->curr->roll;
-  } else if (this->roll.max < this->curr->roll) {
-    changed = true;
-    this->roll.max = this->curr->roll;
   }
 
-  if (this->pitch.min > this->curr->pitch){
-    changed = true;
-    this->pitch.min = this->curr->pitch;
-  } else if (this->roll.max < this->curr->pitch) {
-    changed = true;
-    this->pitch.max = this->curr->pitch;
-  }
+  // TODO save in eeprom
   return changed;
 }
 void Input::update(void) {
-    this->curr->throttle = analogRead(Throttle_pin);
-    this->curr->yaw = analogRead(Yaw_pin);
-    this->curr->roll = analogRead(Roll_pin);
-    this->curr->pitch = analogRead(Pitch_pin);
 
-    this->curr->aux[0] = digitalRead(Aux1_pin);
-    this->curr->aux[1] = digitalRead(Aux2_pin);
-    this->curr->aux[2] = digitalRead(Aux3_pin);
-    this->curr->aux[3] = digitalRead(Aux4_pin);
-    this->curr->aux[4] = digitalRead(Aux5_pin);
-    this->curr->aux[5] = digitalRead(Aux6_pin);
+  for (uint8_t ch = 0; ch < CH_MAX; ch ++) {
 
-    this->curr->menu = digitalRead(Menu_pin);
+    if (this->ch_config[ch].is_analog)
+      this->ch_raw[ch] = analogRead(this->pins[ch]);
+    else
+      this->ch_raw[ch] = digitalRead(this->pins[ch]) == HIGH;
+
+    // do inverting
+    if (this->ch_config[ch].inverted)
+      this->curr->ch_data[ch] = this->ch_config[ch].max - this->ch_raw[ch];
+    else
+      this->curr->ch_data[ch] = this->ch_raw[ch];
+
+    // cap on max
+    
+    if (this->ch_config[ch].min > this->curr->ch_data[ch]) {
+      this->curr->ch_data[ch] = this->ch_config[ch].min;
+    } else if (this->ch_config[ch].max < this->curr->ch_data[ch]) {
+      this->curr->ch_data[ch] = this->ch_config[ch].max;
+    }
+  }
+  this->curr->menu = digitalRead(Menu_pin) == HIGH;
 
 
     /*debug_input("t%d y%d r%d p%d a1_%d a2_%d a3_%d a4_%d a5_%d m%d",
@@ -368,32 +270,7 @@ void Input::update(void) {
     if (curr_state != s_fly)
         return;
 
-    if(this->throttle.inverted)
-      Channel_data[THROTTLE] = map(this->curr->throttle, this->throttle.min, this->throttle.max, CHANNEL_MAX_100, CHANNEL_MIN_100);
-    else
-      Channel_data[THROTTLE] = map(this->curr->throttle, this->throttle.min, this->throttle.max, CHANNEL_MIN_100, CHANNEL_MAX_100);
-
-
-    if(this->yaw.inverted)
-      Channel_data[RUDDER] = map(this->curr->yaw, this->yaw.min, this->yaw.max, CHANNEL_MAX_100, CHANNEL_MIN_100);
-    else
-      Channel_data[RUDDER] = map(this->curr->yaw, this->yaw.min, this->yaw.max, CHANNEL_MIN_100, CHANNEL_MAX_100);
-
-    if(this->roll.inverted)
-      Channel_data[AILERON] = map(this->curr->roll, this->roll.min, this->roll.max, CHANNEL_MAX_100, CHANNEL_MIN_100);
-    else
-      Channel_data[AILERON] = map(this->curr->roll, this->roll.min, this->roll.max, CHANNEL_MIN_100, CHANNEL_MAX_100);
-
-
-    if(this->pitch.inverted)
-      Channel_data[ELEVATOR] = map(this->curr->pitch, this->pitch.min, this->pitch.max, CHANNEL_MAX_100, CHANNEL_MIN_100);
-    else
-      Channel_data[ELEVATOR] = map(this->curr->pitch, this->pitch.min, this->pitch.max, CHANNEL_MIN_100, CHANNEL_MAX_100);
-
-    for (uint8_t i = 0; i<6; ++i) {
-      if(this->aux[i].inverted)
-        Channel_data[CH5+i] = (this->curr->aux[i]) ? CHANNEL_MIN_100 : CHANNEL_MAX_100;
-      else
-        Channel_data[CH5+i] = (this->curr->aux[i]) ? CHANNEL_MAX_100 : CHANNEL_MIN_100;
+  for (uint8_t ch = 0; ch < CH_COUNT; ++ch) {
+    Channel_data[ch] = map(this->curr->ch_data[ch], this->ch_config[ch].min, this->ch_config[ch].max, CHANNEL_MAX_100, CHANNEL_MIN_100);
     }
 }

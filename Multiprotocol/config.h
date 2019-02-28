@@ -168,18 +168,6 @@
 //!!!! This is a work in progress!!! Do not enable unless you want to test and report
 //#define SPORT_POLLING
 
-
-/****************************/
-/*** SERIAL MODE SETTINGS ***/
-/****************************/
-//In this section you can configure the serial mode.
-//The serial mode enables full editing of all the parameters in the GUI of the radio. It is enabled by placing the rotary switch on position 0.
-//This is available natively for ER9X, ERSKY9X and OpenTX.
-
-//If you do not plan to use the Serial mode comment this line using "//" to save Flash space
-//#define ENABLE_SERIAL
-
-
 /*************************/
 /*** PPM MODE SETTINGS ***/
 /*************************/
@@ -214,7 +202,7 @@
 // The default value is 16 to receive all possible channels but you might want to filter some "bad" channels from the PPM frame like the ones above 6 on the Walkera PL0811.
 #define MAX_PPM_CHANNELS 16
 
-#define NBR_BANKS 3
+#define NBR_BANKS 1
 extern uint8_t curr_bank;
 
 struct PPM_Parameters

@@ -18,32 +18,9 @@
 #include "Multiprotocol.h"
 #include "cc2500_spi.h"
 
-#ifdef FAILSAFE_ENABLE
-    uint16_t Failsafe_data[NUM_CHN];
-#endif
+#include "input.h"
 
 
-void InitFailsafe(void)
-{
-  for (uint8_t i = 0; i < NUM_CHN; i++)
-    Failsafe_data[i] = 1024;
-  Failsafe_data[THROTTLE] = (uint16_t)204;  //1=-125%, 204=-100%
-  FAILSAFE_VALUES_on;
-}
-
-void InitPPM(void)
-{
- for(uint8_t i=0;i<NUM_CHN;i++)
-    PPM_data[i]=PPM_MAX_100+PPM_MIN_100;
-  PPM_data[THROTTLE]=PPM_MIN_100*2;
-}
-
-void InitChannel(void)
-{
-  for (uint8_t i = 0; i < NUM_CHN; i++)
-    Channel_data[i] = 1024;
-  Channel_data[THROTTLE] = 204;
-}
 /************************/
 /**  Convert routines  **/
 /************************/
