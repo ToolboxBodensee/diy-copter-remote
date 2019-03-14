@@ -28,4 +28,5 @@ install:
     - platformio update
 
 script:
+    - cd Multiprotocol
     - platformio run
