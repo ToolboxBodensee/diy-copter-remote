@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:remote-cache
-EELAYER 29 0
+EELAYER 26 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -15,10 +15,10 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L remote-rescue:cc2500-remote U?
+L remote-rescue:cc2500-remote U2
 U 1 1 5C490843
 P 2450 2450
-F 0 "U?" H 3028 2465 50  0000 L CNN
+F 0 "U2" H 3028 2465 50  0000 L CNN
 F 1 "cc2500" H 3028 2374 50  0000 L CNN
 F 2 "" H 2750 2700 50  0001 C CNN
 F 3 "" H 2750 2700 50  0001 C CNN
@@ -196,10 +196,10 @@ F 3 "" H 10700 1550 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:Battery_Cell BT?
+L Device:Battery_Cell BT1
 U 1 1 5C5FC330
 P 9800 2200
-F 0 "BT?" H 9918 2296 50  0000 L CNN
+F 0 "BT1" H 9918 2296 50  0000 L CNN
 F 1 "Battery_Cell" H 9918 2205 50  0000 L CNN
 F 2 "" V 9800 2260 50  0001 C CNN
 F 3 "~" V 9800 2260 50  0001 C CNN
@@ -231,16 +231,14 @@ $EndComp
 $Comp
 L power:GND #PWR?
 U 1 1 5C7178B9
-P 4200 5700
-F 0 "#PWR?" H 4200 5450 50  0001 C CNN
-F 1 "GND" H 4205 5527 50  0000 C CNN
-F 2 "" H 4200 5700 50  0001 C CNN
-F 3 "" H 4200 5700 50  0001 C CNN
-	1    4200 5700
+P 4050 5700
+F 0 "#PWR?" H 4050 5450 50  0001 C CNN
+F 1 "GND" H 4055 5527 50  0000 C CNN
+F 2 "" H 4050 5700 50  0001 C CNN
+F 3 "" H 4050 5700 50  0001 C CNN
+	1    4050 5700
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	4200 5700 4250 5700
 Wire Wire Line
 	5200 3800 5300 3800
 Wire Wire Line
@@ -250,7 +248,7 @@ L Device:R R1
 U 1 1 5C5D7699
 P 5300 1250
 F 0 "R1" H 5230 1204 50  0000 R CNN
-F 1 "4k7" H 5230 1295 50  0000 R CNN
+F 1 "10k" H 5230 1295 50  0000 R CNN
 F 2 "" V 5230 1250 50  0001 C CNN
 F 3 "~" H 5300 1250 50  0001 C CNN
 	1    5300 1250
@@ -261,7 +259,7 @@ L Device:R R2
 U 1 1 5C5D80E6
 P 5600 1250
 F 0 "R2" H 5530 1204 50  0000 R CNN
-F 1 "4k7" H 5530 1295 50  0000 R CNN
+F 1 "10k" H 5530 1295 50  0000 R CNN
 F 2 "" V 5530 1250 50  0001 C CNN
 F 3 "~" H 5600 1250 50  0001 C CNN
 	1    5600 1250
@@ -284,14 +282,14 @@ Text GLabel 5200 1500 0    50   Input ~ 0
 scl
 Wire Wire Line
 	6800 1650 6750 1650
-Text GLabel 5300 4100 2    50   Input ~ 0
+Text GLabel 5300 4300 2    50   Input ~ 0
 sda
-Text GLabel 5300 4200 2    50   Input ~ 0
+Text GLabel 5300 4400 2    50   Input ~ 0
 scl
 Wire Wire Line
-	5200 4100 5300 4100
+	5200 4300 5300 4300
 Wire Wire Line
-	5200 4200 5300 4200
+	5200 4400 5300 4400
 Wire Wire Line
 	9300 1100 9300 1150
 Wire Wire Line
@@ -299,10 +297,10 @@ Wire Wire Line
 Wire Wire Line
 	9400 1150 9400 1100
 $Comp
-L remote-rescue:LI_Charger-remote U?
+L remote-rescue:LI_Charger-remote U4
 U 1 1 5C4FB0A2
 P 9450 800
-F 0 "U?" H 9828 765 50  0000 L CNN
+F 0 "U4" H 9828 765 50  0000 L CNN
 F 1 "LI_Charger" H 9828 674 50  0000 L CNN
 F 2 "" H 9700 1000 50  0001 C CNN
 F 3 "" H 9700 1000 50  0001 C CNN
@@ -373,21 +371,21 @@ Wire Wire Line
 Wire Wire Line
 	2750 5000 4250 5000
 Text GLabel 4100 5100 0    50   Input ~ 0
-sw_mode
+sw_1
 Wire Wire Line
 	4250 5100 4100 5100
 Text GLabel 4100 5200 0    50   Input ~ 0
-sw_prearm
+sw_2
 Text GLabel 4100 5300 0    50   Input ~ 0
-sw_beep
+sw_3
 Wire Wire Line
 	4100 5200 4250 5200
 Wire Wire Line
 	4250 5300 4100 5300
 Text GLabel 5300 5500 2    50   Input ~ 0
-sw_led
+sw_5
 Text GLabel 5300 5600 2    50   Input ~ 0
-sw_arm
+sw_4
 Text GLabel 5300 5700 2    50   Input ~ 0
 sw_stickmenu
 Wire Wire Line
@@ -408,9 +406,9 @@ F 3 "" H 8050 4150 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text GLabel 7650 4650 0    50   Input ~ 0
-sw_led
+sw_5
 Text GLabel 7650 4150 0    50   Input ~ 0
-sw_arm
+sw_4
 Text GLabel 7650 5150 0    50   Input ~ 0
 sw_stickmenu
 Wire Wire Line
@@ -442,10 +440,10 @@ Wire Wire Line
 	8450 5250 8450 4750
 Connection ~ 8450 4750
 $Comp
-L Device:Buzzer BZ?
+L Device:Buzzer BZ1
 U 1 1 5C9F50A9
 P 6200 5200
-F 0 "BZ?" H 6352 5229 50  0000 L CNN
+F 0 "BZ1" H 6352 5229 50  0000 L CNN
 F 1 "Buzzer" H 6352 5138 50  0000 L CNN
 F 2 "" V 6175 5300 50  0001 C CNN
 F 3 "~" V 6175 5300 50  0001 C CNN
@@ -480,7 +478,7 @@ Wire Wire Line
 Wire Wire Line
 	7850 3650 7650 3650
 Text GLabel 7650 3650 0    50   Input ~ 0
-sw_beep
+sw_3
 Wire Wire Line
 	8450 3750 8250 3750
 Connection ~ 8450 3750
@@ -515,11 +513,11 @@ Wire Wire Line
 Wire Wire Line
 	8400 2550 8250 2550
 Text GLabel 7650 3150 0    50   Input ~ 0
-sw_prearm
+sw_2
 Wire Wire Line
 	7850 2650 7650 2650
 Text GLabel 7650 2650 0    50   Input ~ 0
-sw_mode
+sw_1
 $Comp
 L Switch:SW_SPDT SW_mode
 U 1 1 5C879BCA
@@ -551,10 +549,10 @@ Wire Wire Line
 Wire Wire Line
 	6750 1750 6800 1750
 $Comp
-L remote-rescue:LCD1602_I2c-remote U?
+L remote-rescue:LCD1602_I2c-remote U3
 U 1 1 5C4907C9
 P 6350 1650
-F 0 "U?" H 6375 2025 50  0000 C CNN
+F 0 "U3" H 6375 2025 50  0000 C CNN
 F 1 "LCD1602_I2c" H 6375 1934 50  0000 C CNN
 F 2 "" H 6400 1400 50  0001 C CNN
 F 3 "" H 6400 1400 50  0001 C CNN
@@ -637,10 +635,10 @@ F 3 "" H 5300 3800 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L remote-rescue:stm32-remote U?
+L remote-rescue:stm32-remote U1
 U 1 1 5C490878
 P 4650 4750
-F 0 "U?" H 4725 5965 50  0000 C CNN
+F 0 "U1" H 4725 5965 50  0000 C CNN
 F 1 "stm32" H 4725 5874 50  0000 C CNN
 F 2 "" H 5050 3650 50  0001 C CNN
 F 3 "" H 5050 3650 50  0001 C CNN
@@ -758,4 +756,102 @@ Wire Wire Line
 Wire Wire Line
 	8800 1650 10150 1650
 Connection ~ 8800 1650
+$Comp
+L Connector:USB_B_Micro J1
+U 1 1 5C8B0CE8
+P 10350 5500
+F 0 "J1" H 10121 5491 50  0000 R CNN
+F 1 "USB_B_Micro" H 10121 5400 50  0000 R CNN
+F 2 "" H 10500 5450 50  0001 C CNN
+F 3 "~" H 10500 5450 50  0001 C CNN
+	1    10350 5500
+	-1   0    0    -1  
+$EndComp
+Text GLabel 9850 5500 0    50   Input ~ 0
+USB_D+
+Text GLabel 9850 5600 0    50   Input ~ 0
+USB_D-
+Wire Wire Line
+	9850 5500 10050 5500
+Wire Wire Line
+	10050 5600 9850 5600
+Text GLabel 9850 5300 0    50   Input ~ 0
+usb_5v
+Wire Wire Line
+	9850 5300 10050 5300
+$Comp
+L power:GND #PWR?
+U 1 1 5C8C5D83
+P 10350 6000
+F 0 "#PWR?" H 10350 5750 50  0001 C CNN
+F 1 "GND" H 10355 5827 50  0000 C CNN
+F 2 "" H 10350 6000 50  0001 C CNN
+F 3 "" H 10350 6000 50  0001 C CNN
+	1    10350 6000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10350 5900 10350 6000
+Wire Notes Line
+	9350 6250 9350 4900
+Text Label 9400 4800 0    50   ~ 0
+Optional
+Wire Notes Line
+	9350 4500 9350 3350
+Wire Notes Line
+	11100 3350 11100 4500
+Text Label 9450 3700 0    50   ~ 0
+sw_1
+Text Label 9700 3700 0    50   ~ 0
+sw_2
+Text Label 10000 3850 0    50   ~ 0
+sw_3
+Text Label 10250 3700 0    50   ~ 0
+sw_4
+Text Label 10550 3700 0    50   ~ 0
+sw_stickmenu
+Text Label 9750 4200 0    50   ~ 0
+sw_on
+Text Label 10250 4200 0    50   ~ 0
+sw_6
+Text Label 9400 3300 0    50   ~ 0
+switch_position_in_3d_model
+Text GLabel 5400 4900 2    50   Input ~ 0
+USB_D-
+Text GLabel 5400 5000 2    50   Input ~ 0
+USB_D+
+Wire Wire Line
+	5400 4900 5200 4900
+Wire Wire Line
+	5200 5000 5400 5000
+Wire Notes Line
+	9350 3350 11100 3350
+Wire Notes Line
+	9350 4500 11100 4500
+Wire Wire Line
+	4250 5600 4050 5600
+Wire Wire Line
+	4050 5600 4050 5700
+Wire Wire Line
+	4050 5700 4250 5700
+Connection ~ 4050 5700
+$Comp
+L power:+3.3V #PWR?
+U 1 1 5C90ECBA
+P 3700 5500
+F 0 "#PWR?" H 3700 5350 50  0001 C CNN
+F 1 "+3.3V" H 3715 5673 50  0000 C CNN
+F 2 "" H 3700 5500 50  0001 C CNN
+F 3 "" H 3700 5500 50  0001 C CNN
+	1    3700 5500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3700 5500 4250 5500
+Wire Notes Line
+	9350 4850 11100 4850
+Wire Notes Line
+	11100 4850 11100 6250
+Wire Notes Line
+	9350 6250 11100 6250
 $EndSCHEMATC
