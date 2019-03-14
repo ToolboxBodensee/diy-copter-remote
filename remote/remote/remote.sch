@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:remote-cache
-EELAYER 29 0
+EELAYER 26 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -250,7 +250,7 @@ L Device:R R1
 U 1 1 5C5D7699
 P 5300 1250
 F 0 "R1" H 5230 1204 50  0000 R CNN
-F 1 "4k7" H 5230 1295 50  0000 R CNN
+F 1 "10k" H 5230 1295 50  0000 R CNN
 F 2 "" V 5230 1250 50  0001 C CNN
 F 3 "~" H 5300 1250 50  0001 C CNN
 	1    5300 1250
@@ -261,7 +261,7 @@ L Device:R R2
 U 1 1 5C5D80E6
 P 5600 1250
 F 0 "R2" H 5530 1204 50  0000 R CNN
-F 1 "4k7" H 5530 1295 50  0000 R CNN
+F 1 "10k" H 5530 1295 50  0000 R CNN
 F 2 "" V 5530 1250 50  0001 C CNN
 F 3 "~" H 5600 1250 50  0001 C CNN
 	1    5600 1250
@@ -758,4 +758,74 @@ Wire Wire Line
 Wire Wire Line
 	8800 1650 10150 1650
 Connection ~ 8800 1650
+$Comp
+L Connector:USB_B_Micro J?
+U 1 1 5C8B0CE8
+P 10450 5500
+F 0 "J?" H 10505 5967 50  0000 C CNN
+F 1 "USB_B_Micro" H 10505 5876 50  0000 C CNN
+F 2 "" H 10600 5450 50  0001 C CNN
+F 3 "~" H 10600 5450 50  0001 C CNN
+	1    10450 5500
+	-1   0    0    -1  
+$EndComp
+Text GLabel 9950 5500 0    50   Input ~ 0
+USB_D+
+Text GLabel 9950 5600 0    50   Input ~ 0
+USB_D-
+Wire Wire Line
+	9950 5500 10150 5500
+Wire Wire Line
+	10150 5600 9950 5600
+Text GLabel 9950 5300 0    50   Input ~ 0
+usb_5v
+Wire Wire Line
+	9950 5300 10150 5300
+$Comp
+L power:GND #PWR?
+U 1 1 5C8C5D83
+P 10450 6000
+F 0 "#PWR?" H 10450 5750 50  0001 C CNN
+F 1 "GND" H 10455 5827 50  0000 C CNN
+F 2 "" H 10450 6000 50  0001 C CNN
+F 3 "" H 10450 6000 50  0001 C CNN
+	1    10450 6000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10450 5900 10450 6000
+Wire Notes Line
+	9350 4850 10950 4850
+Wire Notes Line
+	10950 4850 10950 6250
+Wire Notes Line
+	10950 6250 9350 6250
+Wire Notes Line
+	9350 6250 9350 4900
+Text Label 9800 4800 0    50   ~ 0
+Optional
+Wire Notes Line
+	10950 4500 9350 4500
+Wire Notes Line
+	9350 4500 9350 3350
+Wire Notes Line
+	9350 3350 10950 3350
+Wire Notes Line
+	10950 3350 10950 4500
+Text Label 9500 3700 0    50   ~ 0
+sw_1
+Text Label 9750 3700 0    50   ~ 0
+sw_2
+Text Label 10050 3850 0    50   ~ 0
+sw_3
+Text Label 10300 3700 0    50   ~ 0
+sw_4
+Text Label 10600 3700 0    50   ~ 0
+sw_5
+Text Label 9800 4200 0    50   ~ 0
+sw_on_off
+Text Label 10300 4200 0    50   ~ 0
+sw_6
+Text Label 9400 3300 0    50   ~ 0
+switch_position_in_3d_model
 $EndSCHEMATC

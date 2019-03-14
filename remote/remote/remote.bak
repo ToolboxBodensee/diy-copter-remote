@@ -467,7 +467,7 @@ Wire Wire Line
 	6100 5100 6000 5100
 Wire Wire Line
 	5200 5300 6100 5300
-Text GLabel 9100 1650 0    50   Input ~ 0
+Text GLabel 8600 1650 0    50   Input ~ 0
 usb_5v
 Wire Wire Line
 	9700 1450 10150 1450
@@ -686,25 +686,18 @@ $EndComp
 $Comp
 L Switch:SW_DPDT_x2 SWon
 U 2 1 5CB08670
-P 9200 1350
-F 0 "SWon" H 9200 1635 50  0000 C CNN
-F 1 "SW_DPDT_x2" H 9200 1544 50  0000 C CNN
-F 2 "" H 9200 1350 50  0001 C CNN
-F 3 "" H 9200 1350 50  0001 C CNN
-	2    9200 1350
-	0    -1   1    0   
+P 9000 1150
+F 0 "SWon" H 9000 1435 50  0000 C CNN
+F 1 "SW_DPDT_x2" H 9000 1344 50  0000 C CNN
+F 2 "" H 9000 1150 50  0001 C CNN
+F 3 "" H 9000 1150 50  0001 C CNN
+	2    9000 1150
+	-1   0    0    1   
 $EndComp
 Wire Wire Line
 	9700 1100 9700 1450
 Wire Wire Line
-	9100 1650 9300 1650
-Wire Wire Line
 	9200 1150 9200 1100
-Wire Wire Line
-	9300 1550 9300 1650
-Connection ~ 9300 1650
-Wire Wire Line
-	9300 1650 10150 1650
 $Comp
 L Device:R R3
 U 1 1 5CB3653F
@@ -758,4 +751,11 @@ Text GLabel 5300 5200 2    50   Input ~ 0
 Vbat
 Wire Wire Line
 	5300 5200 5200 5200
+Wire Wire Line
+	8800 1250 8800 1650
+Wire Wire Line
+	8800 1650 8600 1650
+Wire Wire Line
+	8800 1650 10150 1650
+Connection ~ 8800 1650
 $EndSCHEMATC
