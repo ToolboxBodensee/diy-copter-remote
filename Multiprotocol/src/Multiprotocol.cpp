@@ -24,6 +24,7 @@
 
 #define DEBUG_SERIAL    // Only for STM32_BOARD compiled with Upload method "Serial"->usart1, "STM32duino bootloader"->USB serial
 
+#include <cstdint> //adds types like unit_16_t
 
 #include "config.h"
 #include "tx_def.h"
@@ -116,6 +117,12 @@ float TIMER_PRESCALE = 5.82;
 // Callback
 typedef uint16_t (*void_function_t) (void);//pointer to a function with no parameters which return an uint16_t integer
 void_function_t remote_callback = 0;
+
+//forward declarations
+void modules_reset();
+uint32_t random_id(bool create_new);
+static void protocol_init();
+uint8_t Update_All();
 
 // Init
 void setup()
@@ -274,11 +281,11 @@ void loop()
 
         if (next_callback > 4000) {
             uint32_t s;
-            
+
             s =micros();
             input.update();
             debugln("input took %lu", (micros()-s));
-            
+
             s =micros();
             update_state();
             debugln("state took %lu", (micros()-s));
@@ -298,7 +305,7 @@ void loop()
 }
 
 uint8_t Update_All() {
-  
+
     #ifdef ENABLE_BIND_CH
         if(IS_AUTOBIND_FLAG_on &&
             IS_BIND_CH_PREV_off &&
@@ -381,12 +388,12 @@ void update_serial_data()
         RANGE_FLAG_on;
     else
         RANGE_FLAG_off;
-        
+
     if(rx_ok_buff[1]&0x40)                      //check autobind
         AUTOBIND_FLAG_on;
     else
         AUTOBIND_FLAG_off;
-        
+
     if(rx_ok_buff[2]&0x80)                      //if rx_ok_buff[2] ==1,power is low ,0-power high
         POWER_FLAG_off;                         //power low
     else
