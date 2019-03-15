@@ -136,7 +136,7 @@ void LCD_state_bind::update(void)
   unsigned long time_in_s = time_in_ms/1000; // to sec
   unsigned long remain_s = this->bind_time - time_in_s;
 
-  snprintf(line,sizeof(line),"remaining sec %02d",remain_s);
+  snprintf(line,sizeof(line),"remaining sec %02lu",remain_s);
   lcd.setCursor(0,1);
   lcd.print(line);
 
