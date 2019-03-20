@@ -7,6 +7,7 @@
 
 extern uint16_t Channel_data[NUM_TX_CHN];
 extern uint16_t Failsafe_data[NUM_TX_CHN];
+extern const char* ch_name[NUM_TX_CHN];
 class Input {
     public:
         enum input_channels {
@@ -52,6 +53,10 @@ class Input {
         // menu inputs
         bool is_menu_triggered(void);
 
+        void invert_ch(enum input_channels ch);
+        void print_ch(enum input_channels ch);
+        void calibration_init(void);
+        bool calibration_update(void);
     private:
         struct data input[2];
         struct data* curr;
@@ -67,8 +72,6 @@ class Input {
         } ch_config[CH_COUNT];
 
         uint32_t pins[CH_COUNT];
-
-        bool calibration_update(void);
 };
 
 extern uint16_t Channel_data[NUM_TX_CHN];

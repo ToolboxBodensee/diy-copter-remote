@@ -32,8 +32,10 @@
 
 #define Throttle_pin  PA4
 #define Yaw_pin       PA5
-#define Roll_pin      PA6
-#define Pitch_pin     PA7
+//#define Roll_pin      PA6
+//#define Pitch_pin     PA7
+#define Roll_pin      PA7
+#define Pitch_pin     PA6
 
 #define Aux1_pin      PB0
 #define Aux2_pin      PB0

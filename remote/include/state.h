@@ -62,9 +62,7 @@ public:
 
 class LCD_state_menu: public State {
 private:
-    unsigned long time_enter;
-    uint8_t curr_selected;
-
+    int8_t curr_selected;
 public:
     LCD_state_menu(void);
     void enter(void);
@@ -72,11 +70,9 @@ public:
     void leave(void);
 };
 
-class LCD_state_calibration: public State {
-private:
-    unsigned long time_enter;
+class LCD_state_joy_calibration: public State {
 public:
-    LCD_state_calibration(void);
+    LCD_state_joy_calibration(void);
     void enter(void);
     void update(void);
     void leave(void);

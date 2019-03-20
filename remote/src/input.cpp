@@ -103,78 +103,12 @@ void Input::init() {
   this->ch_config[CH_AUX4].inverted     = false;
   this->ch_config[CH_AUX5].inverted     = false;
 
-  this->ch_config[CH_THROTTLE].min  = 0;
-  this->ch_config[CH_YAW].min       = 0;
-  this->ch_config[CH_ROLL].min      = 0;
-  this->ch_config[CH_PITCH].min     = 0;
-
-  this->ch_config[CH_THROTTLE].max  = 4096;
-  this->ch_config[CH_YAW].max       = 4096;
-  this->ch_config[CH_ROLL].max      = 4096;
-  this->ch_config[CH_PITCH].max     = 4096;
 }
 void Input::do_calibration(void) {
-  int8_t turns = 50;
-  int8_t i;
-
-  // min max calibration
-  i = turns;
-  while(i > 0) {
-    this->update();
-    if (true == this->calibration_update()) {
-      i = turns;
-      debugln("new values t %d-%d r %d-%d p %d-%d y %d-%d",
-              this->ch_config[CH_THROTTLE].min, this->ch_config[CH_THROTTLE].max,
-              this->ch_config[CH_ROLL].min,    this->ch_config[CH_ROLL].max,
-              this->ch_config[CH_PITCH].min,   this->ch_config[CH_PITCH].max,
-              this->ch_config[CH_YAW].min,     this->ch_config[CH_YAW].max);
-    }else {
-      i -= 1;
-    }
-
-    delay(100);
-  }
-
-  // center
-  debugln("now center all sticks");
-  i = turns;
-  while(i > 0) {
-    delay(100);
-    this->update();
-    if (false == this->is_centered()) {
-      i = turns;
-    }else {
-      i -= 1;
-    }
-
-  }
-
-  for (int ch = 0; ch < 4 ; ++ch) {
-    debugln("now Move %s to max", ch_name[ch]);
-  i = turns;
-  while(i>0) {
-      delay(50);
-    this->update();
-
-      if (true == this->is_high((enum input_channels)ch)) {
-        debug("u");
-        i--;
-        continue;
-    }
-
-
-      if (true == this->is_low((enum input_channels)ch)) {
-        debug("dI");
-        this->ch_config[CH_THROTTLE].inverted = !this->ch_config[CH_THROTTLE].inverted;
-  i = turns;
-        continue;
-    }
-    }
-  }
-
 }
+
 bool Input::is_centered(void) {
-  return 
+  return
     this->is_centered(CH_ROLL) &&
     this->is_centered(CH_PITCH) &&
     this->is_centered(CH_THROTTLE) &&
@@ -196,8 +130,8 @@ bool Input::is_centered(enum Input::input_channels ch) {
 
 bool Input::is_high(enum Input::input_channels ch) {
   uint16_t range = this->ch_config[ch].max - this->ch_config[ch].min;
-  uint16_t delta = range / 3;
-  if ( this->curr->ch_data[ch] < this->ch_config[ch].max - delta) {
+  uint16_t delta = range / 5;
+  if ( this->curr->ch_data[ch] > this->ch_config[ch].max - delta) {
         return true;
     }
     return false;
@@ -205,7 +139,7 @@ bool Input::is_high(enum Input::input_channels ch) {
 }
 bool Input::is_low(enum Input::input_channels ch) {
   uint16_t range = this->ch_config[ch].max - this->ch_config[ch].min;
-  uint16_t delta = range / 3;
+  uint16_t delta = range / 5;
   if ( this->curr->ch_data[ch] < this->ch_config[ch].min + delta) {
         return true;
     }
@@ -216,23 +150,51 @@ bool Input::is_menu_triggered(void) {
     return this->curr->menu;
 }
 
+void Input::invert_ch(enum Input::input_channels ch) {
+    this->ch_config[ch].inverted = !this->ch_config[ch].inverted;
+}
+void Input::print_ch(enum Input::input_channels ch) {
+    debug("ch%d: %04d %04d min %d max %d high %d mid %d low %d\n",
+            ch,
+            this->ch_raw[ch],
+            this->curr->ch_data[ch],
+            this->ch_config[ch].min,
+            this->ch_config[ch].max,
+            this->is_high((enum Input::input_channels)ch),
+            this->is_centered((enum Input::input_channels)ch),
+            this->is_low((enum Input::input_channels)ch)
+            );
+}
+
 bool Input::calibration_update(void) {
-  bool changed = false;
+    bool changed = false;
 
-  for (uint8_t ch = 0; ch < CH_COUNT; ch++) {
-    if (this->ch_config[ch].min > this->ch_raw[ch]) {
-      this->ch_config[ch].min = this->ch_raw[ch];
-    changed = true;
-    } else if (this->ch_config[ch].max < this->ch_raw[ch]) {
-    changed = true;
-      this->ch_config[ch].max = this->ch_raw[ch];
-  }
+    for (uint8_t ch = 0; ch < CH_COUNT; ch++) {
+        if (this->ch_config[ch].min > this->ch_raw[ch]) {
+            this->ch_config[ch].min = this->ch_raw[ch];
+            changed = true;
+        } else if (this->ch_config[ch].max < this->ch_raw[ch]) {
+            changed = true;
+            this->ch_config[ch].max = this->ch_raw[ch];
+        }
+    }
 
+    if (changed) {
+        debugln("new calib values t %d-%d r %d-%d p %d-%d y %d-%d",
+            this->ch_config[CH_THROTTLE].min, this->ch_config[CH_THROTTLE].max,
+            this->ch_config[CH_ROLL].min,    this->ch_config[CH_ROLL].max,
+            this->ch_config[CH_PITCH].min,   this->ch_config[CH_PITCH].max,
+            this->ch_config[CH_YAW].min,     this->ch_config[CH_YAW].max);
+        // TODO save in eeprom
+    }
 
-  }
-
-  // TODO save in eeprom
-  return changed;
+    return changed;
+}
+void Input::calibration_init(void) {
+    for (uint8_t ch = 0; ch < CH_COUNT; ch++) {
+        this->ch_config[ch].min = this->ch_raw[ch];
+        this->ch_config[ch].max = this->ch_raw[ch];
+    }
 }
 void Input::update(void) {
 
@@ -250,7 +212,7 @@ void Input::update(void) {
       this->curr->ch_data[ch] = this->ch_raw[ch];
 
     // cap on max
-    
+
     if (this->ch_config[ch].min > this->curr->ch_data[ch]) {
       this->curr->ch_data[ch] = this->ch_config[ch].min;
     } else if (this->ch_config[ch].max < this->curr->ch_data[ch]) {

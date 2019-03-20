@@ -223,7 +223,7 @@ void setup()
         sub_protocol    =   PPM_prot[line].sub_proto;
         RX_num          =   PPM_prot[line].rx_num;
 
-  debugln("protocol: %d", protocol);
+  debug("protocol: %d ", protocol);
   switch(protocol) {
     case PROTO_FRSKYD:
       debugln("PROTO_FRSKYD");
@@ -235,9 +235,9 @@ void setup()
       debugln("PROTO_FRSKYV");
       break;
   }
-  debugln("sub_protocol: %d", sub_protocol);
+  debug("sub_protocol: %d\n", sub_protocol);
   option            =   PPM_prot[line].option;  // Use radio-defined option value
-  debugln("freq offset: %d", option);
+  debug("freq offset: %d\n", option);
         if(PPM_prot[line].power)
           POWER_FLAG_on;
         if(PPM_prot[line].autobind) {
@@ -250,20 +250,27 @@ void setup()
 
     }
 #endif //ENABLE_PPM
-  debugln("Init complete");
+  debug("Init complete\n");
   input.init();
   input.update();
   init_state();
 
 
-  debugln("do calibration start moving sticks please");
-  input.do_calibration();
 }
 
 // Main
 // Protocol scheduler
 void loop()
 {
+    uint32_t s;
+    s =micros();
+    input.update();
+    debug("input took %lu", (micros()-s));
+
+    s =micros();
+    update_state();
+    debugln("state took %lu", (micros()-s));
+    return;
     uint32_t next_callback;
 
     if(remote_callback==0 || IS_WAIT_BIND_on ) {
@@ -284,7 +291,7 @@ void loop()
 
             s =micros();
             input.update();
-            debugln("input took %lu", (micros()-s));
+            debug("input took %lu", (micros()-s));
 
             s =micros();
             update_state();
