@@ -17,7 +17,9 @@
 #include "cc2500_spi.h"
 #include "Multiprotocol.h"
 
+uint8_t  hopping_frequency[50];
 uint16_t counter;
+
 void frsky2way_init(uint8_t bind)
 {
   //debugln("frsky2way_init");
@@ -80,17 +82,13 @@ void frsky2way_data_frame()
     packet[11] = 0;
     packet[16] = 0;
     packet[17] = 0;
-    for(uint8_t i = 0; i < 8; i++)
-    {
+    for(uint8_t i = 0; i < 8; i++) {
         uint16_t value;
-            value = convert_channel_frsky(i);
-        if(i < 4)
-        {
+        value = convert_channel_frsky(i);
+        if(i < 4) {
             packet[6+i] = value & 0xff;
             packet[10+(i>>1)] |= ((value >> 8) & 0x0f) << (4 *(i & 0x01));
-        }
-        else
-        {
+        } else {
             packet[8+i] = value & 0xff;
             packet[16+((i-4)>>1)] |= ((value >> 8) & 0x0f) << (4 * ((i-4) & 0x01));
         }
@@ -132,7 +130,7 @@ uint16_t ReadFrSky_2way()
             // menu tells us to stop so do not inc state
             //state++;
         }
-  
+
         if(state == FRSKY_BIND_DONE) {
             debugln("%s bind done fr",__func__);
         }
@@ -199,4 +197,36 @@ uint16_t ReadFrSky_2way()
         state++;
     }
     return state == FRSKY_DATA4 ? 7500 : 9000;
+}
+
+uint16_t convert_channel_frsky(uint8_t num)
+{
+  uint16_t val = input.get_channel_data()[num];
+  return ((val * 15) >> 4) + 1290;
+}
+
+void Frsky_init_hop(void)
+{
+    uint8_t val;
+    uint8_t channel = rx_tx_addr[0] & 0x07;
+    uint8_t channel_spacing = rx_tx_addr[1];
+    //Filter bad tables
+    if (channel_spacing < 0x02)
+        channel_spacing += 0x02;
+    if (channel_spacing > 0xE9)
+        channel_spacing -= 0xE7;
+    if (channel_spacing % 0x2F == 0)
+        channel_spacing++;
+
+    hopping_frequency[0] = channel;
+
+    for (uint8_t i = 1; i < 50; i++) {
+        channel = (channel + channel_spacing) % 0xEB;
+        val = channel;
+
+        if ((val == 0x00) || (val == 0x5A) || (val == 0xDC))
+            val++;
+
+        hopping_frequency[i] = i > 46 ? 0 : val;
+    }
 }

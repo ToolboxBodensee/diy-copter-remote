@@ -19,17 +19,6 @@
 #include "tx_def.h"
 
 void InitChannel(void);
-void reverse_channel(uint8_t num);
-uint16_t convert_channel_ppm(uint8_t num);
-uint16_t convert_channel_10b(uint8_t num);
-uint8_t convert_channel_8b(uint8_t num);
-int16_t convert_channel_16b_limit(uint8_t num, int16_t min, int16_t max);
-int16_t convert_channel_16b_nolimit(uint8_t num, int16_t min, int16_t max);
-uint8_t convert_channel_s8b(uint8_t num);
-uint16_t limit_channel_100(uint8_t num);
-void convert_channel_HK310(uint8_t num, uint8_t *low, uint8_t *high);
-void convert_failsafe_HK310(uint8_t num, uint8_t *low, uint8_t *high);
-uint16_t convert_channel_frsky(uint8_t num);
 
 /******************************/
 /**  FrSky D and X routines  **/
@@ -44,7 +33,6 @@ enum {
   FRSKY_DATA5
 };
 
-void Frsky_init_hop(void);
 /******************************/
 /**  FrSky V, D and X routines  **/
 /******************************/

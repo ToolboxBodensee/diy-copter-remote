@@ -17,6 +17,7 @@
 #define _FRSKYD_CC2500_H_
 
 #include <stdint.h>
+void Frsky_init_hop(void);
 void frsky2way_init(uint8_t bind);
 
 void frsky2way_build_bind_packet();
@@ -26,6 +27,5 @@ void frsky2way_data_frame(void);
 uint16_t initFrSky_2way(void);
 uint16_t ReadFrSky_2way(void);
 
-
-
+uint16_t convert_channel_frsky(uint8_t num);
 #endif

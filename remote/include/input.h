@@ -5,8 +5,7 @@
 
 #define NUM_TX_CHN 16
 
-extern uint16_t Channel_data[NUM_TX_CHN];
-extern uint16_t Failsafe_data[NUM_TX_CHN];
+extern Input input;
 extern const char* ch_name[NUM_TX_CHN];
 class Input {
     public:
@@ -29,20 +28,17 @@ class Input {
             MENU_UP_DOWN = CH_PITCH,
             MENU_LEFT_RIGHT = CH_ROLL,
         };
-
-        struct data {
-            uint16_t ch_data[CH_COUNT];
-            bool menu;
+        struct ch_config {
+            uint16_t max;
+            uint16_t min;
+            bool inverted;
+            bool is_analog;
         };
-
 
         Input(void);
         void init(void);
-        void do_calibration(void);
         void update(void);
 
-        struct data* get_curr_input(void);
-        struct data* get_old_input(void);
         void update_inputs(void);
         void mark_processed(void);
 
@@ -55,25 +51,37 @@ class Input {
 
         void invert_ch(enum input_channels ch);
         void print_ch(enum input_channels ch);
-        void calibration_init(void);
+
+        void calibration_reset(void);
         bool calibration_update(void);
+
+        void set_calibration(struct ch_config *new_config);
+        void get_calibration(struct ch_config *curr_config);
+
+        uint16_t *get_channel_data(void);
     private:
+        // raw sticks input
+        uint16_t ch_raw[CH_COUNT];
+
+        // calculated inputs (my be inverted
+        struct data {
+            uint16_t ch_data[CH_COUNT];
+            bool menu;
+        };
+
+        // actual tx channel data
+        uint16_t channel_data[CH_COUNT];
+
         struct data input[2];
         struct data* curr;
         struct data* old;
 
-        uint16_t ch_raw[CH_COUNT];
 
-        struct {
-          uint16_t max;
-          uint16_t min;
-          bool inverted;
-          bool is_analog;
-        } ch_config[CH_COUNT];
+        // config of each channel
+        struct ch_config ch_config[CH_COUNT];
 
+        // pin setttings
         uint32_t pins[CH_COUNT];
 };
 
-extern uint16_t Channel_data[NUM_TX_CHN];
-extern Input input;
 #endif

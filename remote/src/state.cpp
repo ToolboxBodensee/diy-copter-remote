@@ -4,6 +4,7 @@
 #include "FrSkyD_cc2500.h"
 #include "state.h"
 #include "input.h"
+#include "eeprom.h"
 #include "debug.h"
 #include "tx_def.h"
 
@@ -212,7 +213,7 @@ void LCD_state_joy_calibration::update(void) {
     int8_t i;
 
     // init min/max
-    input.calibration_init();
+    input.calibration_reset();
 
     // min max calibration
     lcd.setCursor(0,0);
@@ -273,6 +274,10 @@ void LCD_state_joy_calibration::update(void) {
             }
         }
     }
+
+    struct ch_config ch_config[CH_COUNT];
+    input.get_calibration(ch_config);
+
 
     lcd.setCursor(0,0);
     lcd.print("center again    ");

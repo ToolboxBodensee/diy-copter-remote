@@ -33,7 +33,6 @@ extern uint8_t protocol_flags;
 extern uint8_t protocol_flags2;
 extern uint8_t pkt[MAX_PKT];//telemetry receiving packets
 extern uint8_t prev_option;
-extern uint8_t  hopping_frequency[50];
 extern uint8_t  crc8;
 extern uint8_t  packet_count;
 extern uint8_t  RX_num;
