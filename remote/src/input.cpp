@@ -30,8 +30,8 @@ Input::Input(void) {
 
     //InitFailsafe
     for (uint8_t i = 0; i < NUM_TX_CHN; i++)
-        Failsafe_data[i] = (CHANNEL_MAX_100 - CHANNEL_MIN_100) / 2 + CHANNEL_MIN_100;
-    Failsafe_data[CH_THROTTLE] = CHANNEL_MIN_100;  //1=-125%, 204=-100%
+        this->failsafe_data[i] = (CHANNEL_MAX_100 - CHANNEL_MIN_100) / 2 + CHANNEL_MIN_100;
+    this->failsafe_data[CH_THROTTLE] = CHANNEL_MIN_100;  //1=-125%, 204=-100%
 
     // init channel
 
@@ -40,21 +40,13 @@ Input::Input(void) {
     this->channel_data[CH_THROTTLE] = 204;
 }
 
-uint16_t *Input::get_channel_data(void) {
+uint16_t* Input::get_channel_data(void) {
     return this->channel_data;
 }
 void Input::mark_processed(void) {
     struct data* temp = this->old;
     this->old = this->curr;
     this->curr = temp;
-}
-
-struct Input::data* Input::get_curr_input(void) {
-    return this->curr;
-}
-
-struct Input::data* Input::get_old_input(void) {
-    return this->old;
 }
 
 void Input::init() {

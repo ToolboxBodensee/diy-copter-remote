@@ -5,8 +5,6 @@
 
 #define NUM_TX_CHN 16
 
-extern Input input;
-extern const char* ch_name[NUM_TX_CHN];
 class Input {
     public:
         enum input_channels {
@@ -60,6 +58,7 @@ class Input {
 
         uint16_t *get_channel_data(void);
     private:
+
         // raw sticks input
         uint16_t ch_raw[CH_COUNT];
 
@@ -71,11 +70,11 @@ class Input {
 
         // actual tx channel data
         uint16_t channel_data[CH_COUNT];
+        uint16_t failsafe_data[CH_COUNT];
 
         struct data input[2];
         struct data* curr;
         struct data* old;
-
 
         // config of each channel
         struct ch_config ch_config[CH_COUNT];
@@ -83,5 +82,7 @@ class Input {
         // pin setttings
         uint32_t pins[CH_COUNT];
 };
+extern const char* ch_name[NUM_TX_CHN];
+extern Input input;
 
 #endif

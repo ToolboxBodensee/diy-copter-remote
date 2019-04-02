@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 
+extern LiquidCrystal_I2C lcd;
 void init_state(void);
 void update_state(void);
 

@@ -20,14 +20,4 @@
     #endif
 #endif
 
-
-#if defined(ENABLE_BIND_CH)
-    #if BIND_CH<4
-        #error BIND_CH must be above 4.
-    #endif
-    #if BIND_CH>16
-        #error BIND_CH must be below or equal to 16.
-    #endif
-#endif
-
 #endif

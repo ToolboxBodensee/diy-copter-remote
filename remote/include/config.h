@@ -16,17 +16,8 @@
 #define _CONFIG_H_
 
 #include <stdint.h>
-/**********************************************/
-/** Multiprotocol module configuration file ***/
-/**********************************************/
 
-/*******************/
-/*** TX SETTINGS ***/
-/*******************/
-//Modify the channel order based on your TX: AETR, TAER, RETA...
-//Examples: Flysky & DEVO is AETR, JR/Spektrum radio is TAER, Multiplex is AERT...
-//Default is AETR.
-#define AETR
+#define DEFAULT_BIND_TIME 13 /*seconds*/
 
 /*****************/
 /*** AUTO BIND ***/  // Also referred as "Bind on powerup"
@@ -171,37 +162,6 @@
 /*************************/
 /*** PPM MODE SETTINGS ***/
 /*************************/
-//In this section you can configure all details about PPM.
-//If you do not plan to use the PPM mode comment this line using "//" to save Flash space, you don't need to configure anything below in this case
-#define ENABLE_PPM
-
-/** TX END POINTS **/
-//It is important for the module to know the endpoints of your radio.
-//Below are some standard transmitters already preconfigured.
-//Uncomment only the one which matches your transmitter.
-#define TX_ER9X         //ER9X/ERSKY9X/OpenTX   ( 988<->2012 microseconds)
-//#define TX_DEVO7      //DEVO                  (1120<->1920 microseconds)
-//#define TX_SPEKTRUM   //Spektrum              (1100<->1900 microseconds)
-//#define TX_HISKY      //HISKY                 (1120<->1920 microseconds)
-//#define TX_MPX        //Multiplex MC2020      (1250<->1950 microseconds)
-//#define TX_WALKERA    //Walkera PL0811-01H    (1000<->1800 microseconds)
-//#define TX_CUSTOM     //Custom
-
-// The lines below are used to set the end points in microseconds if you have selected TX_CUSTOM.
-// A few things to consider:
-//  - If you put too big values compared to your TX you won't be able to reach the extremes which is bad for throttle as an example
-//  - If you put too low values you won't be able to use your full stick range, it will be maxed out before reaching the ends
-//  - Centered stick value is usually 1500. It should match the middle between MIN and MAX, ie Center=(MAX+MIN)/2. If your TX is not centered you can adjust the value MIN or MAX.
-//  - 100% is referred as the value when the TX is set to default with no trims
-
-/** Number of PPM Channels **/
-// The line below is used to set the minimum number of channels which the module should receive to consider a PPM frame valid.
-// The default value is 4 to receive at least AETR for flying models but you could also connect the PPM from a car radio which has only 3 channels by changing this number to 3.
-#define MIN_PPM_CHANNELS 4
-// The line below is used to set the maximum number of channels which the module should work with. Any channels received above this number are discarded.
-// The default value is 16 to receive all possible channels but you might want to filter some "bad" channels from the PPM frame like the ones above 6 on the Walkera PL0811.
-#define MAX_PPM_CHANNELS 16
-
 #define NBR_BANKS 1
 extern uint8_t curr_bank;
 
@@ -228,47 +188,12 @@ struct PPM_Parameters
 enum PROTOCOLS
 {
     MODE_SERIAL     = 0,    // Serial commands
-    PROTO_FLYSKY    = 1,    // =>A7105
-    PROTO_HUBSAN    = 2,    // =>A7105
     PROTO_FRSKYD    = 3,    // =>CC2500
-    PROTO_HISKY     = 4,    // =>NRF24L01
-    PROTO_V2X2      = 5,    // =>NRF24L01
-    PROTO_DSM       = 6,    // =>CYRF6936
-    PROTO_DEVO      = 7,    // =>CYRF6936
-    PROTO_YD717     = 8,    // =>NRF24L01
-    PROTO_KN        = 9,    // =>NRF24L01
-    PROTO_SYMAX     = 10,   // =>NRF24L01
-    PROTO_SLT       = 11,   // =>NRF24L01
-    PROTO_CX10      = 12,   // =>NRF24L01
-    PROTO_CG023     = 13,   // =>NRF24L01
-    PROTO_BAYANG    = 14,   // =>NRF24L01
     PROTO_FRSKYX    = 15,   // =>CC2500
-    PROTO_ESKY      = 16,   // =>NRF24L01
-    PROTO_MT99XX    = 17,   // =>NRF24L01
-    PROTO_MJXQ      = 18,   // =>NRF24L01
-    PROTO_SHENQI    = 19,   // =>NRF24L01
-    PROTO_FY326     = 20,   // =>NRF24L01
     PROTO_SFHSS     = 21,   // =>CC2500
-    PROTO_J6PRO     = 22,   // =>CYRF6936
-    PROTO_FQ777     = 23,   // =>NRF24L01
-    PROTO_ASSAN     = 24,   // =>NRF24L01
     PROTO_FRSKYV    = 25,   // =>CC2500
-    PROTO_HONTAI    = 26,   // =>NRF24L01
-    PROTO_OPENLRS   = 27,   // =>OpenLRS hardware
-    PROTO_AFHDS2A   = 28,   // =>A7105
-    PROTO_Q2X2      = 29,   // =>NRF24L01, extension of CX-10 protocol
-    PROTO_WK2x01    = 30,   // =>CYRF6936
-    PROTO_Q303      = 31,   // =>NRF24L01
-    PROTO_GW008     = 32,   // =>NRF24L01
-    PROTO_DM002     = 33,   // =>NRF24L01
-    PROTO_CABELL    = 34,   // =>NRF24L01
-    PROTO_ESKY150   = 35,   // =>NRF24L01
-    PROTO_H8_3D     = 36,   // =>NRF24L01
     PROTO_CORONA    = 37,   // =>CC2500
-    PROTO_CFLIE     = 38,   // =>NRF24L01
     PROTO_HITEC     = 39,   // =>CC2500
-    PROTO_WFLY      = 40,   // =>CYRF6936
-    PROTO_BUGS      = 41,   // =>A7105
 };
 
 enum FRSKYX_SUP_PROTOCOL

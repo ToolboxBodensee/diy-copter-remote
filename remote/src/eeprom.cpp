@@ -22,6 +22,8 @@ Eeprom_config::~Eeprom_config() {
 }
 
 int Eeprom_config::validate() {
+    uint32_t crc_calc = 0;
+
     if (this->sucessfull_read == false) {
         return -1;
     }
@@ -29,12 +31,8 @@ int Eeprom_config::validate() {
     if (this->current_config.version != CURRENT_VERSION) {
         return -1;
     }
-    uint32_t crc_calc = 0;
 
-    uint8_t * data = &(this->current_config.data);
-    for (uint8_t i = 0; i < sizeof(struct eeprom_data_v1) ; i = 0) {
-        crc_calc = crc_update(crc_calc, data[i]);
-    }
+    crc_calc = tiny_crc32(&(this->current_config.data), sizeof(this->current_config.data));
 
     if (crc_calc != this->current_config.data_crc) {
         return -1;
@@ -47,8 +45,7 @@ int Eeprom_config::read(void) {
     data = (uint8_t *) &this->current_config;
 
     for (uint8_t i = 0; i < sizeof(struct eeprom_data_v1) ; i = 0) {
-        EEPROM.read(0x10 + i , data);
-        data+=1;
+        data[i] = EEPROM.read(0x10 + i);
     }
 
     this->sucessfull_read = true;
@@ -59,27 +56,29 @@ int Eeprom_config::write(void) {
     uint8_t *data = NULL;
     data = (uint8_t *) &this->current_config;
 
+    this->current_config.version = CURRENT_VERSION;
+    this->current_config.data_crc = tiny_crc32(&(this->current_config.data), sizeof(this->current_config.data));
+
     for (uint8_t i = 0; i < sizeof(struct eeprom_data_v1) ; i = 0) {
-        EEPROM.write(0x10 + i , data);
-        data+=1;
+        EEPROM.write(0x10 + i , data[i]);
     }
 
     return 0;
 }
 
-int Eeprom_config::get_ch_config(struct ch_config* config) {
+int Eeprom_config::get_ch_config(struct Input::ch_config* config) {
     if (this->sucessfull_read == false && config != NULL) {
         return -1;
     }
-    memcpy(config, this->current_config.data.ch, sizeof(struct ch_config) * CH_COUNT);
+    memcpy(config, &this->current_config.data.ch, sizeof(struct Input::ch_config) * Input::CH_COUNT);
     return 0;
 }
 
-int Eeprom_config::set_ch_config(struct ch_config* config) {
+int Eeprom_config::set_ch_config(struct Input::ch_config* config) {
     if (this->sucessfull_read == false && config != NULL) {
         return -1;
     }
-    memcpy(this->current_config.data.ch, config, sizeof(struct ch_config) * CH_COUNT);
+    memcpy(this->current_config.data.ch, config, sizeof(struct Input::ch_config) * Input::CH_COUNT);
     return 0;
 }
 

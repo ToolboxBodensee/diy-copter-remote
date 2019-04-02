@@ -27,11 +27,11 @@ private:
         uint32_t data_crc;
         struct {
             uint32_t master_id;
-            struct Input::ch_config[CH_COUNT];
+            struct Input::ch_config ch[Input::CH_COUNT];
         } data;
     } current_config;
     bool sucessfull_read;
-}
+};
 
 
 #endif

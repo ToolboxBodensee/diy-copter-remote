@@ -51,6 +51,7 @@ uint8_t protocol_flags=0,protocol_flags2=0;
 uint8_t  channel;
 uint8_t  packet[40];
 
+static void protocol_init(void);
 
 uint16_t seed;
 
@@ -85,11 +86,6 @@ uint8_t  len;
 // Mode_select variables
 uint8_t mode_select;
 
-#ifdef ENABLE_PPM
-// PPM variable
-volatile uint8_t  PPM_chan_max=0;
-#endif
-
 #if not defined (ORANGE_TX) && not defined (STM32_BOARD)
 //Random variable
 volatile uint32_t gWDT_entropy=0;
@@ -120,8 +116,6 @@ void_function_t remote_callback = 0;
 //forward declarations
 void modules_reset();
 uint32_t random_id(bool create_new);
-static void protocol_init();
-uint8_t Update_All();
 
 // Init
 void setup()
@@ -213,7 +207,6 @@ void setup()
 
     debugln("Module Id: %lx", MProtocol_id_master);
 
-#ifdef ENABLE_PPM
     //Protocol and interrupts initialization
     {
         uint8_t line=curr_bank*14+mode_select-1;
@@ -222,39 +215,30 @@ void setup()
         sub_protocol    =   PPM_prot[line].sub_proto;
         RX_num          =   PPM_prot[line].rx_num;
 
-  debug("protocol: %d ", protocol);
-  switch(protocol) {
-    case PROTO_FRSKYD:
-      debugln("PROTO_FRSKYD");
-      break;
-    case PROTO_FRSKYX:
-      debugln("PROTO_FRSKYX");
-      break;
-    case PROTO_FRSKYV:
-      debugln("PROTO_FRSKYV");
-      break;
-  }
-  debug("sub_protocol: %d\n", sub_protocol);
-  option            =   PPM_prot[line].option;  // Use radio-defined option value
-  debug("freq offset: %d\n", option);
-        if(PPM_prot[line].power)
-          POWER_FLAG_on;
-        if(PPM_prot[line].autobind) {
-            AUTOBIND_FLAG_on;
-            BIND_IN_PROGRESS;   // Force a bind at protocol startup
+        debug("protocol: %d ", protocol);
+        switch(protocol) {
+            case PROTO_FRSKYD:
+                debugln("PROTO_FRSKYD");
+            break;
+            case PROTO_FRSKYX:
+                debugln("PROTO_FRSKYX");
+            break;
+            case PROTO_FRSKYV:
+                debugln("PROTO_FRSKYV");
+            break;
         }
+        debug("sub_protocol: %d\n", sub_protocol);
+        option = PPM_prot[line].option;  // Use radio-defined option value
+        debug("freq offset: %d\n", option);
         line++;
 
         protocol_init();
-
     }
-#endif //ENABLE_PPM
-  debug("Init complete\n");
-  input.init();
-  input.update();
-  init_state();
 
-
+    debug("Init complete\n");
+    input.init();
+    input.update();
+    init_state();
 }
 
 // Main
@@ -271,12 +255,6 @@ void loop()
     debugln("state took %lu", (micros()-s));
     return;
     uint32_t next_callback;
-
-    if(remote_callback==0 || IS_WAIT_BIND_on ) {
-        do {
-            Update_All();
-        } while(remote_callback==0 || IS_WAIT_BIND_on);
-    }
 
     uint32_t end__ = micros();
     uint32_t start = micros();
@@ -310,170 +288,24 @@ void loop()
     }
 }
 
-uint8_t Update_All() {
-
-    #ifdef ENABLE_BIND_CH
-        if(IS_AUTOBIND_FLAG_on &&
-            IS_BIND_CH_PREV_off &&
-            Channel_data[BIND_CH-1] > CHANNEL_MAX_COMMAND &&
-            Channel_data[Input::CH_THROTTLE] < (CHANNEL_MIN_100+50)
-        ) { // Autobind is on and BIND_CH went up and Throttle is low
-            CHANGE_PROTOCOL_FLAG_on;                            //reload protocol
-            BIND_IN_PROGRESS;                                   //enable bind
-
-            debugln("%s:%d set bind prog",__func__, __LINE__);
-            BIND_CH_PREV_on;
-        }
-        if(IS_AUTOBIND_FLAG_on && IS_BIND_CH_PREV_on && Channel_data[BIND_CH-1]<CHANNEL_MIN_COMMAND) {
-            // Autobind is on and BIND_CH went down
-            BIND_CH_PREV_off;
-            //Request protocol to terminate bind
-            #if defined(FRSKYD_CC2500_INO) || defined(FRSKYX_CC2500_INO) || defined(FRSKYV_CC2500_INO)
-            if(protocol==PROTO_FRSKYD || protocol==PROTO_FRSKYX || protocol==PROTO_FRSKYV)
-                BIND_DONE;
-            else
-            #endif
-            if(bind_counter>2)
-                bind_counter=2;
-        }
-    #endif //ENABLE_BIND_CH
-
-    input.update();
-
-    if(IS_CHANGE_PROTOCOL_FLAG_on) {
-        debugln("%s:%d set bind prog",__func__, __LINE__);
-        // Protocol needs to be changed or relaunched for bind
-        protocol_init();                                    //init new protocol
-        return 1;
-    }
-    return 0;
-}
-
 // Protocol start
 static void protocol_init() {
-    static uint16_t next_callback;
-    if(IS_WAIT_BIND_off) {
-        remote_callback = 0;            // No protocol
-        next_callback=0;                // Default is immediate call back
-        modules_reset();                // Reset all modules
+    modules_reset();                // Reset all modules
+    uint32_t next_callback = 0;
 
-        //Set global ID and rx_tx_addr
-        MProtocol_id = RX_num + MProtocol_id_master;
-        set_rx_tx_addr(MProtocol_id);
+    //Set global ID and rx_tx_addr
+    MProtocol_id = RX_num + MProtocol_id_master;
+    set_rx_tx_addr(MProtocol_id);
+    debugln("Protocol selected: %d, sub proto %d, rxnum %d, option %d", protocol, sub_protocol, RX_num, option);
 
-        blink=millis();
-
-        debugln("Protocol selected: %d, sub proto %d, rxnum %d, option %d", protocol, sub_protocol, RX_num, option);
-
-        switch(protocol)                // Init the requested protocol
-        {
+    switch(protocol)                // Init the requested protocol
+    {
         case PROTO_FRSKYD:
             next_callback = initFrSky_2way();
             remote_callback = ReadFrSky_2way;
             break;
-        }
     }
-
-    #if defined(WAIT_FOR_BIND) && defined(ENABLE_BIND_CH)
-        if( IS_AUTOBIND_FLAG_on && IS_BIND_CH_PREV_off && (cur_protocol[1]&0x80)==0 && mode_select == MODE_SERIAL) {
-            // Autobind is active but no bind requested by either BIND_CH or BIND. But do not wait if in PPM mode...
-            WAIT_BIND_on;
-            return;
-        }
-    #endif
-    WAIT_BIND_off;
-    CHANGE_PROTOCOL_FLAG_off;
-
     delayMicroseconds(next_callback);
-    debugln("%s BIND_BUTTON_FLAG_off",__func__);
-}
-
-void update_serial_data()
-{
-    if(rx_ok_buff[1]&0x20)                      //check range
-        RANGE_FLAG_on;
-    else
-        RANGE_FLAG_off;
-
-    if(rx_ok_buff[1]&0x40)                      //check autobind
-        AUTOBIND_FLAG_on;
-    else
-        AUTOBIND_FLAG_off;
-
-    if(rx_ok_buff[2]&0x80)                      //if rx_ok_buff[2] ==1,power is low ,0-power high
-        POWER_FLAG_off;                         //power low
-    else
-        POWER_FLAG_on;                          //power high
-
-    //Forced frequency tuning values for CC2500 protocols
-    #if defined(FORCE_FRSKYD_TUNING)
-        if(protocol==PROTO_FRSKYD)
-            option=FORCE_FRSKYD_TUNING; // Use config-defined tuning value for FrSkyD
-        else
-    #endif
-            option=rx_ok_buff[3];       // Use radio-defined option value
-
-    #ifdef FAILSAFE_ENABLE
-        bool failsafe=false;
-        if(rx_ok_buff[0]&0x02) { // Packet contains failsafe instead of channels
-            failsafe=true;
-            rx_ok_buff[0]&=0xFD;                //remove the failsafe flag
-        }
-    #endif
-    if( (rx_ok_buff[0] != cur_protocol[0]) || ((rx_ok_buff[1]&0x5F) != (cur_protocol[1]&0x5F)) || ( (rx_ok_buff[2]&0x7F) != (cur_protocol[2]&0x7F) ) )
-    { // New model has been selected
-        CHANGE_PROTOCOL_FLAG_on;                //change protocol
-        WAIT_BIND_off;
-        if((rx_ok_buff[1]&0x80)!=0 || IS_AUTOBIND_FLAG_on)
-            BIND_IN_PROGRESS;                   //launch bind right away if in autobind mode or bind is set
-        else
-            BIND_DONE;
-        protocol=(rx_ok_buff[0]==0x55?0:32) + (rx_ok_buff[1]&0x1F); //protocol no (0-63) bits 4-6 of buff[1] and bit 0 of buf[0]
-        sub_protocol=(rx_ok_buff[2]>>4)& 0x07;  //subprotocol no (0-7) bits 4-6
-        RX_num=rx_ok_buff[2]& 0x0F;             // rx_num bits 0---3
-    } else if( ((rx_ok_buff[1]&0x80)!=0) && ((cur_protocol[1]&0x80)==0) )      // Bind flag has been set
-        { // Restart protocol with bind
-            CHANGE_PROTOCOL_FLAG_on;
-            BIND_IN_PROGRESS;
-    } else {
-            if( ((rx_ok_buff[1]&0x80)==0) && ((cur_protocol[1]&0x80)!=0) )  // Bind flag has been reset
-            { // Request protocol to end bind
-                #if defined(FRSKYD_CC2500_INO) || defined(FRSKYX_CC2500_INO) || defined(FRSKYV_CC2500_INO)
-                if(protocol==PROTO_FRSKYD || protocol==PROTO_FRSKYX || protocol==PROTO_FRSKYV)
-                    BIND_DONE;
-                else
-                #endif
-                if(bind_counter>2)
-                    bind_counter=2;
-            }
-    }
-
-    //store current protocol values
-    for(uint8_t i=0;i<3;i++)
-        cur_protocol[i] =  rx_ok_buff[i];
-
-    // decode channel/failsafe values
-    volatile uint8_t *p=rx_ok_buff+3;
-    uint8_t dec=-3;
-    for(uint8_t i=0;i<NUM_TX_CHN;i++) {
-        dec+=3;
-        if(dec>=8) {
-            dec-=8;
-            p++;
-        }
-        p++;
-        uint16_t temp=((*((uint32_t *)p))>>dec)&0x7FF;
-            if(failsafe)
-                Failsafe_data[i]=temp;          //value range 0..2047, 0=no pulses, 2047=hold
-            else
-                Channel_data[i]=temp;           //value range 0..2047, 0=-125%, 2047=+125%
-    }
-        cli();
-    if(IS_RX_MISSED_BUFF_on)                    // If the buffer is still valid
-    {   memcpy((void*)rx_ok_buff,(const void*)rx_buff,RXBUFFER_SIZE);// Duplicate the buffer
-        RX_MISSED_BUFF_off;
-    }
-        sei();
 }
 
 void modules_reset()

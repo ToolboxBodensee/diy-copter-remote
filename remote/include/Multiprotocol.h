@@ -74,9 +74,7 @@ enum MultiPacketTypes
 #define CHANGE_PROTOCOL_FLAG_off    protocol_flags &= ~_BV(1)
 #define IS_CHANGE_PROTOCOL_FLAG_on  ( ( protocol_flags & _BV(1) ) !=0 )
 //
-#define POWER_FLAG_on       protocol_flags |= _BV(2)
-#define POWER_FLAG_off      protocol_flags &= ~_BV(2)
-#define IS_POWER_FLAG_on    ( ( protocol_flags & _BV(2) ) !=0 )
+#define IS_POWER_FLAG_on    (true)
 //
 #define RANGE_FLAG_on       protocol_flags |= _BV(3)
 #define RANGE_FLAG_off      protocol_flags &= ~_BV(3)

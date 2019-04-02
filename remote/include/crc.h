@@ -1,7 +1,5 @@
-#ifndef __CRC_H_H__
-#define __CRC_H_H__
-#include <stdint.h>
-
-uint32_t crc_update (uint32_t crc, uint8_t data);
-
+#ifndef __CRC32_H_
+#define __CRC32_H_
+#include <Arduino.h>
+uint32_t tiny_crc32(const void *data, unsigned int length);
 #endif

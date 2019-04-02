@@ -26,6 +26,7 @@ void frsky2way_data_frame(void);
 
 uint16_t initFrSky_2way(void);
 uint16_t ReadFrSky_2way(void);
+uint16_t ReadFrSky_2way_bind(void);
 
 uint16_t convert_channel_frsky(uint8_t num);
 #endif
