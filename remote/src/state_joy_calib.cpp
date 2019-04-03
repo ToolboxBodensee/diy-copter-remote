@@ -96,6 +96,25 @@ void LCD_state_joy_calibration::update(void) {
 
     struct Input::ch_config ch_config[Input::CH_COUNT];
     input.get_calibration(ch_config);
+    eeprom_config.set_ch_config(ch_config);
+    uint32_t id=0;
+    #ifdef FORCE_GLOBAL_ID
+        id = FORCE_GLOBAL_ID;
+    #else
+        // Generate a random ID from UUID
+        #define STM32_UUID ((uint32_t *)0x1FFFF7E8)
+        id = STM32_UUID[0] ^ STM32_UUID[1] ^ STM32_UUID[2];
+    #endif
+    debugln("Generated new master ID %x", id);
+    eeprom_config.set_master_id(id);
+    eeprom_config.write();
+
+    eeprom_config.read();
+    if (eeprom_config.validate()) {
+        debugln("ok calib\n");
+    }else {
+        debugln("failed calib\n");
+    }
 
 
     lcd.setCursor(0,0);

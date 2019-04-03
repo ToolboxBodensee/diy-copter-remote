@@ -75,7 +75,6 @@ uint8_t  flags;
 uint16_t crc;
 uint8_t  crc8;
 uint16_t failsafe_count;
-uint16_t state;
 uint8_t  len;
 
 #if defined(FRSKYX_CC2500_INO) || defined(SFHSS_CC2500_INO)
@@ -248,11 +247,9 @@ void loop()
     uint32_t s;
     s =micros();
     input.update();
-    debug("input took %lu", (micros()-s));
 
     s =micros();
     update_state();
-    debugln("state took %lu", (micros()-s));
     return;
     uint32_t next_callback;
 
@@ -282,7 +279,6 @@ void loop()
             uint32_t wait = next_callback;
             wait -= ((end__-start));
             delayMicroseconds(wait);
-            end__ += wait;
         }
         end__ = micros();
     }
@@ -328,39 +324,4 @@ void set_rx_tx_addr(uint32_t id)
 
 uint32_t random_id(bool create_new)
 {
-    #ifdef FORCE_GLOBAL_ID
-        (void)create_new;
-        return FORCE_GLOBAL_ID;
-    #else
-        uint32_t id=0;
-
-        if (eeprom_read_byte((EE_ADDR)(10))==0xf0 && !create_new) {
-            // TXID exists in EEPROM
-            for(uint8_t i=4;i>0;i--) {
-                id<<=8;
-                id|=eeprom_read_byte((EE_ADDR)i-1);
-            }
-            if(id!=0x2AD141A7)  //ID with seed=0
-            {
-                debugln("Read ID from EEPROM");
-                return id;
-            }
-        }
-        // Generate a random ID from UUID
-            #define STM32_UUID ((uint32_t *)0x1FFFF7E8)
-        if (!create_new) {
-                id = STM32_UUID[0] ^ STM32_UUID[1] ^ STM32_UUID[2];
-            debugln("Generated ID from STM32 UUID %x", id);
-        } else {
-            id = random(0xfefefefe) + ((uint32_t)random(0xfefefefe) << 16);
-            }
-
-    #if 0
-        for(uint8_t i=0;i<4;i++)
-            eeprom_write_byte((EE_ADDR)address+i,id >> (i*8));
-        eeprom_write_byte((EE_ADDR)(address+10),0xf0);//write bind flag in eeprom.
-    #endif
-        return id;
-    #endif
-
 }

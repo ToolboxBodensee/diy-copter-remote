@@ -5,8 +5,16 @@
 #include <LiquidCrystal_I2C.h>
 #include <stdint.h>
 
-
 extern LiquidCrystal_I2C lcd;
+enum lcd_special_chars {
+    battery_char  = 0,
+    rssiantenna= 1,
+    rssi_bars  = 2,
+    clock_char = 3,
+    MAX_SPECIAL_CHARS =8,
+};
+
+
 void init_state(void);
 void update_state(void);
 
@@ -53,6 +61,9 @@ public:
 class LCD_state_fly: public State {
 private:
     unsigned long time_enter;
+    void print_akku(uint8_t akku_quad, uint8_t akku_remote);
+    void print_rssi(uint8_t rssi_percent);
+    void print_time(uint16_t time);
 
 public:
     LCD_state_fly(void);

@@ -23,20 +23,22 @@ void LCD_state_bind::enter(void) {
 
 void LCD_state_bind::update(void)
 {
-  debugln("blubber\n");
-  char line[17];
-  unsigned long time_in_ms = millis() - this->time_enter;
-  unsigned long time_in_s = time_in_ms/1000; // to sec
-  unsigned long remain_s = this->bind_time - time_in_s;
+    char line[17];
+    unsigned long time_in_ms = millis() - this->time_enter;
+    unsigned long time_in_s = time_in_ms/1000; // to sec
+    unsigned long remain_s = this->bind_time - time_in_s;
 
-  snprintf(line,sizeof(line),"remaining sec %02lu",remain_s);
-  lcd.setCursor(0,1);
-  lcd.print(line);
+    snprintf(line,sizeof(line),"remaining sec %02lu",remain_s);
+    lcd.setCursor(0,1);
+    lcd.print(line);
 
     uint32_t end__ = micros();
     uint32_t start = micros();
     uint32_t next_callback_time;
     next_callback_time = initFrSky_2way();
+
+    // init for bind
+    frsky2way_init(1);
     while(1) {
         start = end__;
         next_callback_time = ReadFrSky_2way_bind();

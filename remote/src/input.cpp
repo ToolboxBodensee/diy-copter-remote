@@ -138,7 +138,7 @@ bool Input::is_low(enum Input::input_channels ch) {
 }
 
 bool Input::is_menu_triggered(void) {
-    return this->curr->menu;
+    return this->curr->menu != this->old->menu;
 }
 
 void Input::invert_ch(enum Input::input_channels ch) {

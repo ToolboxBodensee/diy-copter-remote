@@ -18,19 +18,21 @@
 #include "Multiprotocol.h"
 #include "input.h"
 #include "FrSkyD_cc2500.h"
+#include "common.h"
 
 uint8_t  hopping_frequency[50];
+uint16_t state;
 uint16_t counter;
 
 void frsky2way_init(uint8_t bind)
 {
-  //debugln("frsky2way_init");
+    //debugln("frsky2way_init");
     FRSKY_init_cc2500(FRSKYD_cc2500_conf);
 
     CC2500_WriteReg(CC2500_09_ADDR, bind ? 0x03 : rx_tx_addr[3]);
     CC2500_WriteReg(CC2500_07_PKTCTRL1, 0x05);
     CC2500_Strobe(CC2500_SIDLE);    // Go to idle...
-    //
+
     CC2500_WriteReg(CC2500_0A_CHANNR, 0x00);
     CC2500_WriteReg(CC2500_23_FSCAL3, 0x89);
     CC2500_Strobe(CC2500_SFRX);
@@ -104,7 +106,6 @@ uint16_t initFrSky_2way()
 
     if(IS_BIND_IN_PROGRESS)
     {
-        frsky2way_init(1);
         state = FRSKY_BIND;
         debugln("initFrSky_2way bind");
     } else {
@@ -140,15 +141,16 @@ uint16_t ReadFrSky_2way_bind(void)
 uint16_t ReadFrSky_2way()
 {
     if (state <= FRSKY_BIND_DONE) {
-      //debugln("%s bind done",__func__);
+
+        frsky2way_init(0);
+        //debugln("%s bind done",__func__);
 
         state = FRSKY_DATA2;
-        frsky2way_init(0);
         counter = 0;
     } else if (state == FRSKY_DATA5) {
-            CC2500_Strobe(CC2500_SRX);//0x34 RX enable
-            state = FRSKY_DATA1;
-            return 9200;
+        CC2500_Strobe(CC2500_SRX);//0x34 RX enable
+        state = FRSKY_DATA1;
+        return 9200;
     }
 
     counter = (counter + 1) % 188;
@@ -189,6 +191,7 @@ uint16_t ReadFrSky_2way()
         }
         CC2500_Strobe(CC2500_SIDLE);
         CC2500_WriteReg(CC2500_0A_CHANNR, hopping_frequency[counter % 47]);
+
         if ( prev_option != option ) {
             CC2500_WriteReg(CC2500_0C_FSCTRL0,option);  // Frequency offset hack
             prev_option = option ;

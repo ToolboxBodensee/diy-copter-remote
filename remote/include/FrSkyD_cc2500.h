@@ -17,6 +17,7 @@
 #define _FRSKYD_CC2500_H_
 
 #include <stdint.h>
+extern uint16_t state;
 void Frsky_init_hop(void);
 void frsky2way_init(uint8_t bind);
 
