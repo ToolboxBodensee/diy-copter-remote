@@ -30,7 +30,6 @@ extern uint8_t  crc8;
 extern uint8_t  packet_count;
 extern uint8_t  binding_idx;
 extern uint8_t  packet[40];
-extern uint8_t  rx_tx_addr[5];
 extern uint8_t option;
 extern uint16_t state;
 extern uint8_t  phase;

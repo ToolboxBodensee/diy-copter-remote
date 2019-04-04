@@ -29,8 +29,18 @@ enum {
 };
 
 #define MAX_PKT 29
+extern uint8_t  rx_tx_addr[5];
 extern uint8_t pkt[MAX_PKT];//telemetry receiving packets
-
+extern  uint8_t pktt[MAX_PKT];//telemetry receiving packets
+extern uint8_t v_lipo1;
+extern uint8_t v_lipo2;
+extern uint8_t RX_RSSI;
+extern uint8_t TX_RSSI;
+extern uint8_t RX_LQI;
+extern uint8_t TX_LQI;
+extern uint8_t telemetry_link;
+extern uint8_t telemetry_lost;
+extern uint8_t telemetry_counter;
 
 extern uint8_t freq_offset;
 extern uint16_t state;

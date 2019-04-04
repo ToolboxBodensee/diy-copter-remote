@@ -7,9 +7,7 @@
 
 extern LiquidCrystal_I2C lcd;
 enum lcd_special_chars {
-    battery_char  = 0,
-    battery_char_1  = 0,
-    battery_char_2  = 1,
+    battery_char= 0,
 
     rssiantenna= 3,
     rssi_bars  = 4,
@@ -66,7 +64,8 @@ private:
     unsigned long time_enter;
     uint16_t last_time;
 
-    void print_akku(uint8_t akku_quad, uint8_t akku_remote);
+    void print_akku_quad(uint8_t akku_quad);
+    void print_akku_remote(uint8_t akku_remote);
     void print_rssi(uint8_t rssi_percent);
     void print_time(uint16_t time);
 

@@ -17,10 +17,20 @@
 #include "Multiprotocol.h"
 #include "input.h"
 #include "FrSkyD_cc2500.h"
-
+#include "telemetry.h"
+uint8_t v_lipo1;
+uint8_t v_lipo2;
+uint8_t RX_RSSI;
+uint8_t TX_RSSI;
+uint8_t RX_LQI;
+uint8_t TX_LQI;
+uint8_t telemetry_link=0;
+uint8_t telemetry_lost;
+uint8_t telemetry_counter=0;
 uint8_t  rx_tx_addr[5];
 uint8_t  hopping_frequency[50];
 uint8_t pkt[MAX_PKT];//telemetry receiving packets
+uint8_t pktt[MAX_PKT];//telemetry receiving packets
 
 uint16_t state;
 uint16_t counter;

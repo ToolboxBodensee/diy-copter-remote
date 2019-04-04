@@ -105,7 +105,7 @@ void LCD_state_joy_calibration::update(void) {
         #define STM32_UUID ((uint32_t *)0x1FFFF7E8)
         id = STM32_UUID[0] ^ STM32_UUID[1] ^ STM32_UUID[2];
     #endif
-    debugln("Generated new master ID %x", id);
+    debugln("Generated new master ID %lx", id);
     eeprom_config.set_master_id(id);
     eeprom_config.write();
 

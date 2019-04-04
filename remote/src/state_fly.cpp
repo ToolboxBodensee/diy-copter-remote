@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "Arduino.h"
 #include "FrSkyD_cc2500.h"
+#include "telemetry.h"
 #include "state.h"
 #include "input.h"
 #include "eeprom.h"
@@ -47,18 +48,38 @@ void LCD_state_fly::enter(void) {
     lcd.setCursor(6,1);
     lcd.write(rssiantenna);
 
-    byte rssi_bars_[] = {
-        0b00001,
-        0b00001,
-        0b00001,
-        0b00001,
-        0b00101,
-        0b00101,
-        0b10101,
-        0b10101 };
+
+    byte rssi_bars_[8];
+    rssi_bars_[0] =  0b00001;
+    rssi_bars_[1] =  0b00001;
+    rssi_bars_[2] =  0b00001;
+    rssi_bars_[3] =  0b00001;
+    rssi_bars_[4] =  0b00101;
+    rssi_bars_[5] =  0b00101;
+    rssi_bars_[6] =  0b10101;
+    rssi_bars_[7] =  0b10101;
+
     lcd.createChar(rssi_bars, rssi_bars_);
+
     lcd.setCursor(7,1);
     lcd.write(rssi_bars);
+
+    byte battery_char_data[8];
+    battery_char_data[0] = 0b01110;
+    battery_char_data[1] = 0b11011;
+    battery_char_data[2] = 0b10001;
+    battery_char_data[3] = 0b10001;
+    battery_char_data[4] = 0b10001;
+    battery_char_data[5] = 0b10001;
+    battery_char_data[6] = 0b10001;
+    battery_char_data[7] = 0b11111;
+    lcd.createChar(battery_char, battery_char_data);
+
+    lcd.setCursor(12,1);
+    lcd.write(battery_char);
+
+    lcd.setCursor(12,0);
+    lcd.write(battery_char);
 }
 
 void LCD_state_fly::print_time(uint16_t time)
@@ -70,7 +91,7 @@ void LCD_state_fly::print_time(uint16_t time)
      * fly mode    A PP
      * T SSS AA PP A PP
      **/
-    if(this->last_time==time)
+    if(this->last_time == time)
         return;
 
     this->last_time=time;
@@ -79,37 +100,37 @@ void LCD_state_fly::print_time(uint16_t time)
     snprintf(line, sizeof(line), "%*u", 3, time);
     lcd.print(line);
 }
-void LCD_state_fly::print_akku(uint8_t akku_quad, uint8_t akku_remote)
+void LCD_state_fly::print_akku_quad(uint8_t akku_quad)
 {
     /**
      * 0123456789012345
      * fly mode    A PP
      * T SSS AA PP A PP
      **/
-    byte battery_char_data[8];
-
     char line[17];
-    uint8_t akku[] = {akku_remote, akku_quad};
-    for (int i = 0; i < 2; ++i) {
-        battery_char_data[0] = 0b01110;
-        battery_char_data[1] = ( akku[i] > 90) ? 0b11111 : 0b11011;
-        battery_char_data[2] = ( akku[i] > 75) ? 0b11111 : 0b10001;
-        battery_char_data[3] = ( akku[i] > 60) ? 0b11111 : 0b10001;
-        battery_char_data[4] = ( akku[i] > 45) ? 0b11111 : 0b10001;
-        battery_char_data[5] = ( akku[i] > 30) ? 0b11111 : 0b10001;
-        battery_char_data[6] = ( akku[i] > 15) ? 0b11111 : 0b10001;
-        battery_char_data[7] = 0b11111;
-        lcd.createChar(battery_char+i, battery_char_data);
 
-        lcd.setCursor(12,i);
-        lcd.write(battery_char+i);
-
-        lcd.setCursor(13,i);
-        snprintf(line, sizeof(line), "%*d", 3, akku[i]);
-        lcd.print(line);
-    }
+    lcd.setCursor(13,1);
+    snprintf(line, sizeof(line), "%*d", 3, akku_quad);
+    lcd.print(line);
     return;
 }
+
+void LCD_state_fly::print_akku_remote(uint8_t akku_remote)
+{
+    /**
+     * 0123456789012345
+     * fly mode    A PP
+     * T SSS AA PP A PP
+     **/
+
+    char line[17];
+
+    lcd.setCursor(13,0);
+    snprintf(line, sizeof(line), "%*d", 3, akku_remote);
+    lcd.print(line);
+    return;
+}
+
 void LCD_state_fly::print_rssi(uint8_t rssi_percent)
 {
     char line[17];
@@ -125,12 +146,12 @@ void LCD_state_fly::update(void)
     uint8_t rssi_percent = 100;
     uint8_t akku_quad = 1;
     uint8_t akku_remote = 2;
-    char line[17];
     unsigned long time_in_ms = millis() - this->time_enter;
     unsigned long time_in_s = time_in_ms/1000; // to sec
 
     this->print_time(time_in_s);
-    this->print_akku(akku_quad, akku_remote);
+    this->print_akku_quad(akku_quad);
+    this->print_akku_remote(akku_remote);
     this->print_rssi(rssi_percent);
 
     uint32_t end__ = micros();
@@ -148,7 +169,7 @@ void LCD_state_fly::update(void)
         next_callback_time = ReadFrSky_2way();
 
         //if (next_callback_time > 9000) {
-        if (next_callback_time > 9000) {
+        if (next_callback_time == 9200) {
             input.update();
 
             if (input.is_menu_triggered()) {
@@ -156,39 +177,48 @@ void LCD_state_fly::update(void)
                 input.print();
                 break;
             }
+        }
 
 
+        if (next_callback_time == 9200) {
             // print on lcd
-            call +=1;
-            if(call > 5)
+            call +=2;
+            if(call > 50)
                 call= 0;
 
             switch(call)
             {
-            case 1:
+            case 10:
                 rssi_percent += 1;
                 if(rssi_percent > 100)
                     rssi_percent = 0;
                 this->print_rssi(rssi_percent);
                 break;
 
-            case 2:
+            case 20:
                 // update time
                 time_in_ms = millis() - this->time_enter;
                 time_in_s = time_in_ms/1000; // to sec
                 this->print_time(time_in_s);
                 break;
 
-            case 3:
+            case 30:
                 // update akku
                 akku_quad += 1;
-                akku_remote += 2;
                 if(akku_quad > 100)
                     akku_quad = 0;
+                this->print_akku_quad(akku_quad);
+                break;
+
+            case 40:
+                // update akku
+                akku_remote += 2;
                 if(akku_remote > 100)
                     akku_remote = 0;
-                this->print_akku(akku_quad, akku_remote);
+                this->print_akku_remote(akku_remote);
                 break;
+            case 50:
+                //print_frskyd_telemetry();
 
             default:
                 break;
@@ -202,6 +232,8 @@ void LCD_state_fly::update(void)
             uint32_t wait = next_callback_time;
             wait -= (end__ - start);
             delayMicroseconds(wait);
+            if((end__ - start) > 1000 )
+                debug("call %d waited %lu timed %lu vs wait %lu \n", call,next_callback_time, wait, (end__ - start));
         }
         end__ = micros();
     }
