@@ -88,10 +88,11 @@ void Input::init() {
     this->ch_config[CH_YAW].inverted      = false;
     this->ch_config[CH_ROLL].inverted     = false;
     this->ch_config[CH_PITCH].inverted    = false;
-    this->ch_config[CH_AUX1].inverted     = false;
-    this->ch_config[CH_AUX2].inverted     = false;
-    this->ch_config[CH_AUX3].inverted     = false;
-    this->ch_config[CH_AUX4].inverted     = false;
+    this->ch_config[CH_AUX1].inverted     = true;
+    this->ch_config[CH_AUX2].inverted     = true;
+    this->ch_config[CH_AUX3].inverted     = true;
+    this->ch_config[CH_AUX4].inverted     = true;
+    this->ch_config[CH_AUX5].inverted     = true;
 }
 
 bool Input::is_centered(void) {
@@ -190,8 +191,13 @@ bool Input::calibration_update(void) {
 }
 void Input::calibration_reset(void) {
     for (uint8_t ch = 0; ch < CH_COUNT; ch++) {
-        this->ch_config[ch].min = this->ch_raw[ch];
-        this->ch_config[ch].max = this->ch_raw[ch];
+        if (this->ch_config[ch].is_analog) {
+            this->ch_config[ch].min = this->ch_raw[ch];
+            this->ch_config[ch].max = this->ch_raw[ch];
+        }else {
+            this->ch_config[ch].min = CHANNEL_MIN_100;
+            this->ch_config[ch].max = CHANNEL_MAX_100;
+        }
     }
 }
 void Input::set_calibration(struct ch_config *new_config)
@@ -214,7 +220,7 @@ void Input::update(void) {
         if (this->ch_config[ch].is_analog) {
             this->ch_raw[ch] = analogRead(this->pins[ch]);
         } else {
-            this->ch_raw[ch] = digitalRead(this->pins[ch]) == HIGH;
+            this->ch_raw[ch] = digitalRead(this->pins[ch]) == HIGH ? CHANNEL_MIN_100 : CHANNEL_MAX_100;
         }
 
         // do inverting

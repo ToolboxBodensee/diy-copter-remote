@@ -8,6 +8,9 @@
 #include "eeprom.h"
 #include "debug.h"
 #include "tx_def.h"
+#include "pins.h"
+
+int16_t map16b(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t out_max);
 
 LCD_state_fly::LCD_state_fly(void) {
 }
@@ -45,8 +48,6 @@ void LCD_state_fly::enter(void) {
         0b00101,
         0b00101, };
     lcd.createChar(rssiantenna, rssi_antenna_);
-    lcd.setCursor(6,1);
-    lcd.write(rssiantenna);
 
 
     byte rssi_bars_[8];
@@ -61,8 +62,6 @@ void LCD_state_fly::enter(void) {
 
     lcd.createChar(rssi_bars, rssi_bars_);
 
-    lcd.setCursor(7,1);
-    lcd.write(rssi_bars);
 
     byte battery_char_data[8];
     battery_char_data[0] = 0b01110;
@@ -75,11 +74,16 @@ void LCD_state_fly::enter(void) {
     battery_char_data[7] = 0b11111;
     lcd.createChar(battery_char, battery_char_data);
 
-    lcd.setCursor(12,1);
-    lcd.write(battery_char);
-
     lcd.setCursor(12,0);
     lcd.write(battery_char);
+#if 0
+    lcd.setCursor(12,1);
+    lcd.write(battery_char);
+    lcd.setCursor(6,1);
+    lcd.write(rssiantenna);
+    lcd.setCursor(7,1);
+    lcd.write(rssi_bars);
+#endif
 }
 
 void LCD_state_fly::print_time(uint16_t time)
@@ -149,11 +153,6 @@ void LCD_state_fly::update(void)
     unsigned long time_in_ms = millis() - this->time_enter;
     unsigned long time_in_s = time_in_ms/1000; // to sec
 
-    this->print_time(time_in_s);
-    this->print_akku_quad(akku_quad);
-    this->print_akku_remote(akku_remote);
-    this->print_rssi(rssi_percent);
-
     uint32_t end__ = micros();
     uint32_t start = micros();
     uint32_t next_callback_time;
@@ -188,18 +187,21 @@ void LCD_state_fly::update(void)
 
             switch(call)
             {
-            case 10:
-                rssi_percent += 1;
-                if(rssi_percent > 100)
-                    rssi_percent = 0;
-                this->print_rssi(rssi_percent);
-                break;
 
-            case 20:
+
+            case 10:
                 // update time
                 time_in_ms = millis() - this->time_enter;
                 time_in_s = time_in_ms/1000; // to sec
                 this->print_time(time_in_s);
+                break;
+
+#if 0
+            case 20:
+                rssi_percent += 1;
+                if(rssi_percent > 100)
+                    rssi_percent = 0;
+                this->print_rssi(rssi_percent);
                 break;
 
             case 30:
@@ -210,11 +212,17 @@ void LCD_state_fly::update(void)
                 this->print_akku_quad(akku_quad);
                 break;
 
+#endif
             case 40:
                 // update akku
-                akku_remote += 2;
-                if(akku_remote > 100)
-                    akku_remote = 0;
+                akku_remote = analogRead(Battery_pin);
+                if (akku_remote > 3830)
+                    akku_remote = 3830;
+                if (akku_remote < 3450)
+                    akku_remote = 3450;
+                akku_remote = map16b(akku_remote, 3450, 3830, 0, 100);
+                if (akku_remote > 100)
+                    akku_remote = 100;
                 this->print_akku_remote(akku_remote);
                 break;
 

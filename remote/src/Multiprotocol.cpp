@@ -66,6 +66,10 @@ uint8_t  crc8;
 uint16_t failsafe_count;
 uint8_t  len;
 
+#include <USBComposite.h>
+USBHID HID;
+HIDJoystick Joystick(HID);
+
 // Telemetry
 void setup()
 {
@@ -78,6 +82,7 @@ void setup()
         debugln("Multiprotocol startup");
         debugln("time %s ", __TIME__);
     #endif
+    HID.begin(HID_JOYSTICK);
 
     // all inputs
     // outputs

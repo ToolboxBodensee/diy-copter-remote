@@ -57,10 +57,11 @@ class Input {
         void get_calibration(struct ch_config *curr_config);
 
         uint16_t *get_channel_data(void);
+
+        uint16_t ch_raw[CH_COUNT];
     private:
 
         // raw sticks input
-        uint16_t ch_raw[CH_COUNT];
 
         // calculated inputs (my be inverted
         struct data {
