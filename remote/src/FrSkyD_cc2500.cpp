@@ -245,13 +245,16 @@ uint16_t ReadFrSky_2way()
 
             //debugln("%d len",len);
             if (len && len<=(0x11+3)) { // 20bytes
+                debug("rx tel\n");
                 CC2500_ReadData(pkt, len);              //received telemetry packets
                 #if defined(TELEMETRY)
                     if(pkt[len-1] & 0x80)
                     {//with valid crc
+                        debug("rx invalid crc\n");
                         packet_count=0;
                         frsky_check_telemetry(pkt,len); //check if valid telemetry packets and buffer them.
                     }
+                    debug("rx end crc\n");
                 #endif
             } else {
                 packet_count++;

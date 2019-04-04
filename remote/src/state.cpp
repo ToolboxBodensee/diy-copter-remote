@@ -17,6 +17,7 @@ State *s_init = NULL;
 State *s_bind = NULL;
 State *s_fly  = NULL;
 State *s_joy  = NULL;
+State *s_usb  = NULL;
 State *s_menu = NULL;
 
 
@@ -32,6 +33,7 @@ void init_state(void) {
     s_bind = new LCD_state_bind();
     s_fly  = new LCD_state_fly();
     s_joy  = new LCD_state_joy_calibration();
+    s_usb  = new LCD_state_joy_usb();
     s_menu = new LCD_state_menu();
     lcd.backlight();
     curr_state = NULL;

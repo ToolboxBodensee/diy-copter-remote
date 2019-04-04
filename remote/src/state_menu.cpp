@@ -26,6 +26,7 @@ void LCD_state_menu::update(void)
     } menus[] = {
         { "Flight        ", s_fly },
         { "Bind          ", s_bind },
+        { "Joy usb       ", s_usb},
         { "Joy calib     ", s_joy },
         { "HF calib      ", NULL },
         { "              ", NULL },
