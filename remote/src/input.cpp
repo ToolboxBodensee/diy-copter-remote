@@ -234,7 +234,7 @@ void Input::update(void) {
 
 
     for (uint8_t ch = 0; ch < CH_COUNT; ++ch) {
-        this->channel_data[ch] = map(this->curr->ch_data[ch], this->ch_config[ch].min, this->ch_config[ch].max, CHANNEL_MAX_100, CHANNEL_MIN_100);
+        this->channel_data[ch] = map(this->curr->ch_data[ch], this->ch_config[ch].min, this->ch_config[ch].max, CHANNEL_MIN_100, CHANNEL_MAX_100);
     }
 
     /*debug_input("t%d y%d r%d p%d a1_%d a2_%d a3_%d a4_%d a5_%d m%d",
