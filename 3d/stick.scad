@@ -7,9 +7,9 @@ use <lib/cylinder.scad>
 // draw itself
 stick();
 
-module stick(h=10,is_ps2_shaft=0)
+module stick(h=10,is_ps2_shaft=1)
 {
-    $fn=32;
+    $fn=128;
     translate([0,0,15-3]) {
         cylinder(d=5,h=h);
         translate([0,0,h])
@@ -22,7 +22,7 @@ module stick(h=10,is_ps2_shaft=0)
     }
 
     // dust protector
-    translate([0,0,-3+2.9]) {
+    translate([0,0,0]) {
         resize([30,30,22])
         protector_cone(thickness=0.4*2.5);
     }
@@ -77,13 +77,17 @@ module stick_mount(is_ps2_shaft=0) {
 
     difference() {
         color([1,0,1]) {
-            translate([0,0,5])
-            cylinder_flange_sphere($fn=32,r2=5, r1=3, h=5);
+            translate([0,0,4])
+                cylinder_flange_sphere($fn=32,r2=8, r1=3, h=4.5);
+            translate([0,0,8.5])
+                cylinder_flange_sphere($fn=32,r2=3, r1=8, h=4.5);
+            
             if ( is_ps2_shaft ) {
                 cylinder(d=6.75,h=10);
             } else {
                 cylinder(d=6,h=10);
             }
+            //cylinder(d=15,h=0.1);
         }
         translate([0,0,-eps])
         if ( is_ps2_shaft ) {

@@ -18,12 +18,6 @@
 
 #include "Arduino.h"
 
-#define LED_off
-#define LED_on
-#define LED_output
-#define IS_LED_on false
-#define LED_toggle
-
 //
 #define SDI_pin       PA0 /* SDIO MOSI */
 #define SCLK_pin      PA1 /* SCLK */
@@ -37,17 +31,28 @@
 #define Roll_pin      PA7
 #define Pitch_pin     PA6
 
-#define Aux1_pin      PB0
-#define Aux2_pin      PB0
-#define Aux3_pin      PB0
-#define Aux4_pin      PB0
-#define Aux5_pin      PB0
-#define Aux6_pin      PB0
-#define Menu_pin      PB0
+#define Aux1_pin      PB1
+#define Aux2_pin      PB10
+#define Aux3_pin      PB11
+#define Aux4_pin      PB13
+#define Aux5_pin      PB15
+#define Menu_pin      PB12
+
+#define Battery_pin   PA9
+#define Led_pin       PC13
+#define Buzzer_pin    PA8
 
 #define cli()
 #define sei()
 #define NOP() __asm__ __volatile__("nop")
+
+#define BUZZER_off    digitalWrite(Buzzer_pin, LOW)
+#define BUZZER_on     digitalWrite(Buzzer_pin, HIGH)
+#define BUZZER_output pinMode(Buzzer_pin, OUTPUT)
+
+#define LED_off       digitalWrite(Led_pin, LOW)
+#define LED_on        digitalWrite(Led_pin, HIGH)
+#define LED_output    pinMode(Led_pin,OUTPUT)
 
 #define SDI_on      digitalWrite(SDI_pin, HIGH)
 #define SDI_off     digitalWrite(SDI_pin, LOW)

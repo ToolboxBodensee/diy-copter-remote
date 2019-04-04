@@ -13,10 +13,9 @@
  along with Multiprotocol.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "config.h"
-uint8_t curr_bank = 0;
 const PPM_Parameters PPM_prot[14]=    {
 //******************************       BANK 1       ******************************
-//  Switch  Protocol            Sub protocol    RX_Num  Power       Auto Bind       Option
+//  Switch  Protocol        Sub protocol  RX_Num  Power       Auto Bind       Option
 /*  1 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 0   },
 /*  2 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 20   },
 /*  3 */    {PROTO_FRSKYD,  0           , 0 , P_LOW , AUTOBIND  , 40   },
