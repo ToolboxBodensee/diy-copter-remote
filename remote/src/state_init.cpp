@@ -22,7 +22,7 @@ void LCD_state_init::update(void)
     uint32_t diff;
     delay(100);
     diff = millis() - this->time_enter;
-    if (diff > 5 * 1000) {
+    if (diff > 3 * 1000) {
         new_state = s_joy;
         debugln("read start");
         delay(1000);

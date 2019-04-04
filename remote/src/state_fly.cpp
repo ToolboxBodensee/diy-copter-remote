@@ -217,8 +217,6 @@ void LCD_state_fly::update(void)
                     akku_remote = 0;
                 this->print_akku_remote(akku_remote);
                 break;
-            case 50:
-                //print_frskyd_telemetry();
 
             default:
                 break;
@@ -232,8 +230,10 @@ void LCD_state_fly::update(void)
             uint32_t wait = next_callback_time;
             wait -= (end__ - start);
             delayMicroseconds(wait);
-            if((end__ - start) > 1000 )
-                debug("call %d waited %lu timed %lu vs wait %lu \n", call,next_callback_time, wait, (end__ - start));
+            /* if((end__ - start) > 1000 ) { */
+            /*     debug("call %d waited %lu timed %lu vs wait %lu \n", call,next_callback_time, wait, (end__ - start)); */
+            /*     print_frskyd_telemetry(); */
+            /* } */
         }
         end__ = micros();
     }
