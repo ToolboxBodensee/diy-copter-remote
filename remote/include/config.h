@@ -163,7 +163,6 @@
 /*** PPM MODE SETTINGS ***/
 /*************************/
 #define NBR_BANKS 1
-extern uint8_t curr_bank;
 
 struct PPM_Parameters
 {

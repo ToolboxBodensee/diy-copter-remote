@@ -33,7 +33,6 @@
 
 #include "pins.h"
 #include "Validate.h"
-#include "common.h"
 #include "state.h"
 #include "input.h"
 #include "cc2500_spi.h"
@@ -43,21 +42,14 @@
 #include "FrSkyD_cc2500.h"
 
 //Global constants/variables
-uint32_t MProtocol_id;//tx id,
-uint32_t MProtocol_id_master;
 uint32_t blink=0,last_signal=0;
 uint8_t protocol_flags=0,protocol_flags2=0;
 //
 uint8_t  channel;
 uint8_t  packet[40];
 
-static void protocol_init(void);
-
-uint16_t seed;
-
 // Protocol variables
 uint8_t  cyrfmfg_id[6];//for dsm2 and devo
-uint8_t  rx_tx_addr[5];
 uint8_t  rx_id[4];
 uint8_t  phase;
 uint16_t bind_counter;
@@ -68,260 +60,66 @@ uint8_t  packet_count;
 uint8_t  packet_sent;
 uint8_t  packet_length;
 uint8_t  *hopping_frequency_ptr;
-uint8_t  hopping_frequency_no=0;
 uint8_t  rf_ch_num;
-uint8_t  throttle, rudder, elevator, aileron;
-uint8_t  flags;
 uint16_t crc;
 uint8_t  crc8;
 uint16_t failsafe_count;
 uint8_t  len;
 
-#if defined(FRSKYX_CC2500_INO) || defined(SFHSS_CC2500_INO)
-    uint8_t calData[48];
-#endif
-
-
-// Mode_select variables
-uint8_t mode_select;
-
-#if not defined (ORANGE_TX) && not defined (STM32_BOARD)
-//Random variable
-volatile uint32_t gWDT_entropy=0;
-#endif
-
-//Serial protocol
-uint8_t sub_protocol;
-uint8_t protocol;
-uint8_t option;
-uint8_t cur_protocol[3];
-uint8_t prev_option;
-uint8_t  RX_num;
-
-//Serial RX variables
-#define BAUD 100000
-#define RXBUFFER_SIZE 26
-volatile uint8_t rx_buff[RXBUFFER_SIZE];
-volatile uint8_t rx_ok_buff[RXBUFFER_SIZE];
-volatile uint8_t discard_frame = 0;
-
 // Telemetry
-uint8_t pkt[MAX_PKT];//telemetry receiving packets
-float TIMER_PRESCALE = 5.82;
-// Callback
-typedef uint16_t (*void_function_t) (void);//pointer to a function with no parameters which return an uint16_t integer
-void_function_t remote_callback = 0;
-
-//forward declarations
-void modules_reset();
-uint32_t random_id(bool create_new);
-
-// Init
 void setup()
 {
     // Setup diagnostic uart before anything else
     #ifdef ENABLE_DBEUG
         Serial.begin(115200,SERIAL_8N1);
+        delay(1000);
         while (!Serial); // Wait for ever for the serial port to connect...
+        delay(1000);
         debugln("Multiprotocol startup");
         debugln("time %s ", __TIME__);
     #endif
 
-        // all inputs
-        // outputs
-        SDI_output;
-        SCLK_output;
-        CC25_CSN_output;
+    // all inputs
+    // outputs
+    SDI_output;
+    SCLK_output;
+    CC25_CSN_output;
 
-        // Random
-        //random_init();
-        CC25_CSN_on;
-        SDI_on;
-        SCLK_off;
+    // Random
+    //random_init();
+    CC25_CSN_on;
+    SDI_on;
+    SCLK_off;
 
     //Wait for every component to start
     delay(100);
 
     // Read status of bind button
-    if( /*IS_BIND_BUTTON_on */ true)
-    {
-        BIND_BUTTON_FLAG_on;    // If bind button pressed save the status
-        BIND_IN_PROGRESS;       // Request bind
-    }
-    else
-        BIND_DONE;
-
-    // Read status of mode select binary switch
-    // after this mode_select will be one of {0000, 0001, ..., 1111}
-
-
-    String str;
-    debugln("select bank:");
-    str="";
-    while(true) {
-      if (Serial.available() > 0) {
-        char recieved = Serial.read();
-        if (recieved == '\n') {
-          int new_bank = atoi(str.c_str());
-          curr_bank = new_bank;
-          debugln("Bank selection %d", new_bank);
-          break;
-        }else {
-          str += recieved;
-        }
-      }
-    }
-
-    debugln("select mode:");
-    str="";
-    while(true) {
-      if (Serial.available() > 0) {
-        char recieved = Serial.read();
-        if (recieved == '\n') {
-          int new_mode = atoi(str.c_str());
-          debugln("Protocol selection switch reads as %d with \'%s\'", new_mode,str.c_str());
-          mode_select = new_mode;
-          break;
-        }else {
-          str += recieved;
-        }
-      }
-    }
-    debugln("Protocol selection switch reads as %d", mode_select);
+    BIND_IN_PROGRESS;       // Request bind
 
     // Update LED
     LED_off;
     LED_output;
 
-    //Init RF modules
-    modules_reset();
-
+    //frquency offset initialization
     {
-        seed = analogRead(PA0);
-        randomSeed(seed);
+        freq_offset = 0;
+        debug("freq offset: %d\n", freq_offset);
+        CC2500_Reset();
+
+        //Wait for cc2500 to reset
+        delay(100);
     }
 
-    // Read or create protocol id
-    MProtocol_id_master=random_id(false);
-
-    debugln("Module Id: %lx", MProtocol_id_master);
-
-    //Protocol and interrupts initialization
-    {
-        uint8_t line=curr_bank*14+mode_select-1;
-        protocol        =   PPM_prot[line].protocol;
-        cur_protocol[1] = protocol;
-        sub_protocol    =   PPM_prot[line].sub_proto;
-        RX_num          =   PPM_prot[line].rx_num;
-
-        debug("protocol: %d ", protocol);
-        switch(protocol) {
-            case PROTO_FRSKYD:
-                debugln("PROTO_FRSKYD");
-            break;
-            case PROTO_FRSKYX:
-                debugln("PROTO_FRSKYX");
-            break;
-            case PROTO_FRSKYV:
-                debugln("PROTO_FRSKYV");
-            break;
-        }
-        debug("sub_protocol: %d\n", sub_protocol);
-        option = PPM_prot[line].option;  // Use radio-defined option value
-        debug("freq offset: %d\n", option);
-        line++;
-
-        protocol_init();
-    }
-
-    debug("Init complete\n");
     input.init();
     input.update();
+
     init_state();
+
+    debug("Init complete\n");
 }
 
-// Main
-// Protocol scheduler
 void loop()
 {
-    uint32_t s;
-    s =micros();
-    input.update();
-
-    s =micros();
     update_state();
-    return;
-    uint32_t next_callback;
-
-    uint32_t end__ = micros();
-    uint32_t start = micros();
-
-    while(1) {
-        start = end__;
-        next_callback = remote_callback();
-
-        if (next_callback > 4000) {
-            uint32_t s;
-
-            s =micros();
-            input.update();
-            debug("input took %lu", (micros()-s));
-
-            s =micros();
-            update_state();
-            debugln("state took %lu", (micros()-s));
-        }
-
-        uint32_t wait_until = start + next_callback;
-        end__ = micros();
-
-        if (end__-start < next_callback) {
-            uint32_t wait = next_callback;
-            wait -= ((end__-start));
-            delayMicroseconds(wait);
-        }
-        end__ = micros();
-    }
-}
-
-// Protocol start
-static void protocol_init() {
-    modules_reset();                // Reset all modules
-    uint32_t next_callback = 0;
-
-    //Set global ID and rx_tx_addr
-    MProtocol_id = RX_num + MProtocol_id_master;
-    set_rx_tx_addr(MProtocol_id);
-    debugln("Protocol selected: %d, sub proto %d, rxnum %d, option %d", protocol, sub_protocol, RX_num, option);
-
-    switch(protocol)                // Init the requested protocol
-    {
-        case PROTO_FRSKYD:
-            next_callback = initFrSky_2way();
-            remote_callback = ReadFrSky_2way;
-            break;
-    }
-    delayMicroseconds(next_callback);
-}
-
-void modules_reset()
-{
-    CC2500_Reset();
-
-    //Wait for every component to reset
-    delay(100);
-}
-
-// Convert 32b id to rx_tx_addr
-void set_rx_tx_addr(uint32_t id)
-{ // Used by almost all protocols
-    rx_tx_addr[0] = (id >> 24) & 0xFF;
-    rx_tx_addr[1] = (id >> 16) & 0xFF;
-    rx_tx_addr[2] = (id >>  8) & 0xFF;
-    rx_tx_addr[3] = (id >>  0) & 0xFF;
-    rx_tx_addr[4] = (rx_tx_addr[2]&0xF0)|(rx_tx_addr[3]&0x0F);
-}
-
-uint32_t random_id(bool create_new)
-{
 }

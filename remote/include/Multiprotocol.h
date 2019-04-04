@@ -24,24 +24,15 @@
 #include "stdint.h"
 
 void set_rx_tx_addr(uint32_t id);
-#define MAX_PKT 29
-extern uint8_t  hopping_frequency_no;
-extern uint8_t sub_protocol;
-extern uint8_t calData[48];
-extern uint32_t MProtocol_id_master;
 extern uint8_t protocol_flags;
 extern uint8_t protocol_flags2;
-extern uint8_t pkt[MAX_PKT];//telemetry receiving packets
-extern uint8_t prev_option;
 extern uint8_t  crc8;
 extern uint8_t  packet_count;
-extern uint8_t  RX_num;
 extern uint8_t  binding_idx;
 extern uint8_t  packet[40];
 extern uint8_t  rx_tx_addr[5];
 extern uint8_t option;
 extern uint16_t state;
-extern uint16_t seed;
 extern uint8_t  phase;
 extern uint8_t  len;
 
@@ -86,7 +77,6 @@ enum MultiPacketTypes
 //
 #define BIND_BUTTON_FLAG_on     protocol_flags |= _BV(5)
 #define BIND_BUTTON_FLAG_off    protocol_flags &= ~_BV(5)
-#define IS_BIND_BUTTON_FLAG_on  ( ( protocol_flags & _BV(5) ) !=0 )
 //Bind flag
 #define BIND_IN_PROGRESS    protocol_flags &= ~_BV(7)
 #define BIND_DONE           protocol_flags |= _BV(7)

@@ -18,7 +18,6 @@ class Input {
             CH_AUX3     = 6,
             CH_AUX4     = 7,
             CH_AUX5     = 8,
-            CH_AUX6     = 8,
 
             CH_MAX      = 8,
             CH_COUNT    = 9,
@@ -49,6 +48,7 @@ class Input {
 
         void invert_ch(enum input_channels ch);
         void print_ch(enum input_channels ch);
+        void print();
 
         void calibration_reset(void);
         bool calibration_update(void);
@@ -69,8 +69,8 @@ class Input {
         };
 
         // actual tx channel data
-        uint16_t channel_data[CH_COUNT];
-        uint16_t failsafe_data[CH_COUNT];
+        uint16_t channel_data[NUM_TX_CHN];
+        uint16_t failsafe_data[NUM_TX_CHN];
 
         struct data input[2];
         struct data* curr;
@@ -80,9 +80,9 @@ class Input {
         struct ch_config ch_config[CH_COUNT];
 
         // pin setttings
-        uint32_t pins[CH_COUNT];
+        int pins[CH_COUNT];
 };
-extern const char* ch_name[NUM_TX_CHN];
+extern const char* ch_name[Input::CH_COUNT];
 extern Input input;
 
 #endif

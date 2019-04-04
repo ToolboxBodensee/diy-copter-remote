@@ -54,7 +54,6 @@ void LCD_state_bind::update(void)
         lcd.setCursor(14,1);
         lcd.print(line);
 
-        uint32_t wait_until = start + next_callback_time;
         end__ = micros();
 
         if (end__ - start < next_callback_time) {

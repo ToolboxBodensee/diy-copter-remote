@@ -32,14 +32,14 @@ int Eeprom_config::validate() {
     }
 
     if (this->current_config.version != CURRENT_VERSION) {
-        debugln("wrong version %d vs %d \n", this->current_config.version, CURRENT_VERSION);
+        debugln("wrong version %lu vs %lu \n", this->current_config.version, CURRENT_VERSION);
         return -1;
     }
 
     crc_calc = tiny_crc32(&(this->current_config.data), sizeof(this->current_config.data));
 
     if (crc_calc != this->current_config.data_crc) {
-        debugln("wrong version %d vs %d \n", crc_calc, this->current_config.data_crc);
+        debugln("wrong crc %lu vs %lu \n", crc_calc, this->current_config.data_crc);
         return -1;
     }
     debugln("valid config\n");
@@ -48,16 +48,12 @@ int Eeprom_config::validate() {
 
 int Eeprom_config::read(void) {
     uint8_t *data = NULL;
-    debugln("enter \n");
     data = (uint8_t *) &this->current_config;
 
-    debugln("for start\n");
     for (uint8_t i = 0; i < sizeof(struct eeprom_data_v1) ; i++) {
         data[i] = EEPROM.read(0x10 + i);
-        debugln("Read %d\n",i);
     }
 
-    debugln("Read end\n");
     this->sucessfull_read = true;
     return 0;
 }

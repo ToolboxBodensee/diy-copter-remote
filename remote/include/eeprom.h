@@ -21,7 +21,7 @@ public:
     int set_master_id(uint32_t master_id);
 
 private:
-    #define CURRENT_VERSION 0x01
+    #define CURRENT_VERSION 0x02
     struct eeprom_data_v1 {
         uint8_t version;
         uint32_t data_crc;

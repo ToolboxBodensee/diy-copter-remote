@@ -44,6 +44,12 @@ void LCD_state_init::update(void)
         struct Input::ch_config ch_config[Input::CH_COUNT];
         eeprom_config.get_ch_config(ch_config);
         input.set_calibration(ch_config);
+
+        uint32_t master_id = 0;
+        eeprom_config.get_master_id(&master_id);
+        set_rx_tx_addr(master_id);
+
+
     }
 }
 void LCD_state_init::leave(void)

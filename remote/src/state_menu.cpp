@@ -41,6 +41,7 @@ void LCD_state_menu::update(void)
     lcd.setCursor(0,1);
     lcd.print(curr[1]);
 
+    input.update();
     if (false == input.is_centered(Input::MENU_UP_DOWN)) {
         if (input.is_low(Input::MENU_UP_DOWN)){
             this->curr_selected +=1;

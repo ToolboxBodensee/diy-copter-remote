@@ -9,7 +9,7 @@
 Input input;
 
 
-const char* ch_name[NUM_TX_CHN] = {
+const char* ch_name[Input::CH_COUNT] = {
     "CH_ROLL",
     "CH_PITCH",
     "CH_THROTTLE",
@@ -20,24 +20,23 @@ const char* ch_name[NUM_TX_CHN] = {
     "CH_AUX3",
     "CH_AUX4",
     "CH_AUX5",
-    "CH_AUX6"
 };
 
 Input::Input(void) {
+    uint8_t i;
     this->curr = &(this->input[0]);
     this->old  = &(this->input[1]);
     memset(this->input,0, sizeof(this->input));
 
-    //InitFailsafe
-    for (uint8_t i = 0; i < NUM_TX_CHN; i++)
+    for (i = 0; i < NUM_TX_CHN; i++) {
+        //InitFailsafe
         this->failsafe_data[i] = (CHANNEL_MAX_100 - CHANNEL_MIN_100) / 2 + CHANNEL_MIN_100;
-    this->failsafe_data[CH_THROTTLE] = CHANNEL_MIN_100;  //1=-125%, 204=-100%
-
-    // init channel
-
-    for (uint8_t i = 0; i < NUM_TX_CHN; i++)
+        // init channel
         this->channel_data[i] = 1024;
-    this->channel_data[CH_THROTTLE] = 204;
+    }
+
+    this->failsafe_data[CH_THROTTLE] = CHANNEL_MIN_100;  //1=-125%, 204=-100%
+    this->channel_data[CH_THROTTLE] = CHANNEL_MIN_100;
 }
 
 uint16_t* Input::get_channel_data(void) {
@@ -77,9 +76,6 @@ void Input::init() {
     this->pins[CH_AUX5] = Aux5_pin;
     this->ch_config[CH_AUX5].is_analog = false;
 
-    this->pins[CH_AUX6] = Aux6_pin;
-    this->ch_config[CH_AUX6].is_analog = false;
-
     for (uint8_t i = 0; i < CH_COUNT; ++i) {
         pinMode(this->pins[i], INPUT);
     }
@@ -96,7 +92,6 @@ void Input::init() {
     this->ch_config[CH_AUX2].inverted     = false;
     this->ch_config[CH_AUX3].inverted     = false;
     this->ch_config[CH_AUX4].inverted     = false;
-    this->ch_config[CH_AUX5].inverted     = false;
 }
 
 bool Input::is_centered(void) {
@@ -145,10 +140,11 @@ void Input::invert_ch(enum Input::input_channels ch) {
     this->ch_config[ch].inverted = !this->ch_config[ch].inverted;
 }
 void Input::print_ch(enum Input::input_channels ch) {
-    debug("ch%d: %04d %04d min %d max %d high %d mid %d low %d\n",
+    debug("ch%d: %04d %04d %04d min %d max %d high %d mid %d low %d\n",
             ch,
             this->ch_raw[ch],
             this->curr->ch_data[ch],
+            this->old->ch_data[ch],
             this->ch_config[ch].min,
             this->ch_config[ch].max,
             this->is_high((enum Input::input_channels)ch),
@@ -156,6 +152,17 @@ void Input::print_ch(enum Input::input_channels ch) {
             this->is_low((enum Input::input_channels)ch)
             );
 }
+void Input::print() {
+    debug("menu %d (old %d)\n", this->curr->menu, this->old->menu);
+
+    for (uint8_t i = 0; i < CH_COUNT; ++i) {
+        print_ch((enum Input::input_channels) i);
+    }
+    for (uint8_t i = 0; i < NUM_TX_CHN; ++i) {
+        debug("chdata %d \n", this->channel_data[i]);
+    }
+}
+
 
 bool Input::calibration_update(void) {
     bool changed = false;
@@ -201,12 +208,14 @@ void Input::get_calibration(struct ch_config *curr_config)
 }
 
 void Input::update(void) {
+    this->mark_processed();
     for (uint8_t ch = 0; ch < CH_MAX; ch ++) {
 
-        if (this->ch_config[ch].is_analog)
+        if (this->ch_config[ch].is_analog) {
             this->ch_raw[ch] = analogRead(this->pins[ch]);
-        else
+        } else {
             this->ch_raw[ch] = digitalRead(this->pins[ch]) == HIGH;
+        }
 
         // do inverting
         if (this->ch_config[ch].inverted)
@@ -234,4 +243,3 @@ void Input::update(void) {
                 this->curr->aux[4],this->curr->aux[5],this->curr->menu
                 );*/
 }
-// Channel value for FrSky (PPM is multiplied by 1.5)
