@@ -16,6 +16,7 @@
 #define _CONFIG_H_
 
 #include <stdint.h>
+#define REMOE_OWNER "Sina"
 
 #define DEFAULT_BIND_TIME 13 /*seconds*/
 

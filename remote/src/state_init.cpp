@@ -6,7 +6,17 @@
 #include "input.h"
 #include "eeprom.h"
 #include "debug.h"
+#include "config.h"
+#include "pins.h"
 #include "tx_def.h"
+void centerText(char *text, int fieldWidth)
+{
+    int padlen = 0;
+    padlen = (fieldWidth - strlen(text)) / 2 ;
+    char line[17];
+    sprintf(line, "%*s%s%*s\n", padlen, "", text, padlen, "");
+    lcd.print(line);
+}
 
 LCD_state_init::LCD_state_init(void) {
 }
@@ -14,9 +24,11 @@ void LCD_state_init::enter(void) {
     lcd.setCursor(0,0);
     lcd.print("    wellcome    ");
     lcd.setCursor(0,1);
-    lcd.print("    phschoen    ");
+    centerText(REMOE_OWNER,16);
+
     this->time_enter = millis();
 }
+
 void LCD_state_init::update(void)
 {
     uint32_t diff;
@@ -48,10 +60,9 @@ void LCD_state_init::update(void)
         uint32_t master_id = 0;
         eeprom_config.get_master_id(&master_id);
         set_rx_tx_addr(master_id);
-
-
     }
 }
+
 void LCD_state_init::leave(void)
 {
     lcd.clear();
