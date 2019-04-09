@@ -239,8 +239,16 @@ void Input::update(void) {
     this->curr->menu = digitalRead(Menu_pin) == HIGH;
 
 
+#define CHANNEL_DEAD 60
+    uint8_t mid = (CHANNEL_MAX_100 - CHANNEL_MIN_100)/2 + CHANNEL_MIN_100;
+    uint8_t min_dead = mid - CHANNEL_DEAD;
+    uint8_t max_dead = mid + CHANNEL_DEAD;
     for (uint8_t ch = 0; ch < CH_COUNT; ++ch) {
         this->channel_data[ch] = map(this->curr->ch_data[ch], this->ch_config[ch].min, this->ch_config[ch].max, CHANNEL_MIN_100, CHANNEL_MAX_100);
+        if (min_dead <= this->channel_data[ch] ||
+            this->channel_data[ch] <= max_dead) {
+            this->channel_data[ch] = mid;
+        }
     }
 
     /*debug_input("t%d y%d r%d p%d a1_%d a2_%d a3_%d a4_%d a5_%d m%d",
