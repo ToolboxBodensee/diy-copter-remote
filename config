@@ -1,57 +1,30 @@
-resource MOTOR 1 A03
-resource MOTOR 2 B08
-resource MOTOR 3 A02
-resource MOTOR 4 B09
-resource PWM 1 D07
-resource PWM 2 C08
-resource PWM 3 K05
-resource PWM 4 D04
-resource PWM 5 B02
-resource PWM 7 B01
-resource PWM 8 A02
+# resource list
+IO
+A02: MOTOR 4
+A03: MOTOR 3
+B08: MOTOR 1
+B09: MOTOR 2
 
-feature -RX_PPM
-feature -OSD
-feature RX_SERIAL
-feature LED_STRIP
-beeper -GPS_STATUS
-beeper -ON_USB
-beeper -CAM_CONNECTION_OPEN
-beeper -CAM_CONNECTION_CLOSED
-serial 2 64 115200 57600 0 115200
-led 0 1,0::CW:0
-led 1 0,0::CW:0
-aux 0 0 0 1650 2100 0
-aux 1 1 1 1600 2100 0
-aux 2 2 1 925 1400 0
-aux 3 27 0 1475 2100 0
-set acc_calibration = 46,25,-115
-set baro_hardware = NONE
-set mid_rc = 1518
-set min_check = 1003
-set max_check = 1995
-set serialrx_provider = SBUS
-set blackbox_device = NONE
-set align_board_yaw = 270
-set bat_capacity = 750
-profile 0
 
-profile 1
+4         2
+     A
+     |
+3         1
 
-profile 2
 
-profile 2
-rateprofile 0
 
-rateprofile 1
-
-rateprofile 2
-
-rateprofile 3
-
-rateprofile 4
-
-rateprofile 5
-
-rateprofile 0
+#pauline
+4         2            2         1
+     A                      A
+     |                      |
+3         1            4         3
+resource motor 1 A03
+resource motor 2 B08
+resource motor 3 A02
+resource motor 4 B09
 save
+
+1 inv
+2 inv
+:w
+

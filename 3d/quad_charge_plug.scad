@@ -21,15 +21,15 @@ module charger_plug() {
         // plug cut
         translate([0,0,1])
         union() {
-            scale([1.2,1.3,1])
+            scale([1.20,1.4,1])
             linear_extrude(5)
                 plug_surface();
         }
 
         // pin cuts
         for (i= [1,-1]) {
-            translate([1*i,0,-0.01])
-                aligned_cube([0.85,0.85,50]); 
+            translate([1*i,-0.2,-0.01])
+                aligned_cube([0.99,0.99,50]); 
             translate([1*i,0,1])
                 aligned_cube([2,2,5]); 
         }
