@@ -9,7 +9,7 @@
 #include "config.h"
 #include "pins.h"
 #include "tx_def.h"
-void centerText(char *text, int fieldWidth)
+void centerText(const char *text, int fieldWidth)
 {
     int padlen = 0;
     padlen = (fieldWidth - strlen(text)) / 2 ;

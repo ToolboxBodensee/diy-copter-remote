@@ -28,11 +28,9 @@ extern uint8_t protocol_flags;
 extern uint8_t protocol_flags2;
 extern uint8_t  crc8;
 extern uint8_t  packet_count;
-extern uint8_t  binding_idx;
 extern uint8_t  packet[40];
 extern uint8_t option;
 extern uint16_t state;
-extern uint8_t  phase;
 extern uint8_t  len;
 
 // Telemetry

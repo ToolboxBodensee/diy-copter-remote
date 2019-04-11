@@ -5,7 +5,10 @@
 #include "input.h"
 #include "debug.h"
 
+#ifndef ENABLE_DBEUG
 int16_t map16b( int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t out_max);
+
+
 #include <USBComposite.h>
 extern HIDJoystick Joystick;
 LCD_state_joy_usb::LCD_state_joy_usb(void) {
@@ -62,3 +65,4 @@ void LCD_state_joy_usb::leave(void) {
     lcd.setCursor(0,1);
     lcd.print("usb mode ");
 }
+#endif

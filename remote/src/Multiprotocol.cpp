@@ -21,9 +21,6 @@
  along with Multiprotocol.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#define DEBUG_SERIAL    // Only for STM32_BOARD compiled with Upload method "Serial"->usart1, "STM32duino bootloader"->USB serial
-
 #include <cstdint> //adds types like unit_16_t
 
 #include "config.h"
@@ -42,47 +39,40 @@
 #include "FrSkyD_cc2500.h"
 
 //Global constants/variables
-uint32_t blink=0,last_signal=0;
 uint8_t protocol_flags=0,protocol_flags2=0;
 //
 uint8_t  channel;
 uint8_t  packet[40];
 
 // Protocol variables
-uint8_t  cyrfmfg_id[6];//for dsm2 and devo
 uint8_t  rx_id[4];
-uint8_t  phase;
-uint16_t bind_counter;
-uint8_t  bind_phase;
-uint8_t  binding_idx;
 uint16_t packet_period;
 uint8_t  packet_count;
-uint8_t  packet_sent;
-uint8_t  packet_length;
 uint8_t  *hopping_frequency_ptr;
-uint8_t  rf_ch_num;
 uint16_t crc;
 uint8_t  crc8;
 uint16_t failsafe_count;
 uint8_t  len;
-
+#ifndef ENABLE_DBEUG
 #include <USBComposite.h>
 USBHID HID;
 HIDJoystick Joystick(HID);
+#endif
 
 // Telemetry
 void setup()
 {
     // Setup diagnostic uart before anything else
     #ifdef ENABLE_DBEUG
-        Serial.begin(115200,SERIAL_8N1);
-        delay(1000);
-        while (!Serial); // Wait for ever for the serial port to connect...
+        Serial.begin(9600,SERIAL_8N1);
         delay(1000);
         debugln("Multiprotocol startup");
+        delay(1000);
         debugln("time %s ", __TIME__);
+        delay(1000);
+    #else
+        HID.begin(HID_JOYSTICK);
     #endif
-    HID.begin(HID_JOYSTICK);
 
     // all inputs
     // outputs

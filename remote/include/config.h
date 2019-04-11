@@ -16,7 +16,7 @@
 #define _CONFIG_H_
 
 #include <stdint.h>
-#define REMOE_OWNER "Sina"
+#define REMOE_OWNER "phschoen"
 
 #define DEFAULT_BIND_TIME 13 /*seconds*/
 
@@ -123,7 +123,7 @@
 //In this section you can configure the telemetry.
 
 //If you do not plan using the telemetry comment this global setting using "//" and skip to the next section.
-//#define TELEMETRY
+#define TELEMETRY
 
 //Comment to invert the polarity of the output telemetry serial signal.
 //This function takes quite some flash space and processor power on an atmega.
