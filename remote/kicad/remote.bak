@@ -854,4 +854,8 @@ Wire Notes Line
 	11100 4850 11100 6250
 Wire Notes Line
 	9350 6250 11100 6250
+Text GLabel 4100 4000 0    50   Input ~ 0
+charger_watchdog
+Wire Wire Line
+	4250 4000 4100 4000
 $EndSCHEMATC
