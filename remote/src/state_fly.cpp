@@ -76,7 +76,7 @@ void LCD_state_fly::enter(void) {
 
     lcd.setCursor(12,0);
     lcd.write(battery_char);
-#if 0
+#if 1
     lcd.setCursor(12,1);
     lcd.write(battery_char);
     lcd.setCursor(6,1);
@@ -149,7 +149,8 @@ void LCD_state_fly::update(void)
     uint8_t call=0;
     uint8_t rssi_percent = 100;
     uint8_t akku_quad = 1;
-    uint8_t akku_remote = 2;
+    uint32_t akku_remote = 2;
+    uint32_t old_akku_remote = 2;
     unsigned long time_in_ms = millis() - this->time_enter;
     unsigned long time_in_s = time_in_ms/1000; // to sec
 
@@ -196,9 +197,9 @@ void LCD_state_fly::update(void)
                 this->print_time(time_in_s);
                 break;
 
-#if 0
+#if 1
             case 20:
-                rssi_percent += 1;
+                rssi_percent = TX_RSSI;
                 if(rssi_percent > 100)
                     rssi_percent = 0;
                 this->print_rssi(rssi_percent);
@@ -215,12 +216,20 @@ void LCD_state_fly::update(void)
 #endif
             case 40:
                 // update akku
-                akku_remote = analogRead(Battery_pin);
-                if (akku_remote > 3830)
-                    akku_remote = 3830;
-                if (akku_remote < 3450)
-                    akku_remote = 3450;
-                akku_remote = map16b(akku_remote, 3450, 3830, 0, 100);
+                // 3.7 -> 1560
+                // 4.22 -> 1440
+                pinMode(Battery_pin, INPUT);
+                for(int i = 0; i < 10; ++i)
+                    akku_remote += analogRead(Battery_pin);
+                akku_remote /=10;
+                akku_remote = (old_akku_remote +akku_remote )/2;
+                old_akku_remote = akku_remote;
+                debug("akku %u \n", akku_remote);
+                if (akku_remote > 1560)
+                    akku_remote = 1560;
+                if (akku_remote < 1440)
+                    akku_remote = 1440;
+                akku_remote = map16b(akku_remote, 1440, 1560, 100, 0);
                 if (akku_remote > 100)
                     akku_remote = 100;
                 this->print_akku_remote(akku_remote);

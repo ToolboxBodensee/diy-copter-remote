@@ -9,14 +9,6 @@
 #include "config.h"
 #include "pins.h"
 #include "tx_def.h"
-void centerText(const char *text, int fieldWidth)
-{
-    int padlen = 0;
-    padlen = (fieldWidth - strlen(text)) / 2 ;
-    char line[17];
-    sprintf(line, "%*s%s%*s\n", padlen, "", text, padlen, "");
-    lcd.print(line);
-}
 
 LCD_state_init::LCD_state_init(void) {
 }
@@ -24,9 +16,18 @@ void LCD_state_init::enter(void) {
     lcd.setCursor(0,0);
     lcd.print("    wellcome    ");
     lcd.setCursor(0,1);
-    centerText(REMOE_OWNER,16);
+    lcd_centerText(REMOE_OWNER);
 
     this->time_enter = millis();
+    BUZZER_output;
+
+    /* for(int i = 0 ; i < 10;++i) { */
+    /*     delay(100); */
+    /*     BUZZER_on; */
+    /*     delay(100); */
+    /*     BUZZER_off; */
+    /*     delay(100); */
+    /* } */
 }
 
 void LCD_state_init::update(void)

@@ -36,9 +36,10 @@
 #define Aux3_pin      PB11
 #define Aux4_pin      PB13
 #define Aux5_pin      PB15
+#define Aux6_pin      PA15
 #define Menu_pin      PB12
 
-#define Battery_pin   PA9
+#define Battery_pin   PB0
 #define Led_pin       PC13
 #define Buzzer_pin    PA8
 

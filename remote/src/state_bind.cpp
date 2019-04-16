@@ -54,6 +54,13 @@ void LCD_state_bind::update(void)
         lcd.setCursor(14,1);
         lcd.print(line);
 
+        input.update();
+        if (input.is_menu_triggered()) {
+            debug("%lu menu button trigger\n", millis);
+            new_state = s_menu;
+            break;
+        }
+
         end__ = micros();
 
         if (end__ - start < next_callback_time) {

@@ -17,7 +17,9 @@ State *s_init = NULL;
 State *s_bind = NULL;
 State *s_fly  = NULL;
 State *s_joy  = NULL;
+#ifndef ENABLE_DBEUG
 State *s_usb  = NULL;
+#endif
 State *s_menu = NULL;
 
 
@@ -33,7 +35,9 @@ void init_state(void) {
     s_bind = new LCD_state_bind();
     s_fly  = new LCD_state_fly();
     s_joy  = new LCD_state_joy_calibration();
+#ifndef ENABLE_DBEUG
     s_usb  = new LCD_state_joy_usb();
+#endif
     s_menu = new LCD_state_menu();
     lcd.backlight();
     curr_state = NULL;
@@ -55,4 +59,13 @@ void update_state(void) {
         if(curr_state)
             curr_state->enter();
     }
+}
+void lcd_centerText(const char *text)
+{
+    int fieldWidth = 16;
+    int padlen = 0;
+    padlen = (fieldWidth - strlen(text)) / 2 ;
+    char line[17] = {0};
+    sprintf(line, "%*s%s%*s\n", padlen, "", text, padlen, "");
+    lcd.print(line);
 }

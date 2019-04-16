@@ -10,16 +10,16 @@ Input input;
 
 
 const char* ch_name[Input::CH_COUNT] = {
-    "CH_ROLL",
-    "CH_PITCH",
-    "CH_THROTTLE",
-    "CH_YAW",
+    "ROLL",
+    "PITCH",
+    "THROTTLE",
+    "YAW",
 
-    "CH_AUX1",
-    "CH_AUX2",
-    "CH_AUX3",
-    "CH_AUX4",
-    "CH_AUX5",
+    "AUX1",
+    "AUX2",
+    "AUX3",
+    "AUX4",
+    "AUX5",
 };
 
 Input::Input(void) {
@@ -76,6 +76,9 @@ void Input::init() {
     this->pins[CH_AUX5] = Aux5_pin;
     this->ch_config[CH_AUX5].is_analog = false;
 
+    this->pins[CH_AUX6] = Aux6_pin;
+    this->ch_config[CH_AUX6].is_analog = false;
+
     for (uint8_t i = 0; i < CH_COUNT; ++i) {
         pinMode(this->pins[i], INPUT);
     }
@@ -93,6 +96,7 @@ void Input::init() {
     this->ch_config[CH_AUX3].inverted     = true;
     this->ch_config[CH_AUX4].inverted     = true;
     this->ch_config[CH_AUX5].inverted     = true;
+    this->ch_config[CH_AUX6].inverted     = true;
 }
 
 bool Input::is_centered(void) {
@@ -240,7 +244,7 @@ void Input::update(void) {
 
 
     for (uint8_t ch = 0; ch < CH_COUNT; ++ch) {
-        this->channel_data[ch] = map(this->curr->ch_data[ch], this->ch_config[ch].min, this->ch_config[ch].max, CHANNEL_MIN_100, CHANNEL_MAX_100);
+        this->channel_data[ch] = map(this->curr->ch_data[ch], this->ch_config[ch].min, this->ch_config[ch].max, CHANNEL_MIN_100+3, CHANNEL_MAX_100);
     }
 
     #define CHANNEL_DEAD 70
@@ -248,6 +252,11 @@ void Input::update(void) {
     uint8_t min_dead = mid - CHANNEL_DEAD;
     uint8_t max_dead = mid + CHANNEL_DEAD;
     for (uint8_t ch = 0; ch < CH_COUNT; ++ch) {
+        if (this->channel_data[ch] > mid) {
+            this->channel_data[ch] -= CHANNEL_DEAD;
+        } else {
+            this->channel_data[ch] -= CHANNEL_DEAD;
+        }
         if (min_dead <= this->channel_data[ch] &&
             this->channel_data[ch] <= max_dead) {
             this->channel_data[ch] = mid;

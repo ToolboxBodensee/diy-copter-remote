@@ -26,7 +26,9 @@ void LCD_state_menu::update(void)
     } menus[] = {
         { "Flight        ", s_fly },
         { "Bind          ", s_bind },
+#ifdef ENABLE_DBEUG
         { "Joy usb       ", s_usb},
+#endif
         { "Joy calib     ", s_joy },
         { "HF calib      ", NULL },
         { "              ", NULL },
@@ -65,6 +67,7 @@ void LCD_state_menu::update(void)
         lcd.print("entering         ");
         lcd.setCursor(0,1);
         lcd.print(menus[this->curr_selected].name);
+
         // do wait until its centered
         while(false == input.is_centered(Input::MENU_LEFT_RIGHT)) {
             input.update();
@@ -77,7 +80,7 @@ void LCD_state_menu::update(void)
     }
 
     if(wait)
-        delay(500);
+        delay(1100);
 }
 
 void LCD_state_menu::leave(void)

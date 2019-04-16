@@ -245,7 +245,7 @@ uint16_t ReadFrSky_2way()
 
             //debugln("%d len",len);
             if (len && len<=(0x11+3)) { // 20bytes
-                debug("rx tel\n");
+                debug("rx tel %d\n", len);
                 CC2500_ReadData(pkt, len);              //received telemetry packets
                 #if defined(TELEMETRY)
                     if(pkt[len-1] & 0x80)
@@ -257,6 +257,8 @@ uint16_t ReadFrSky_2way()
                     debug("rx end crc\n");
                 #endif
             } else {
+                if (len != 0)
+                    debug("rx len %d\n", len);
                 packet_count++;
                 // restart sequence on missed packet - might need count or timeout instead of one missed
                 if(packet_count > 100) {//~1sec

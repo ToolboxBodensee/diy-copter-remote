@@ -18,9 +18,10 @@ class Input {
             CH_AUX3     = 6,
             CH_AUX4     = 7,
             CH_AUX5     = 8,
+            CH_AUX6     = 9,
 
-            CH_MAX      = 8,
-            CH_COUNT    = 9,
+            CH_MAX      = 9,
+            CH_COUNT    = 10,
 
             MENU_UP_DOWN = CH_PITCH,
             MENU_LEFT_RIGHT = CH_ROLL,

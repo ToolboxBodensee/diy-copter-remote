@@ -46,6 +46,7 @@ public:
     void update(void);
     void leave(void);
 };
+extern State *s_init;
 
 class LCD_state_bind: public State {
 private:
@@ -58,6 +59,7 @@ public:
     void update(void);
     void leave(void);
 };
+extern State *s_bind;
 
 class LCD_state_fly: public State {
 private:
@@ -75,6 +77,7 @@ public:
     void update(void);
     void leave(void);
 };
+extern State *s_fly;
 
 class LCD_state_menu: public State {
 private:
@@ -85,6 +88,7 @@ public:
     void update(void);
     void leave(void);
 };
+extern State *s_menu;
 
 class LCD_state_joy_calibration: public State {
 public:
@@ -93,7 +97,9 @@ public:
     void update(void);
     void leave(void);
 };
+extern State *s_joy;
 
+#ifndef ENABLE_DBEUG
 class LCD_state_joy_usb: public State {
 private:
     unsigned long time_enter;
@@ -103,13 +109,11 @@ public:
     void update(void);
     void leave(void);
 };
+extern State *s_usb;
+#endif
+
 extern State *curr_state;
 extern State *new_state;
 
-extern State *s_init;
-extern State *s_bind;
-extern State *s_fly;
-extern State *s_joy;
-extern State *s_usb;
-extern State *s_menu;
+void lcd_centerText(const char *text);
 #endif  /*_STATE_H_*/

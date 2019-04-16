@@ -104,11 +104,15 @@ static void multi_send_frskyhub()
 void frsky_check_telemetry(uint8_t *pkt,uint8_t len)
 {
     uint8_t clen = pkt[0] + 3 ;
-    if (len != clen)  // wrong length
+    if (len != clen)  {
+        // wrong length
+        debug("wrong length %d vs %d \n", len , clen);
         return;
+    }
     if(pkt[1] == rx_tx_addr[3] && pkt[2] == rx_tx_addr[2] ) {
         telemetry_link |= 1;                              // Telemetry data is available
         TX_RSSI = pkt[len-2];
+        debug("rssi %d\n", TX_RSSI);
 
         if(TX_RSSI >=128)
             TX_RSSI -= 128;
@@ -116,6 +120,8 @@ void frsky_check_telemetry(uint8_t *pkt,uint8_t len)
             TX_RSSI += 128;
 
         TX_LQI = pkt[len-1]&0x7F;
+        debug("TX_LQI %d\n", TX_LQI);
+
         for (uint8_t i=3;i<len-2;i++)
             pktt[i]=pkt[i];                             // Buffer telemetry values to be sent
 

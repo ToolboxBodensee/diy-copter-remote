@@ -36,6 +36,7 @@ void LCD_state_joy_usb::update(void) {
     bool bt2 =  ch_data[Input::CH_AUX3] == CHANNEL_MIN_100;
     bool bt3 =  ch_data[Input::CH_AUX4] == CHANNEL_MIN_100;
     bool bt4 =  ch_data[Input::CH_AUX5] == CHANNEL_MIN_100;
+    bool bt5 =  ch_data[Input::CH_AUX6] == CHANNEL_MIN_100;
     delay(50);
 
     Joystick.X(x);
@@ -47,12 +48,7 @@ void LCD_state_joy_usb::update(void) {
     Joystick.button(2, bt2);
     Joystick.button(3, bt3);
     Joystick.button(4, bt4);
-
-    char line[17];
-    snprintf(line,sizeof(line),"%lu %lu", bt0 , input.ch_raw[Input::CH_AUX1]);
-    lcd.setCursor(0,1);
-    lcd.print(line);
-
+    Joystick.button(5, bt5);
 
     if (input.is_menu_triggered()) {
         debug("%lu menu button trigger\n", millis);

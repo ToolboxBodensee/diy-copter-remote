@@ -18,15 +18,19 @@ void LCD_state_joy_calibration::enter(void) {
     lcd.print("move all sticks ");
     delay(500);
 }
-void show_dots(int row, int number) {
+
+void lcd_show_dots(int row, int number) {
+    char line[17] = "";
+    int c = 0;
     lcd.setCursor(0,row);
-    for(int c = 0; c < 16;++c) {
+    for(c = 0; c < 16;++c) {
         if (c < number)
-            lcd.print(".");
-        else
-            lcd.print(" ");
+            line[c]='.';
     }
+    line[c]='\0';
+    lcd_centerText(line);
 }
+
 void LCD_state_joy_calibration::update(void) {
     int8_t turns = 50;
     int8_t i;
@@ -37,7 +41,7 @@ void LCD_state_joy_calibration::update(void) {
     // min max calibration
     lcd.setCursor(0,0);
     lcd.print("min max Calib.  ");
-    show_dots(1,16);
+    lcd_show_dots(1,16);
     i = turns;
     while(i > 0) {
         input.update();
@@ -45,43 +49,64 @@ void LCD_state_joy_calibration::update(void) {
             i = turns;
         }else {
             i -= 1;
-            show_dots(1,(i *16)/turns);
+            lcd_show_dots(1,(i *16)/turns);
         }
         delay(100);
     }
 
     // center
     lcd.setCursor(0,0);
-    lcd.print("center sticks   ");
+    lcd.print("center stick     ");
     i = turns;
+    lcd_show_dots(1,16);
     while(i > 0) {
         input.update();
         if (false == input.is_centered()) {
             i = turns;
         }else {
             i -= 1;
-            show_dots(1,(i *16)/turns);
+            lcd_show_dots(1,(i *16)/turns);
         }
+        if (input.is_centered(Input::CH_THROTTLE)) {
+            lcd.setCursor(12,0);
+            lcd.write('T');
+        }
+        if (input.is_centered(Input::CH_YAW)) {
+            lcd.setCursor(13,0);
+            lcd.write('Y');
+        }
+        if (input.is_centered(Input::CH_PITCH)) {
+            lcd.setCursor(14,0);
+            lcd.write('P');
+        }
+        if (input.is_centered(Input::CH_ROLL)) {
+            lcd.setCursor(15,0);
+            lcd.write('R');
+        }
+
+
+
         delay(100);
     }
 
     for (uint8_t _ch = 0; _ch < 4 ; ++_ch) {
         enum Input::input_channels ch = (enum Input::input_channels) _ch;
+        char line [17]="";
+        sprintf(line, "move max %s", ch_name[ch]);
         lcd.setCursor(0,0);
-        lcd.print("move to max:    ");
-        lcd.setCursor(0,1);
-        lcd.print("                ");
-        lcd.setCursor(0,1);
-        lcd.print(ch_name[ch]);
+        lcd.print(line);
 
         i = turns;
+        lcd_show_dots(1,16);
         while(i>0) {
             delay(50);
             input.update();
 
             input.print_ch(ch);
             if (input.is_high(ch)) {
-                i--;
+                i -= 1;
+                lcd.setCursor(0,1);
+                lcd_show_dots(1,(i *16)/turns);
                 continue;
             }
 
