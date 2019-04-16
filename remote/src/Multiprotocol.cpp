@@ -99,7 +99,6 @@ void setup()
     //frquency offset initialization
     {
         freq_offset = 0;
-        debug("freq offset: %d\n", freq_offset);
         CC2500_Reset();
 
         //Wait for cc2500 to reset

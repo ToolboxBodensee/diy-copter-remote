@@ -112,6 +112,18 @@ public:
 extern State *s_usb;
 #endif
 
+class LCD_state_hf_cfg: public State {
+private:
+    unsigned long time_enter;
+    bool changed;
+public:
+    LCD_state_hf_cfg(void);
+    void enter(void);
+    void update(void);
+    void leave(void);
+};
+extern State *s_hf_cfg;
+
 extern State *curr_state;
 extern State *new_state;
 

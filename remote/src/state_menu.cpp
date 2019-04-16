@@ -30,7 +30,7 @@ void LCD_state_menu::update(void)
         { "Joy usb       ", s_usb},
 #endif
         { "Joy calib     ", s_joy },
-        { "HF calib      ", NULL },
+        { "HF config     ", s_hf_cfg },
         { "              ", NULL },
     };
 
@@ -48,8 +48,8 @@ void LCD_state_menu::update(void)
     if (false == input.is_centered(Input::MENU_UP_DOWN)) {
         if (input.is_low(Input::MENU_UP_DOWN)){
             this->curr_selected +=1;
-            if ( this->curr_selected > 3)
-                this->curr_selected = 3;
+            if ( this->curr_selected > 4)
+                this->curr_selected = 4;
             else
                 wait = true;
         }
