@@ -67,20 +67,31 @@ void LCD_state_joy_calibration::update(void) {
             i -= 1;
             lcd_show_dots(1,(i *16)/turns);
         }
+        lcd.setCursor(12,0);
         if (input.is_centered(Input::CH_THROTTLE)) {
-            lcd.setCursor(12,0);
+            lcd.write(' ');
+        } else {
             lcd.write('T');
         }
+
+        lcd.setCursor(13,0);
         if (input.is_centered(Input::CH_YAW)) {
-            lcd.setCursor(13,0);
+            lcd.write(' ');
+        } else {
             lcd.write('Y');
         }
+
+        lcd.setCursor(14,0);
         if (input.is_centered(Input::CH_PITCH)) {
-            lcd.setCursor(14,0);
+            lcd.write(' ');
+        } else {
             lcd.write('P');
         }
+
+        lcd.setCursor(15,0);
         if (input.is_centered(Input::CH_ROLL)) {
-            lcd.setCursor(15,0);
+            lcd.write(' ');
+        } else {
             lcd.write('R');
         }
 
