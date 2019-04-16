@@ -76,14 +76,15 @@ void LCD_state_fly::enter(void) {
 
     lcd.setCursor(12,0);
     lcd.write(battery_char);
-#if 1
-    lcd.setCursor(12,1);
-    lcd.write(battery_char);
+
+    //lcd.setCursor(12,1);
+    //lcd.write(battery_char);
+
     lcd.setCursor(6,1);
     lcd.write(rssiantenna);
+
     lcd.setCursor(7,1);
     lcd.write(rssi_bars);
-#endif
 }
 
 void LCD_state_fly::print_time(uint16_t time)
@@ -147,8 +148,8 @@ void LCD_state_fly::print_rssi(uint8_t rssi_percent)
 void LCD_state_fly::update(void)
 {
     uint8_t call=0;
-    uint8_t rssi_percent = 100;
-    uint8_t akku_quad = 1;
+    uint8_t rssi_percent = freq_offset;
+    uint8_t akku_quad = freq_offset;
     uint32_t akku_remote = 2;
     uint32_t old_akku_remote = 2;
     unsigned long time_in_ms = millis() - this->time_enter;
@@ -197,23 +198,16 @@ void LCD_state_fly::update(void)
                 this->print_time(time_in_s);
                 break;
 
-#if 1
             case 20:
-                rssi_percent = TX_RSSI;
-                if(rssi_percent > 100)
-                    rssi_percent = 0;
+                rssi_percent = freq_offset;//TX_RSSI;
                 this->print_rssi(rssi_percent);
                 break;
 
             case 30:
                 // update akku
-                akku_quad += 1;
-                if(akku_quad > 100)
-                    akku_quad = 0;
-                this->print_akku_quad(akku_quad);
+                //this->print_akku_quad(akku_quad);
                 break;
 
-#endif
             case 40:
                 // update akku
                 // 3.7 -> 1560
