@@ -6,7 +6,7 @@
 //********************
 //** Debug messages **
 //********************
-#define ENABLE_DBEUG // ~1k
+//#define ENABLE_DBEUG // ~1k
 #ifdef ENABLE_DBEUG
   #define debug(msg, ...)  {  char buf[256]; sprintf(buf, msg, ##__VA_ARGS__); Serial.print(buf);}
   #define debugln(msg, ...)  {  char buf[256];   sprintf(buf, msg "\r\n", ##__VA_ARGS__);  Serial.println(buf);}
