@@ -242,34 +242,34 @@ void Input::update(void) {
     }
     this->curr->menu = digitalRead(Menu_pin) == HIGH;
 
+    #define CHANNEL_DEAD 80
+    uint16_t mid = (CHANNEL_MAX_100 - CHANNEL_MIN_100)/2 + CHANNEL_MIN_100;
+    uint16_t min_dead = mid - CHANNEL_DEAD;
+    uint16_t max_dead = mid + CHANNEL_DEAD;
 
     for (uint8_t ch = 0; ch < CH_COUNT; ++ch) {
-        this->channel_data[ch] = map(this->curr->ch_data[ch], this->ch_config[ch].min, this->ch_config[ch].max, CHANNEL_MIN_100, CHANNEL_MAX_100);
-    }
-
-    #define CHANNEL_DEAD 70
-    uint8_t mid = (CHANNEL_MAX_100 - CHANNEL_MIN_100)/2 + CHANNEL_MIN_100;
-    uint8_t min_dead = mid - CHANNEL_DEAD;
-    uint8_t max_dead = mid + CHANNEL_DEAD;
-    for (uint8_t ch = 0; ch < 4; ++ch) {
-        if (min_dead < this->channel_data[ch] &&
-            this->channel_data[ch] < max_dead) {
-            // dead range
-            this->channel_data[ch] = mid;
+        if ( ch >= 2 ) {
+            this->channel_data[ch] = map(this->curr->ch_data[ch], this->ch_config[ch].min, this->ch_config[ch].max, CHANNEL_MIN_100 , CHANNEL_MAX_100);
+            continue;
+        } else {
+            this->channel_data[ch] = map(this->curr->ch_data[ch], this->ch_config[ch].min, this->ch_config[ch].max, CHANNEL_MIN_100 - CHANNEL_DEAD , CHANNEL_MAX_100 + CHANNEL_DEAD);
+            if (min_dead < this->channel_data[ch] &&
+                this->channel_data[ch] < max_dead) {
+                // dead range
+                this->channel_data[ch] = mid;
+            } else {
+                if (this->channel_data[ch] > mid) {
+                    this->channel_data[ch] -= CHANNEL_DEAD;
+                } else {
+                    this->channel_data[ch] += CHANNEL_DEAD;
+                }
+            }
         }
-        /* else { */
-        /*     if (this->channel_data[ch] > mid) { */
-        /*         this->channel_data[ch] -= CHANNEL_DEAD; */
-        /*     } else { */
-        /*         this->channel_data[ch] += CHANNEL_DEAD; */
-        /*     } */
-        /*     this->channel_data[ch] = map(this->curr->ch_data[ch], CHANNEL_MIN_100+CHANNEL_DEAD, CHANNEL_MAX_100-CHANNEL_DEAD, CHANNEL_MIN_100, CHANNEL_MAX_100); */
-        /* } */
     }
-
-    /*debug_input("t%d y%d r%d p%d a1_%d a2_%d a3_%d a4_%d a5_%d m%d",
-                this->curr->throttle,this->curr->yaw,this->curr->roll,this->curr->pitch,
-                this->curr->aux[0],this->curr->aux[1],this->curr->aux[2],this->curr->aux[3],
-                this->curr->aux[4],this->curr->aux[5],this->curr->menu
-                );*/
+    /* debug_input("t%d y%d r%d p%d \n", */
+    /*             this->channel_data[CH_THROTTLE], */
+    /*             this->channel_data[CH_YAW], */
+    /*             this->channel_data[CH_ROLL], */
+    /*             this->channel_data[CH_PITCH] */
+    /*             ); */
 }
