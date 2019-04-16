@@ -13,6 +13,7 @@
 LCD_state_init::LCD_state_init(void) {
 }
 void LCD_state_init::enter(void) {
+    lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("    wellcome    ");
     lcd.setCursor(0,1);
@@ -61,6 +62,11 @@ void LCD_state_init::update(void)
         uint32_t master_id = 0;
         eeprom_config.get_master_id(&master_id);
         set_rx_tx_addr(master_id);
+
+        uint8_t freq_ = 0;
+        eeprom_config.get_freq_offset(&freq_);
+        freq_offset = freq_;
+
     }
 }
 
