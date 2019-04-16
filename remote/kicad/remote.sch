@@ -56,35 +56,16 @@ Wire Wire Line
 $Comp
 L remote-rescue:joystick-remote left
 U 1 1 5C49DC62
-P 1400 5000
-F 0 "left" H 1978 5365 50  0000 L CNN
-F 1 "joystick" H 1978 5274 50  0000 L CNN
-F 2 "" H 1900 5550 50  0001 C CNN
-F 3 "" H 1900 5550 50  0001 C CNN
-	1    1400 5000
-	1    0    0    -1  
-$EndComp
-$Comp
-L remote-rescue:joystick-remote right
-U 1 1 5C49FFCD
-P 1400 5800
-F 0 "right" H 1978 6165 50  0000 L CNN
-F 1 "joystick" H 1978 6074 50  0000 L CNN
-F 2 "" H 1900 6350 50  0001 C CNN
-F 3 "" H 1900 6350 50  0001 C CNN
-	1    1400 5800
+P 2300 6600
+F 0 "left" H 2878 6965 50  0000 L CNN
+F 1 "joystick" H 2878 6874 50  0000 L CNN
+F 2 "" H 2800 7150 50  0001 C CNN
+F 3 "" H 2800 7150 50  0001 C CNN
+	1    2300 6600
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	1900 4850 1900 4950
-Wire Wire Line
-	1700 4850 1700 5200
-Wire Wire Line
-	1600 5250 1600 4850
-Wire Wire Line
-	1700 5650 1700 6000
-Wire Wire Line
-	1600 6050 1600 5650
+	2800 6450 2800 6550
 $Comp
 L power:+3.3V #PWR?
 U 1 1 5C539DC8
@@ -99,61 +80,61 @@ $EndComp
 $Comp
 L power:+3.3V #PWR?
 U 1 1 5C539EAE
-P 2400 4850
-F 0 "#PWR?" H 2400 4700 50  0001 C CNN
-F 1 "+3.3V" H 2415 5023 50  0000 C CNN
-F 2 "" H 2400 4850 50  0001 C CNN
-F 3 "" H 2400 4850 50  0001 C CNN
-	1    2400 4850
+P 3300 6450
+F 0 "#PWR?" H 3300 6300 50  0001 C CNN
+F 1 "+3.3V" H 3315 6623 50  0000 C CNN
+F 2 "" H 3300 6450 50  0001 C CNN
+F 3 "" H 3300 6450 50  0001 C CNN
+	1    3300 6450
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:+3.3V #PWR?
 U 1 1 5C539EFA
-P 2400 5650
-F 0 "#PWR?" H 2400 5500 50  0001 C CNN
-F 1 "+3.3V" H 2415 5823 50  0000 C CNN
-F 2 "" H 2400 5650 50  0001 C CNN
-F 3 "" H 2400 5650 50  0001 C CNN
-	1    2400 5650
+P 2200 6450
+F 0 "#PWR?" H 2200 6300 50  0001 C CNN
+F 1 "+3.3V" H 2215 6623 50  0000 C CNN
+F 2 "" H 2200 6450 50  0001 C CNN
+F 3 "" H 2200 6450 50  0001 C CNN
+	1    2200 6450
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:GND #PWR?
 U 1 1 5C56BD86
-P 1900 5700
-F 0 "#PWR?" H 1900 5450 50  0001 C CNN
-F 1 "GND" H 1905 5527 50  0000 C CNN
-F 2 "" H 1900 5700 50  0001 C CNN
-F 3 "" H 1900 5700 50  0001 C CNN
-	1    1900 5700
+P 1700 6500
+F 0 "#PWR?" H 1700 6250 50  0001 C CNN
+F 1 "GND" H 1705 6327 50  0000 C CNN
+F 2 "" H 1700 6500 50  0001 C CNN
+F 3 "" H 1700 6500 50  0001 C CNN
+	1    1700 6500
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	1900 5650 1900 5700
+	1700 6450 1700 6500
 Wire Wire Line
-	1800 5650 1800 5950
+	1600 6450 1600 6750
 Wire Wire Line
-	1800 5950 2400 5950
+	1600 6750 2200 6750
 Wire Wire Line
-	2400 5950 2400 5650
+	2200 6750 2200 6450
 $Comp
 L power:GND #PWR?
 U 1 1 5C585C56
-P 1900 4950
-F 0 "#PWR?" H 1900 4700 50  0001 C CNN
-F 1 "GND" H 1905 4777 50  0000 C CNN
-F 2 "" H 1900 4950 50  0001 C CNN
-F 3 "" H 1900 4950 50  0001 C CNN
-	1    1900 4950
+P 2800 6550
+F 0 "#PWR?" H 2800 6300 50  0001 C CNN
+F 1 "GND" H 2805 6377 50  0000 C CNN
+F 2 "" H 2800 6550 50  0001 C CNN
+F 3 "" H 2800 6550 50  0001 C CNN
+	1    2800 6550
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	1800 5150 2400 5150
+	2700 6750 3300 6750
 Wire Wire Line
-	2400 5150 2400 4850
+	3300 6750 3300 6450
 Wire Wire Line
-	1800 4850 1800 5150
+	2700 6450 2700 6750
 $Comp
 L power:GND #PWR?
 U 1 1 5C59B403
@@ -241,8 +222,6 @@ F 3 "" H 4050 5700 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	5200 3800 5300 3800
-Wire Wire Line
-	1500 5650 1500 6100
 $Comp
 L Device:R R1
 U 1 1 5C5D7699
@@ -340,36 +319,6 @@ Wire Wire Line
 	5850 1000 5850 1700
 Wire Wire Line
 	5850 1700 5900 1700
-Wire Wire Line
-	2550 4600 2550 5200
-Wire Wire Line
-	2550 5200 1700 5200
-Wire Wire Line
-	2550 4600 4250 4600
-Wire Wire Line
-	2600 4700 2600 5250
-Wire Wire Line
-	2600 5250 1600 5250
-Wire Wire Line
-	2600 4700 4250 4700
-Wire Wire Line
-	1700 6000 2650 6000
-Wire Wire Line
-	2650 6000 2650 4800
-Wire Wire Line
-	2650 4800 4250 4800
-Wire Wire Line
-	4250 4900 2700 4900
-Wire Wire Line
-	2700 4900 2700 6050
-Wire Wire Line
-	2700 6050 1600 6050
-Wire Wire Line
-	1500 6100 2750 6100
-Wire Wire Line
-	2750 6100 2750 5000
-Wire Wire Line
-	2750 5000 4250 5000
 Text GLabel 4100 5100 0    50   Input ~ 0
 sw_1
 Wire Wire Line
@@ -745,10 +694,10 @@ Vbat
 Wire Wire Line
 	10300 2250 10050 2250
 Connection ~ 10050 2250
-Text GLabel 5400 4800 2    50   Input ~ 0
+Text GLabel 4100 5000 0    50   Input ~ 0
 Vbat
 Wire Wire Line
-	5400 4800 5200 4800
+	4100 5000 4250 5000
 Wire Wire Line
 	8800 1250 8800 1650
 Wire Wire Line
@@ -858,4 +807,55 @@ Text GLabel 4100 4000 0    50   Input ~ 0
 charger_watchdog
 Wire Wire Line
 	4250 4000 4100 4000
+Text GLabel 4100 4600 0    50   Input ~ 0
+left_X
+Wire Wire Line
+	4250 4600 4100 4600
+Wire Wire Line
+	2600 6450 2600 6500
+Text GLabel 4100 4700 0    50   Input ~ 0
+left_Y
+Wire Wire Line
+	4250 4700 4100 4700
+Text GLabel 2600 6500 3    50   Input ~ 0
+left_X
+$Comp
+L remote-rescue:joystick-remote right
+U 1 1 5C49FFCD
+P 1200 6600
+F 0 "right" H 1778 6965 50  0000 L CNN
+F 1 "joystick" H 1778 6874 50  0000 L CNN
+F 2 "" H 1700 7150 50  0001 C CNN
+F 3 "" H 1700 7150 50  0001 C CNN
+	1    1200 6600
+	1    0    0    -1  
+$EndComp
+Text GLabel 2500 6500 3    50   Input ~ 0
+left_Y
+Wire Wire Line
+	2500 6500 2500 6450
+Text GLabel 4100 4800 0    50   Input ~ 0
+right_X
+Wire Wire Line
+	4250 4800 4100 4800
+Text GLabel 4100 4900 0    50   Input ~ 0
+right_Y
+Wire Wire Line
+	4250 4900 4100 4900
+Wire Wire Line
+	1500 6450 1500 6500
+Wire Wire Line
+	1400 6500 1400 6450
+Wire Wire Line
+	5200 4800 5400 4800
+Text GLabel 5400 4800 2    50   Input ~ 0
+right_sw
+Text GLabel 1400 6500 3    50   Input ~ 0
+right_Y
+Text GLabel 1500 6500 3    50   Input ~ 0
+right_X
+Text GLabel 1300 6500 3    50   Input ~ 0
+right_sw
+Wire Wire Line
+	1300 6450 1300 6500
 $EndSCHEMATC

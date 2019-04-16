@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:remote-cache
-EELAYER 26 0
+EELAYER 29 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -745,10 +745,10 @@ Vbat
 Wire Wire Line
 	10300 2250 10050 2250
 Connection ~ 10050 2250
-Text GLabel 5300 5200 2    50   Input ~ 0
+Text GLabel 5400 4800 2    50   Input ~ 0
 Vbat
 Wire Wire Line
-	5300 5200 5200 5200
+	5400 4800 5200 4800
 Wire Wire Line
 	8800 1250 8800 1650
 Wire Wire Line
