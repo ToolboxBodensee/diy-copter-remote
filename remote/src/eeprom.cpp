@@ -81,9 +81,6 @@ int Eeprom_config::get_ch_config(struct Input::ch_config* config) {
 }
 
 int Eeprom_config::set_ch_config(struct Input::ch_config* config) {
-    if (this->sucessfull_read == false && config != NULL) {
-        return -1;
-    }
     memcpy(this->current_config.data.ch, config, sizeof(struct Input::ch_config) * Input::CH_COUNT);
     return 0;
 }
@@ -99,9 +96,18 @@ int Eeprom_config::get_master_id(uint32_t* master_id)
 
 int Eeprom_config::set_master_id(uint32_t master_id)
 {
-    if (this->sucessfull_read == false) {
+    this->current_config.data.master_id = master_id;
+    return 0;
+}
+
+int Eeprom_config::get_freq_offset(uint8_t* freq_offset) {
+    if (this->sucessfull_read == false && freq_offset != NULL) {
         return -1;
     }
-    this->current_config.data.master_id = master_id;
+    *freq_offset = this->current_config.data.freq_offset;
+    return 0;
+}
+int Eeprom_config::set_freq_offset(uint8_t freq_offset) {
+    this->current_config.data.freq_offset = freq_offset;
     return 0;
 }

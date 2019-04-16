@@ -20,6 +20,8 @@ public:
     int get_master_id(uint32_t* master_id);
     int set_master_id(uint32_t master_id);
 
+    int get_freq_offset(uint8_t* freq_offset);
+    int set_freq_offset(uint8_t freq_offset);
 private:
     #define CURRENT_VERSION 0x02
     struct eeprom_data_v1 {
@@ -28,6 +30,7 @@ private:
         struct {
             uint32_t master_id;
             struct Input::ch_config ch[Input::CH_COUNT];
+            uint8_t freq_offset;
         } data;
     } current_config;
     bool sucessfull_read;
