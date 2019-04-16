@@ -10,7 +10,7 @@ use <lib/threads.scad>;
 $fn=64;
 
 show_top            =0;
-show_bottom         =1;
+show_bottom         =0;
 show_strapholder    =0;
 show_joysticks      =0;
 show_grip           =0;
@@ -18,7 +18,7 @@ show_grip           =0;
 enable_text_engrave =0;
 
 show_switch         =0;
-show_lcd            =0;
+show_lcd            =1;
 show_sticks         =0;
 show_stm32          =0;
 show_antenna        =0;
@@ -56,7 +56,7 @@ font="Go Mono:style=Bold";
 font="Go Mono";
 font="Arial Rounded MT Bold:style=Bold";
 font_size=3.75;
-font_size_name=6.5;
+font_size_name=5.5;
 font_spaceing=1.25;
 
 
@@ -218,7 +218,7 @@ module strapholder() {
 
             // name
             translate([0,13,5])
-                text_engave(thick,font_size=font_size_name, text_="toolbox v1");
+                text_engave(thick,font_size=font_size_name, text_=name);
 
             // strap holder
             translate([0,0,12]) {

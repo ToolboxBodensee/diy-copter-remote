@@ -4,10 +4,11 @@
 use <lib/cube.scad>
 use <lib/cylinder.scad>
 
+is_ps2_stick=0;
 // draw itself
-stick();
+stick(10, is_ps2_stick);
 
-module stick(h=10,is_ps2_shaft=1)
+module stick(h=10,is_ps2_stick=0)
 {
     $fn=128;
     translate([0,0,15-3]) {
@@ -18,7 +19,7 @@ module stick(h=10,is_ps2_shaft=1)
     }
     // stick holder with cutout
     translate([0,0,0]) {
-        stick_mount(is_ps2_shaft);
+        stick_mount(is_ps2_stick);
     }
 
     // dust protector
@@ -67,11 +68,11 @@ module gabber_part() {
     }
 }
 
-module stick_mount(is_ps2_shaft=0) {
+module stick_mount(is_ps2_stick=0) {
     ps2_dia=4+0.4;
     ps2_width=3+0.4;
-    
-    
+
+
     mount_h=5;
     eps = 0.01;
 
@@ -81,8 +82,8 @@ module stick_mount(is_ps2_shaft=0) {
                 cylinder_flange_sphere($fn=32,r2=8, r1=3, h=4.5);
             translate([0,0,8.5])
                 cylinder_flange_sphere($fn=32,r2=3, r1=8, h=4.5);
-            
-            if ( is_ps2_shaft ) {
+
+            if ( is_ps2_stick  ) {
                 cylinder(d=6.75,h=10);
             } else {
                 cylinder(d=6,h=10);
@@ -90,7 +91,7 @@ module stick_mount(is_ps2_shaft=0) {
             //cylinder(d=15,h=0.1);
         }
         translate([0,0,-eps])
-        if ( is_ps2_shaft ) {
+        if ( is_ps2_stick) {
             intersection() {
                 cube(center=true,[ps2_width,100,100]);
                 cylinder(d=ps2_dia,h=mount_h);
