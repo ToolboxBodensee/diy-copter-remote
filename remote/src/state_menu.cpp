@@ -20,13 +20,13 @@ void LCD_state_menu::enter(void) {
 
 void LCD_state_menu::update(void)
 {
-    struct {
+    struct menu_entry {
         char name[15];
         State * state;
     } menus[] = {
         { "Flight        ", s_fly },
         { "Bind          ", s_bind },
-#ifdef ENABLE_DBEUG
+#ifndef ENABLE_DBEUG
         { "Joy usb       ", s_usb},
 #endif
         { "Joy calib     ", s_joy },
@@ -48,8 +48,8 @@ void LCD_state_menu::update(void)
     if (false == input.is_centered(Input::MENU_UP_DOWN)) {
         if (input.is_low(Input::MENU_UP_DOWN)){
             this->curr_selected +=1;
-            if ( this->curr_selected > 4)
-                this->curr_selected = 4;
+            if ( this->curr_selected > sizeof(menus)/sizeof(menus[0]))
+                this->curr_selected = sizeof(menus)/sizeof(menus[0]);
             else
                 wait = true;
         }
@@ -80,7 +80,7 @@ void LCD_state_menu::update(void)
     }
 
     if(wait)
-        delay(1100);
+        delay(200);
 }
 
 void LCD_state_menu::leave(void)
