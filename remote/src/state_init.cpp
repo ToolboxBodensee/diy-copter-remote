@@ -15,7 +15,7 @@ LCD_state_init::LCD_state_init(void) {
 void LCD_state_init::enter(void) {
     lcd.clear();
     lcd.setCursor(0,0);
-    lcd.print("    wellcome    ");
+    lcd.print("     welcome    ");
     lcd.setCursor(0,1);
     lcd_centerText(REMOE_OWNER);
 

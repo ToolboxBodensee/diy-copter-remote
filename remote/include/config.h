@@ -17,11 +17,11 @@
 
 #include <stdint.h>
 //#define REMOE_OWNER "phschoen"
-#define REMOE_OWNER "Marleen"
+//#define REMOE_OWNER "Marleen"
 //#define REMOE_OWNER "Sina"
 //#define REMOE_OWNER "Malaika"
 //#define REMOE_OWNER "Pauline"
-//#define REMOE_OWNER "Mara"
+#define REMOE_OWNER "Mara"
 
 #define DEFAULT_BIND_TIME 13 /*seconds*/
 

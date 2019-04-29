@@ -23,7 +23,7 @@ public:
     int get_freq_offset(uint8_t* freq_offset);
     int set_freq_offset(uint8_t freq_offset);
 private:
-    #define CURRENT_VERSION 0x02
+    #define CURRENT_VERSION 0x01
     struct eeprom_data_v1 {
         uint8_t version;
         uint32_t data_crc;

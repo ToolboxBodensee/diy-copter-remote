@@ -91,7 +91,7 @@ void Input::init() {
     this->ch_config[CH_YAW].inverted      = false;
     this->ch_config[CH_ROLL].inverted     = false;
     this->ch_config[CH_PITCH].inverted    = false;
-    this->ch_config[CH_AUX1].inverted     = true;
+    this->ch_config[CH_AUX1].inverted     = false;
     this->ch_config[CH_AUX2].inverted     = true;
     this->ch_config[CH_AUX3].inverted     = true;
     this->ch_config[CH_AUX4].inverted     = true;
@@ -226,19 +226,19 @@ void Input::update(void) {
         } else {
             this->ch_raw[ch] = digitalRead(this->pins[ch]) == HIGH ? CHANNEL_MIN_100 : CHANNEL_MAX_100;
         }
-
-        // do inverting
-        if (this->ch_config[ch].inverted)
-            this->curr->ch_data[ch] = this->ch_config[ch].max - this->ch_raw[ch];
-        else
-            this->curr->ch_data[ch] = this->ch_raw[ch];
-
         // cap on max
         if (this->ch_config[ch].min > this->curr->ch_data[ch]) {
             this->curr->ch_data[ch] = this->ch_config[ch].min;
         } else if (this->ch_config[ch].max < this->curr->ch_data[ch]) {
             this->curr->ch_data[ch] = this->ch_config[ch].max;
         }
+
+        // do inverting
+        if (this->ch_config[ch].inverted)
+            this->curr->ch_data[ch] = map(this->ch_raw[ch], this->ch_config[ch].min, this->ch_config[ch].max, this->ch_config[ch].max, this->ch_config[ch].min);
+        else
+            this->curr->ch_data[ch] = this->ch_raw[ch];
+
     }
     this->curr->menu = digitalRead(Menu_pin) == HIGH;
 
@@ -265,6 +265,11 @@ void Input::update(void) {
                 }
             }
         }
+        if (this->channel_data[ch] < CHANNEL_MIN_100 )
+            this->channel_data[ch] = CHANNEL_MIN_100;
+
+        if (this->channel_data[ch] > CHANNEL_MAX_100 )
+            this->channel_data[ch] = CHANNEL_MAX_100;
     }
     /* debug_input("t%d y%d r%d p%d \n", */
     /*             this->channel_data[CH_THROTTLE], */
@@ -272,4 +277,11 @@ void Input::update(void) {
     /*             this->channel_data[CH_ROLL], */
     /*             this->channel_data[CH_PITCH] */
     /*             ); */
+    int ch = CH_AUX1;
+    debug_input("raw t%d min %d max %d -> %d\n",
+                this->ch_raw[ch],
+                this->ch_config[ch].min,
+                this->ch_config[ch].max,
+                this->channel_data[ch]
+                );
 }
