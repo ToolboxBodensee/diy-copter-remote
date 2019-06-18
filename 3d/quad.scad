@@ -2,14 +2,15 @@ $fn = 128;
 with_frame=1;
 with_akku=0;
 
-with_props=1;
+with_props=0;
 with_motor=1;
-with_pcbs=1;
+with_pcbs=0;
 with_motor_brim=1;
 
-name="Malaika";
-version="v1.2";
+name="phschoen";
+version="v1.3";
 text_depth=0.5;
+with_cam=true;
 
 motor_d = 8.75;//8.620;
 motor_r=motor_d/2;
@@ -38,6 +39,11 @@ body_wall_thickness = 2;
 body_bottom_flange = 5;
 body_bottom_bridge = 6;
 
+cam_width = 14;
+cam_angle = 20;
+cam_pos = body_width/2 +5;
+cam_hight = 5;
+
 triangle_cut_height = 10;
 cable_cut_width = 3;
 cable_cut_height = 3;
@@ -59,6 +65,45 @@ module triangle_cuts(h=4) {
         translate([0,body_width/2 -body_bottom_flange,0]) {
             rotate([0,0,45])
                 aligned_triangle(h_tri, h_tri, h);
+        }
+    }
+}
+
+module cam_tx06(with_hull = false) {
+    q = 20;
+    hcam = 13;         // camera height
+
+
+    le = 0;
+    translate([ 0,0, 0]) {
+        color("green")
+        if (with_hull)
+        {
+            hull()
+            {
+                translate([ 0,-7.0, 0]) cube([0.8,14,  hcam  ]);   // front pcb
+                translate([-5,-7.0, 0]) cube([0.8,14,  hcam  ]);   // back pcb
+                translate([-5,-2.5,13]) cube([0.8, 5,   2  ]);     // antena pcb
+            }
+        } else {
+            translate([ 0,-7.0, 0]) cube([0.8,14,  hcam  ]);   // front pcb
+            translate([-5,-7.0, 0]) cube([0.8,14,  hcam  ]);   // back pcb
+            translate([-5,-2.5,13]) cube([0.8, 5,   2  ]);     // antena pcb
+        }
+
+        color("grey") {
+            translate([0.1,0, 6]) rotate([0,90,0]) cylinder(d= 8, h=6,$fn=4*q);
+            translate([6  ,0, 6]) rotate([0,90,0]) cylinder(d=10, h=3,$fn=4*q);
+            translate([-6.25,4.,12]) cube([1, 2, 2]);
+            translate([-4.5,5.,2]) cube([4.5, 2, 3.6]);
+            translate([-4,0, 15]) rotate([0,le,0]) translate([0,0,  5]) cylinder(d=3, h=28, $fn=2*q);
+            translate([-4,0, 15]) rotate([0,le,0]) translate([0,0, 10]) cylinder(d=5, h=10, $fn=3*q);
+        }
+        color("wheat") {
+            translate([-4,0, 15]) rotate([0,le,0]) cylinder(d=1.5, h=5, $fn=2*q);
+        }
+        color("silver") {
+            translate([-6.5,3,11]) cube([1.5, 4, 2]);
         }
     }
 }
@@ -171,6 +216,7 @@ module body() {
             // board mount
             color("red")
                 aligned_cube([body_width, body_width, body_height]);
+
         }
 
         // board pcb cutout
@@ -195,16 +241,23 @@ module body() {
         // text stamp
         union()
         {
-            rotate([0,0,90]) {
-                translate([0,-body_width/2+text_depth-eps,body_height/2])
-                rotate([90,0,0])
-                linear_extrude(height = text_depth)
-                {
-                    translate([0,2,0])
-                    text(halign="center",valign="center", $fn=$fn, size=5,font="Linux Libertine:style=Bold", "Toolbox");
-                    translate([0,-3,0])
-                    text(halign="center",valign="center", $fn=$fn, size=3,font="Linux Libertine:style=Bold", version);
+            if (with_cam == false)
+            {
+                rotate([0,0,90]) {
+                    translate([0,-body_width/2+text_depth-eps,body_height/2])
+                    rotate([90,0,0])
+                    linear_extrude(height = text_depth)
+                    {
+                        translate([0,2,0])
+                        text(halign="center",valign="center", $fn=$fn, size=5,font="Linux Libertine:style=Bold", "Toolbox");
+                        translate([0,-3,0])
+                        text(halign="center",valign="center", $fn=$fn, size=3,font="Linux Libertine:style=Bold", version);
+                    }
+
                 }
+            }else {
+                translate([body_width/2, 0, body_wall_thickness])
+                aligned_cube([10, cam_width, body_height+eps]);
             }
             rotate([0,0,180]) {
                 translate([0,-body_width/2+text_depth-eps,body_height/2])
@@ -217,6 +270,37 @@ module body() {
         }
 
     }
+            color("orange")
+            if (with_cam) {
+                difference() {
+                    translate([body_width/2, 0, 0])
+                    {
+                        intersection() {
+                        rotate([0,-cam_angle,0])
+                        aligned_cube([10, cam_width+body_wall_thickness*2, body_height], [0,1,0]);
+
+                        aligned_cube([10, cam_width+body_wall_thickness*2, body_height], [0,1,0]);
+                        }
+
+                    }
+
+                    translate([body_width/2+5, 0, 0])
+                    translate([3.5,0,5])
+                    rotate([0,90-cam_angle,0])
+                    rotate([0,0,90])
+                    linear_extrude(height = text_depth)
+                    text(halign="center",valign="center", $fn=$fn, size=3,font="Linux Libertine:style=Bold", version);
+
+                    rotate([0,-cam_angle,0])
+                    translate([cam_pos,0,-8.5])
+                    scale([1.05,1.05,1.2])
+                    {
+                        for (i = [0:1:10])
+                        translate([0,0,i + cam_hight])
+                        cam_tx06(with_hull=true);
+                    }
+                }
+            }
 }
 
 module quad() {
@@ -236,6 +320,12 @@ module quad() {
         translate([0,0,body_height]) {
             akku_holder();
         }
+    }
+    if (with_cam) {
+        translate([cam_pos, 0, 0])
+        rotate([0,-cam_angle,0])
+        translate([0, 0, cam_hight])
+            %cam_tx06();
     }
 }
 
